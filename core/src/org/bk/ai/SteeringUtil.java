@@ -1,0 +1,110 @@
+package org.bk.ai;
+
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.ai.steer.Steerable;
+import com.badlogic.gdx.ai.steer.SteerableAdapter;
+import com.badlogic.gdx.ai.steer.SteeringAcceleration;
+import com.badlogic.gdx.ai.steer.SteeringBehavior;
+import com.badlogic.gdx.ai.utils.Location;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import org.bk.component.Movement;
+import org.bk.component.Steering;
+import org.bk.component.Transform;
+
+import static org.bk.component.Mapper.BODY;
+import static org.bk.component.Mapper.MOVEMENT;
+import static org.bk.component.Mapper.TRANSFORM;
+
+/**
+ * Created by dante on 16.10.2016.
+ */
+public class SteeringUtil {
+    private static SteeringAcceleration<Vector2> tsa = new SteeringAcceleration<Vector2>(new Vector2());
+
+    public static SteeringAcceleration<Vector2> applySteering(SteeringBehavior<Vector2> behavior, Steerable<Vector2> steerable, Steering steering) {
+        behavior.calculateSteering(tsa);
+        if (tsa.linear.len() > MathUtils.FLOAT_ROUNDING_ERROR) {
+            float delta = ((tsa.linear.angleRad() - steerable.getOrientation() + 3 * MathUtils.PI) % MathUtils.PI2) - MathUtils.PI;
+            steering.turn = MathUtils.clamp(delta, -1, 1);
+            if (Math.abs(delta) < 0.2f) {
+                float thrust = (0.2f - Math.abs(delta)) / 0.2f;
+                thrust *= tsa.linear.len() / steerable.getMaxLinearAcceleration();
+                steering.thrust = MathUtils.clamp(thrust, 0, 1);
+            }
+        }
+        return tsa;
+    }
+
+
+    public static Steerable<Vector2> toSteeringBehavior(Entity entity) {
+        final Movement movement = MOVEMENT.get(entity);
+        final Transform transform = TRANSFORM.get(entity);
+        final org.bk.component.Body body = BODY.get(entity);
+        return new SteerableAdapter<Vector2>() {
+            @Override
+            public Vector2 getLinearVelocity() {
+                return movement.velocity;
+            }
+
+            @Override
+            public Vector2 getPosition() {
+                return transform.location;
+            }
+
+            @Override
+            public float getOrientation() {
+                return transform.orientRad;
+            }
+
+            @Override
+            public float getMaxLinearAcceleration() {
+                return movement.linearThrust / body.physicsBody.getMass();
+            }
+
+            @Override
+            public float getMaxLinearSpeed() {
+                return movement.maxVelocity;
+            }
+
+            @Override
+            public float getMaxAngularSpeed() {
+                return movement.angularThrust / body.physicsBody.getMass() / body.physicsBody.getAngularDamping() / body.physicsBody.getAngularDamping();
+            }
+        };
+    }
+
+    public static Location<Vector2> toLocation(final Vector2 v) {
+        return new Location<Vector2>() {
+            @Override
+            public Vector2 getPosition() {
+                return v;
+            }
+
+            @Override
+            public float getOrientation() {
+                return 0;
+            }
+
+            @Override
+            public void setOrientation(float orientation) {
+
+            }
+
+            @Override
+            public float vectorToAngle(Vector2 vector) {
+                return 0;
+            }
+
+            @Override
+            public Vector2 angleToVector(Vector2 outVector, float angle) {
+                return null;
+            }
+
+            @Override
+            public Location<Vector2> newLocation() {
+                return null;
+            }
+        };
+    }
+}
