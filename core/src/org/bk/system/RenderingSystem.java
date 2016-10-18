@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
+import com.sun.org.apache.bcel.internal.generic.LAND;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.component.*;
@@ -25,7 +26,6 @@ public class RenderingSystem extends EntitySystem {
     private final Assets assets;
     private final SpriteBatch batch;
     private ImmutableArray<Entity> shipEntities;
-    private ImmutableArray<Entity> mountedEntities;
     private ImmutableArray<Entity> projectileEntities;
     private ImmutableArray<Entity> planetEntities;
     private Array<Star> stars = new Array<Star>();
@@ -41,14 +41,12 @@ public class RenderingSystem extends EntitySystem {
         assets = game.assets;
         batch = game.batch;
         radar = new Radar(game);
-        radar.bounds.set(0, 300, 200, 100);
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         planetEntities = engine.getEntitiesFor(Family.all(Planet.class, Transform.class, Body.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Ship.class, Transform.class, Body.class).get());
-        mountedEntities = engine.getEntitiesFor(Family.all(VisibleAddon.class, Transform.class).get());
         projectileEntities = engine.getEntitiesFor(Family.all(Projectile.class, Transform.class, Body.class).get());
     }
 
@@ -57,42 +55,61 @@ public class RenderingSystem extends EntitySystem {
         batch.begin();
         updateStarBackground();
 
-        for (Entity entity: planetEntities) {
+        for (Entity entity : planetEntities) {
             drawEntityWithBody(entity, assets.planet_placeholder);
         }
-        for (Entity entity: shipEntities) {
+        for (Entity entity : shipEntities) {
             drawEntityWithBody(entity, assets.ship_placeholder);
         }
-        for (Entity entity: mountedEntities) {
-            Transform transform = TRANSFORM.get(entity);
-            VisibleAddon visibleAddon = VISIBLE_ADDON.get(entity);
-            ta.setToTranslation(transform.location);
-            ta.rotateRad(transform.orientRad);
-            Vector2 dimension = visibleAddon.dimension;
-            draw(transform, dimension, assets.ship_placeholder);
-        }
-        for (Entity entity: projectileEntities) {
-            drawEntityWithBody(entity, assets.ship_placeholder);
+        for (Entity entity : projectileEntities) {
+            drawEntityWithBody(entity, assets.projectile_placeholder);
         }
         batch.end();
         game.uiBatch.begin();
+        radar.bounds.set(0, game.height - 256, 256, 256);
         drawRadar();
         game.uiBatch.end();
     }
 
     private void drawEntityWithBody(Entity entity, TextureRegion textureRegion) {
         Transform transform = TRANSFORM.get(entity);
+        Landing landing = LANDING.get(entity);
+        if (landing == null) {
+            Mounts mounts = MOUNTS.get(entity);
+            if (mounts != null) {
+                Movement movement = MOVEMENT.get(entity);
+                if (movement != null & movement.linearAccel.len2() > 0) {
+                    for (Vector2 thruster : mounts.thrusters) {
+                        tv.set(thruster).rotateRad(transform.orientRad).add(transform.location);
+                        float hbx = 8;
+                        float hby = 40;
+                        batch.draw(assets.flare_placeholder, tv.x - hbx, tv.y - hby, hbx, hby,
+                                hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
+                    }
+                }
+            }
+        }
         Body body = BODY.get(entity);
         ta.setToTranslation(transform.location);
         ta.rotateRad(transform.orientRad);
-        Vector2 dimension = body.dimension;
-        draw(transform, dimension, textureRegion);
+        tv.set(body.dimension);
+        if (landing != null) {
+            float scale = landing.timeRemaining / landing.duration;
+            if (landing.isLiftingOff) {
+                scale = 1 - scale;
+            }
+            tv.scl(scale);
+        }
+        draw(transform, tv, textureRegion);
     }
 
     private void drawRadar() {
         radar.position.set(TRANSFORM.get(game.player).location);
         radar.drawBackground();
-        for (Entity entity: shipEntities) {
+        for (Entity entity : planetEntities) {
+            radar.drawPlanet(entity);
+        }
+        for (Entity entity : shipEntities) {
             radar.drawShip(entity);
         }
     }
@@ -111,7 +128,7 @@ public class RenderingSystem extends EntitySystem {
                 stars.add(star);
             }
         }
-        for (Star star: stars) {
+        for (Star star : stars) {
             tv.set(star.position);
             game.viewport.project(tv);
             if (tv.x < -50 || tv.x > Gdx.graphics.getWidth() + 50) {

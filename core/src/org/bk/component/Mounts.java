@@ -9,8 +9,9 @@ import org.bk.spec.ProjectileSpec;
 /**
  * Created by dante on 15.10.2016.
  */
-public class Weapons implements Component {
+public class Mounts implements Component {
     public final Array<Weapon> weapons = new Array<Weapon>();
+    public final Array<Vector2> thrusters = new Array<Vector2>();
 
     public static class Weapon {
         public final Vector2 offset = new Vector2();

@@ -11,6 +11,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 public class Assets {
     private final TextureAtlas atlas;
+    public final TextureRegion flare_placeholder;
+    public final TextureRegion projectile_placeholder;
+    public final TextureRegion ui_radar;
     public TextureRegion ship_placeholder;
     public TextureRegion planet_placeholder;
     public TextureRegion bg_star;
@@ -21,6 +24,9 @@ public class Assets {
         ship_placeholder = tr("ship/sparrow");
         bg_star = tr("particle");
         planet_placeholder = tr("planet/forest2");
+        flare_placeholder = tr("effect/small+1");
+        projectile_placeholder = tr("projectile/ion bolt~0");
+        ui_radar = tr("ui/radar_placeholder");
         debugFont = new BitmapFont();
     }
 

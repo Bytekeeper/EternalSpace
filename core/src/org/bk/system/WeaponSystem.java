@@ -11,7 +11,7 @@ import org.bk.spec.ProjectileSpec;
 
 import static org.bk.component.Mapper.MOVEMENT;
 import static org.bk.component.Mapper.TRANSFORM;
-import static org.bk.component.Mapper.WEAPON;
+import static org.bk.component.Mapper.MOUNTS;
 
 /**
  * Created by dante on 15.10.2016.
@@ -20,13 +20,13 @@ public class WeaponSystem extends IteratingSystem {
     private static final float MAX_PROJECTILE_LIFETIME = 20;
 
     public WeaponSystem(int priority) {
-        super(Family.all(Weapons.class, Transform.class).get(), priority);
+        super(Family.all(Mounts.class, Transform.class).get(), priority);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        Weapons weapons = WEAPON.get(entity);
-        for (Weapons.Weapon weapon: weapons.weapons) {
+        Mounts mounts = MOUNTS.get(entity);
+        for (Mounts.Weapon weapon: mounts.weapons) {
             weapon.cooldown = Math.max(0, weapon.cooldown - deltaTime);
             if (weapon.cooldown > 0 || !weapon.firing) {
                 return;
@@ -38,13 +38,13 @@ public class WeaponSystem extends IteratingSystem {
         }
     }
 
-    private void spawnProjectile(Weapons.Weapon weapon, Entity owner, ProjectileSpec projectileSpec) {
+    private void spawnProjectile(Mounts.Weapon weapon, Entity owner, ProjectileSpec projectileSpec) {
         if (projectileSpec == null) {
             Gdx.app.error(WeaponSystem.class.getSimpleName(), "No ProjectileSpec");
             return;
         }
         if (owner == null) {
-            Gdx.app.error(WeaponSystem.class.getSimpleName(), "Weapons without owner");
+            Gdx.app.error(WeaponSystem.class.getSimpleName(), "Mounts without owner");
             return;
         }
         Transform sourceTransform = TRANSFORM.get(owner);

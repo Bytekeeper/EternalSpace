@@ -1,9 +1,16 @@
 
 textures.png
-size: 512,256
+size: 512,512
 format: RGBA8888
 filter: MipMapLinearLinear,Linear
 repeat: none
+effect/small+1
+  rotate: false
+  xy: 194, 106
+  size: 25, 120
+  orig: 25, 120
+  offset: 0, 0
+  index: -1
 particle
   rotate: false
   xy: 2, 2
@@ -18,10 +25,24 @@ planet/forest2
   orig: 190, 190
   offset: 0, 0
   index: -1
+projectile/ion bolt~0
+  rotate: false
+  xy: 260, 302
+  size: 16, 100
+  orig: 16, 100
+  offset: 0, 0
+  index: -1
 ship/sparrow
   rotate: false
-  xy: 194, 146
+  xy: 260, 404
   size: 70, 80
   orig: 70, 80
+  offset: 0, 0
+  index: -1
+ui/radar_placeholder
+  rotate: false
+  xy: 2, 228
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1

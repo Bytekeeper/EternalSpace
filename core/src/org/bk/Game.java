@@ -7,6 +7,8 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.ai.GdxAI;
+import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.graphics.GL20;
@@ -28,14 +30,20 @@ public class Game extends ApplicationAdapter {
     public SpriteBatch batch;
     public SpriteBatch uiBatch;
     public Assets assets;
+    public Behaviors behaviors;
+    public Ships ships = new Ships();
     PooledEngine engine;
     public Entity player;
     private Entity planet;
+    public int width;
+    public int height;
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
         uiBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
+        this.width = width;
+        this.height = height;
     }
 
     @Override
@@ -43,31 +51,36 @@ public class Game extends ApplicationAdapter {
         viewport = new ScreenViewport();
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         assets = new Assets();
+        behaviors = new Behaviors();
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         batch.getProjectionMatrix().setToOrtho2D(-Gdx.graphics.getWidth() / 2, -Gdx.graphics.getHeight() / 2,
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         engine = new PooledEngine();
-        engine.addSystem(new RenderingSystem(this, 1));
-        engine.addSystem(new AISystem(this, 2));
-        engine.addSystem(new SteeringSystem(3));
+        engine.addSystem(new AISystem(this, 1));
+        engine.addSystem(new SteeringSystem(2));
+        engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(4));
+        engine.addSystem(new LandingSystem(5));
         engine.addSystem(new Box2DPhysicsSystem(5));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(7));
+        engine.addSystem(new TrafficSystem(this, 7));
         engine.addSystem(new HealthSystem(8));
 
         planet = addPlanet();
+        TRANSFORM.get(addPlanet()).location.set(2000, 1000);
 
-        player = addShip();
-        for (int i = 0; i < 10; i++) {
-            Entity enemy = addShip();
+        player = ships.addShip(engine);
+        for (int i = 0; i < 0; i++) {
+            Entity enemy = ships.addShip(engine);
             TRANSFORM.get(enemy).location.x += i * 120;
+            Steering steering = STEERING.get(enemy);
+
             AIControlled aiControlled = new AIControlled();
-            aiControlled.steerable = SteeringUtil.toSteeringBehavior(enemy);
-            Attack attack = new Attack(aiControlled.steerable, SteeringUtil.toSteeringBehavior(player));
-            attack.setMaxMatchDistance(20);
-            aiControlled.behavior = attack;
+            aiControlled.behaviorTree = behaviors.land(enemy);
+            steering.targetEntity = planet;
+            steering.targetLocation = SteeringUtil.toLocation(TRANSFORM.get(planet).location);
 //        Arrive<Vector2> arrive = new Arrive<Vector2>(aiControlled.steerable, SteeringUtil.toLocation(new Vector2(2000, 3000)));
 //        arrive.setTimeToTarget(0.01f);
 //        arrive.setDecelerationRadius(1000);
@@ -90,44 +103,8 @@ public class Game extends ApplicationAdapter {
         return entity;
     }
 
-    private Entity addShip() {
-        Entity ship = new Entity();
-        Body body = new Body();
-        body.dimension.set(35, 40);
-        ship.add(body);
-        Transform transform = new Transform();
-        transform.location.set(400, 300);
-        transform.orientRad = 0;
-        ship.add(transform);
-        ship.add(new Ship());
-        Movement movement = new Movement();
-        movement.maxVelocity = 500;
-        movement.angularThrust = 3000;
-        movement.linearThrust = 20000;
-        ship.add(movement);
-        Health health = new Health();
-        health.hull = 100;
-        health.shields = 100;
-        ship.add(health);
-        ship.add(new Steering());
 
-        Weapons.Weapon weapon = new Weapons.Weapon();
-        weapon.cooldownPerShot = 0.1f;
-        weapon.projectileSpec = new ProjectileSpec();
-        weapon.projectileSpec.dimension.set(20, 30);
-        weapon.projectileSpec.initialSpeed = 1000;
-        weapon.projectileSpec.lifeTime = 2;
-        weapon.projectileSpec.yield = 10;
-        Weapons weapons = new Weapons();
-        weapons.weapons.add(weapon);
-        ship.add(weapons);
-
-        engine.addEntity(ship);
-        return ship;
-    }
-
-    private SteeringBehavior<Vector2> playerBehavior;
-    private Steerable<Vector2> playerSteerable;
+    private BehaviorTree<Entity> playerAutopilot;
 
     @Override
     public void render() {
@@ -136,28 +113,28 @@ public class Game extends ApplicationAdapter {
         Steering steering = STEERING.get(player);
         if (Gdx.input.isKeyPressed(Keys.UP)) {
             steering.thrust = 1;
-            playerBehavior = null;
+            playerAutopilot = null;
         }
         if (Gdx.input.isKeyPressed(Keys.LEFT)) {
             steering.turn = 1;
-            playerBehavior = null;
+            playerAutopilot = null;
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             steering.turn = -1;
-            playerBehavior = null;
+            playerAutopilot = null;
         }
         if (Gdx.input.isKeyPressed(Keys.L)) {
-            playerSteerable = SteeringUtil.toSteeringBehavior(player);
-            Arrive<Vector2> arrive = new Arrive<Vector2>(playerSteerable, SteeringUtil.toSteeringBehavior(planet));
-            arrive.setArrivalTolerance(20);
-            playerBehavior = arrive;
+            STEERING.get(player).targetLocation = SteeringUtil.toLocation(TRANSFORM.get(planet).location);
+            STEERING.get(player).targetEntity = planet;
+            playerAutopilot = behaviors.land(player);
         }
-        if (playerBehavior != null) {
-            SteeringUtil.applySteering(playerBehavior, playerSteerable, STEERING.get(player));
+        if (playerAutopilot != null) {
+            playerAutopilot.setObject(player);
+            playerAutopilot.step();
         }
-        ImmutableArray<Entity> weapons = engine.getEntitiesFor(Family.all(Weapons.class).get());
+        ImmutableArray<Entity> weapons = engine.getEntitiesFor(Family.all(Mounts.class).get());
         for (Entity e: weapons) {
-            for (Weapons.Weapon weapon: WEAPON.get(e).weapons) {
+            for (Mounts.Weapon weapon: MOUNTS.get(e).weapons) {
                 weapon.firing = Gdx.input.isKeyPressed(Keys.SPACE);
             }
         }
@@ -165,7 +142,9 @@ public class Game extends ApplicationAdapter {
         viewport.getCamera().position.set(transform.location, 0);
         viewport.getCamera().update();
         batch.setProjectionMatrix(viewport.getCamera().combined);
-        engine.update(Gdx.graphics.getDeltaTime());
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        GdxAI.getTimepiece().update(deltaTime);
+        engine.update(deltaTime);
     }
 
     @Override

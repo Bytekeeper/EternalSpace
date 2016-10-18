@@ -23,7 +23,6 @@ import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector;
-import com.badlogic.gdx.math.Vector2;
 
 /**
  * {@code Arrive} behavior moves the agent towards a target position. It is similar to seek but it attempts to arrive at the target
@@ -46,7 +45,6 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
 
-    private static final float THRESHOLD = 50f;
     /**
      * The target to arrive to.
      */
@@ -93,36 +91,26 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
         T toTarget = steering.linear.set(targetPosition).sub(owner.getPosition());
         float distance = toTarget.len();
 
-        // Check if we are there, return no steering
-
-        T targetVelocity = toTarget;
-
         Limiter actualLimiter = getActualLimiter();
-        if (distance > arrivalTolerance) {
-            // Go max speed
-            float targetSpeed = actualLimiter.getMaxLinearSpeed();
+        // Go max speed
+        float targetSpeed = actualLimiter.getMaxLinearSpeed();
 
-            float velocity = owner.getLinearVelocity().len();
-            float turnTime = MathUtils.PI  * MathUtils.PI / actualLimiter.getMaxAngularSpeed() / distance * velocity;
-            float breakDst = velocity * velocity / (2 * actualLimiter.getMaxLinearAcceleration());
-            float decelerationRadius = turnTime * velocity + breakDst;
+        float lookDelta = Math.abs((owner.vectorToAngle(owner.getLinearVelocity()) - owner.getOrientation() + 3 * MathUtils.PI) % MathUtils.PI2 - MathUtils.PI);
 
-            // If we are inside the slow down radius calculate a scaled speed
-            if (distance > decelerationRadius) // Target velocity combines speed and direction
-                targetVelocity = toTarget.scl(targetSpeed / distance); // Optimized code for: toTarget.nor().scl(targetSpeed)
-            else
-                targetVelocity.setZero();
+        float t = (float) Math.sqrt(2 * distance / actualLimiter.getMaxLinearAcceleration()) + lookDelta / owner.getMaxAngularSpeed() + 3;
+        targetSpeed = 2 * distance / t;
+
+        // Target velocity combines speed and direction
+        T targetVelocity = toTarget.scl(targetSpeed / distance); // Optimized code for: toTarget.nor().scl(targetSpeed)
+
+        // Check if we are there, return no steering
+        if (distance <= arrivalTolerance && owner.getLinearVelocity().len2() < 10) {
+            targetVelocity.setZero();
         } else {
-            targetVelocity.setZero();
+            // Acceleration tries to get to the target velocity without exceeding max acceleration
+            // Notice that steering.linear and targetVelocity are the same vector
+            targetVelocity.sub(owner.getLinearVelocity()).scl(1f / timeToTarget).limit(actualLimiter.getMaxLinearAcceleration());
         }
-
-        // Acceleration tries to get to the target velocity without exceeding max acceleration
-        // Notice that steering.linear and targetVelocity are the same vector
-        targetVelocity.sub(owner.getLinearVelocity()).scl(1f / timeToTarget).limit(actualLimiter.getMaxLinearAcceleration());
-        if (targetVelocity.len2() < THRESHOLD) {
-            targetVelocity.setZero();
-        }
-
         // No angular acceleration
         steering.angular = 0f;
 

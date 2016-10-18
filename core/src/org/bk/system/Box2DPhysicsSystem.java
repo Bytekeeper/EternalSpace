@@ -137,7 +137,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 fixtureDef.isSensor = true;
             } else if (PLANET.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_POI;
-                fixtureDef.filter.maskBits = 0;
+                fixtureDef.filter.maskBits = CATEGORY_SHIPS;
                 fixtureDef.isSensor = true;
             }
 
@@ -214,6 +214,10 @@ public class Box2DPhysicsSystem extends EntitySystem {
                     return true;
                 }
                 if (projB != null && projB.owner != entityA) {
+                    return true;
+                }
+                if (SHIP.has(entityA) && PLANET.has(entityB) ||
+                    SHIP.has(entityB) && PLANET.has(entityA)) {
                     return true;
                 }
             }
