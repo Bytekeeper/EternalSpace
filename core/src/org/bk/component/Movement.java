@@ -15,4 +15,11 @@ public class Movement implements Component {
 
     public float linearThrust;
     public float angularThrust;
+
+    public Movement reset() {
+        velocity.setZero();
+        linearAccel.setZero();
+        angularVelocity = angularAccel = maxVelocity = angularThrust = linearThrust = 0;
+        return this;
+    }
 }

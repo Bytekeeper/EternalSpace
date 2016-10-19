@@ -4,6 +4,13 @@ size: 512,512
 format: RGBA8888
 filter: MipMapLinearLinear,Linear
 repeat: none
+asteroid/asteroid_placeholder
+  rotate: false
+  xy: 260, 394
+  size: 90, 90
+  orig: 90, 90
+  offset: 0, 0
+  index: -1
 effect/small+1
   rotate: false
   xy: 194, 106
@@ -27,14 +34,14 @@ planet/forest2
   index: -1
 projectile/ion bolt~0
   rotate: false
-  xy: 260, 302
+  xy: 221, 126
   size: 16, 100
   orig: 16, 100
   offset: 0, 0
   index: -1
 ship/sparrow
   rotate: false
-  xy: 260, 404
+  xy: 260, 312
   size: 70, 80
   orig: 70, 80
   offset: 0, 0

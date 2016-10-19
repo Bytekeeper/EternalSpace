@@ -10,4 +10,12 @@ import com.badlogic.gdx.math.Vector2;
 public class Projectile implements Component {
     public Entity owner;
     public float yield;
+    public float initialSpeed;
+
+    public Projectile reset() {
+        owner = null;
+        yield = 0;
+        initialSpeed = 0;
+        return this;
+    }
 }

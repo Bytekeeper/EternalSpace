@@ -10,4 +10,10 @@ import com.badlogic.gdx.math.Vector2;
 public class Transform implements Component {
     public final Vector2 location = new Vector2();
     public float orientRad;
+
+    public Transform reset() {
+        location.setZero();
+        orientRad = 0;
+        return this;
+    }
 }

@@ -1,6 +1,8 @@
 package org.bk.system;
 
 import com.badlogic.ashley.core.*;
+import com.badlogic.ashley.signals.Listener;
+import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
@@ -40,8 +42,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     @Override
     public void addedToEngine(Engine engine) {
-        entities = engine.getEntitiesFor(Family.all(Transform.class, Body.class).get());
-        engine.addEntityListener(Family.all(Transform.class, Body.class).get(), new MyEntityListener());
+        entities = engine.getEntitiesFor(Family.all(Transform.class, Physics.class).get());
+        engine.addEntityListener(Family.all(Transform.class, Physics.class).get(), new MyEntityListener());
     }
 
     @Override
@@ -52,9 +54,10 @@ public class Box2DPhysicsSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         for (Entity entity: entities) {
-            Body body = BODY.get(entity);
+            Physics physics = PHYSICS.get(entity);
+
             Transform transform = TRANSFORM.get(entity);
-            com.badlogic.gdx.physics.box2d.Body physicsBody = body.physicsBody;
+            com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
             tv.set(physicsBody.getPosition()).scl(B2W);
             if (transform.location.dst2(tv) > 0.1f ||
                     Math.abs(transform.orientRad - physicsBody.getAngle()) > 0.01f) {
@@ -84,9 +87,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
             world.step(1 / 60f, 6, 2);
         }
         for (Entity entity: entities) {
-            Body body = BODY.get(entity);
+            Physics physics = PHYSICS.get(entity);
             Transform transform = TRANSFORM.get(entity);
-            com.badlogic.gdx.physics.box2d.Body physicsBody = body.physicsBody;
+            com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
             transform.orientRad = physicsBody.getAngle() % MathUtils.PI2;
             transform.location.set(physicsBody.getPosition()).scl(B2W);
             Movement movement = MOVEMENT.get(entity);
@@ -103,31 +106,38 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
         @Override
         public void entityAdded(Entity entity) {
-            Body body = BODY.get(entity);
             Transform transform = TRANSFORM.get(entity);
 
             bodyDef.type = BodyDef.BodyType.DynamicBody;
-            bodyDef.angularDamping = 5f;
+            if (SHIP.has(entity)) {
+                bodyDef.angularDamping = 5f;
+            } else {
+                bodyDef.angularDamping = 0;
+            }
             bodyDef.angle = transform.orientRad;
             tv.set(transform.location).scl(W2B);
             bodyDef.position.set(tv);
             Movement movement = MOVEMENT.get(entity);
             if (movement != null) {
                 bodyDef.linearVelocity.set(movement.velocity).scl(W2B);
+                bodyDef.angularVelocity = movement.angularVelocity;
             } else {
                 bodyDef.linearVelocity.setZero();
+                bodyDef.angularVelocity = 0;
             }
 
             com.badlogic.gdx.physics.box2d.Body physicsBody = world.createBody(bodyDef);
             physicsBody.setUserData(entity);
-            body.physicsBody = physicsBody;
+            Physics physics = PHYSICS.get(entity);
+            Body body = BODY.get(entity);
+            physics.physicsBody = physicsBody;
             CircleShape circleShape = new CircleShape();
             circleShape.setRadius(body.dimension.len() * W2B / 2);
 
             fixtureDef.shape = circleShape;
             fixtureDef.density = 5f;
-            fixtureDef.friction = 0.0f;
-            fixtureDef.restitution = 0.1f;
+            fixtureDef.friction = 0.5f;
+            fixtureDef.restitution = 0.2f;
             if (SHIP.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_SHIPS;
                 fixtureDef.filter.maskBits = CATEGORY_WEAPON | CATEGORY_POI;
@@ -139,6 +149,10 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 fixtureDef.filter.categoryBits = CATEGORY_POI;
                 fixtureDef.filter.maskBits = CATEGORY_SHIPS;
                 fixtureDef.isSensor = true;
+            } else if (ASTEROID.has(entity)) {
+                fixtureDef.filter.categoryBits = CATEGORY_DEBRIS;
+                fixtureDef.filter.maskBits = CATEGORY_DEBRIS | CATEGORY_WEAPON;
+                fixtureDef.isSensor = false;
             }
 
             Fixture fixture = physicsBody.createFixture(fixtureDef);
@@ -147,11 +161,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
         @Override
         public void entityRemoved(Entity entity) {
-            com.badlogic.gdx.physics.box2d.Body physicsBody = BODY.get(entity).physicsBody;
-            if (physicsBody == null) {
-                return;
-            }
-            world.destroyBody(physicsBody);
         }
     }
 
@@ -210,16 +219,18 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 Entity entityB = (Entity) fixtureB.getBody().getUserData();
                 Projectile projA = PROJECTILE.get(entityA);
                 Projectile projB = PROJECTILE.get(entityB);
-                if (projA != null && projA.owner != entityB) {
-                    return true;
+                if (projA != null && projB != null) {
+                    if (projA.owner == projB.owner) {
+                        return false;
+                    }
                 }
-                if (projB != null && projB.owner != entityA) {
-                    return true;
+                if (projA != null && projA.owner == entityB) {
+                    return false;
                 }
-                if (SHIP.has(entityA) && PLANET.has(entityB) ||
-                    SHIP.has(entityB) && PLANET.has(entityA)) {
-                    return true;
+                if (projB != null && projB.owner == entityA) {
+                    return false;
                 }
+                return true;
             }
             return false;
         }

@@ -28,7 +28,7 @@ public class AISystem extends IteratingSystem {
     private int line;
 
     public AISystem(Game game, int priority) {
-        super(Family.all(AIControlled.class).get(), priority);
+        super(Family.all(Steering.class, Transform.class, AIControlled.class).get(), priority);
         uiBatch = game.uiBatch;
         assets = game.assets;
     }
@@ -36,7 +36,6 @@ public class AISystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(Family.all(Steering.class, Transform.class, AIControlled.class).get(), new MyAIEntityListener());
     }
 
     @Override
@@ -53,27 +52,20 @@ public class AISystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        // Not ready yet?
+        Steering steering = STEERING.get(entity);
+        Physics physics = PHYSICS.get(entity);
+        if (steering == null || steering.steerable == null ||
+                physics == null || physics.physicsBody == null) {
+            return;
+        }
         AI_CONTROLLED.get(entity).behaviorTree.step();
         if (DEBUG) {
             Transform transform = TRANSFORM.get(entity);
-            Steering steering = STEERING.get(entity);
             assets.debugFont.draw(uiBatch, String.format("loc = (%1.1f, %1.1f) turn = %1.1f thrust = %1.1f",
                     transform.location.x, transform.location.y, steering.turn, steering.thrust),
                     0, line);
             line += 20;
-        }
-    }
-
-    private class MyAIEntityListener implements EntityListener {
-        @Override
-        public void entityAdded(Entity entity) {
-            AIControlled aiControlled = AI_CONTROLLED.get(entity);
-//            aiControlled.steerable = SteeringUtil.toSteeringBehavior(entity);
-        }
-
-        @Override
-        public void entityRemoved(Entity entity) {
-
         }
     }
 }

@@ -28,6 +28,7 @@ public class RenderingSystem extends EntitySystem {
     private ImmutableArray<Entity> shipEntities;
     private ImmutableArray<Entity> projectileEntities;
     private ImmutableArray<Entity> planetEntities;
+    private ImmutableArray<Entity> asteroidEntities;
     private Array<Star> stars = new Array<Star>();
     private Game game;
     private RandomXS128 rnd = new RandomXS128();
@@ -46,6 +47,7 @@ public class RenderingSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         planetEntities = engine.getEntitiesFor(Family.all(Planet.class, Transform.class, Body.class).get());
+        asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Ship.class, Transform.class, Body.class).get());
         projectileEntities = engine.getEntitiesFor(Family.all(Projectile.class, Transform.class, Body.class).get());
     }
@@ -57,6 +59,9 @@ public class RenderingSystem extends EntitySystem {
 
         for (Entity entity : planetEntities) {
             drawEntityWithBody(entity, assets.planet_placeholder);
+        }
+        for (Entity entity : asteroidEntities) {
+            drawEntityWithBody(entity, assets.asteroid_placeholder);
         }
         for (Entity entity : shipEntities) {
             drawEntityWithBody(entity, assets.ship_placeholder);

@@ -40,7 +40,7 @@ public class Radar {
     public void drawPlanet(Entity entity) {
         determineDrawPosition(entity);
         batch.setColor(Color.OLIVE);
-        batch.draw(assets.bg_star, tv2.x - 4, tv2.y - 4, 8, 8);
+        batch.draw(assets.bg_star, tv2.x - 5, tv2.y - 5, 10, 10);
         batch.setColor(Color.WHITE);
     }
 

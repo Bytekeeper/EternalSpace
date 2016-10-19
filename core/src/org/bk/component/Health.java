@@ -8,4 +8,10 @@ import com.badlogic.ashley.core.Component;
 public class Health implements Component {
     public float hull;
     public float shields;
+
+    public Health reset() {
+        hull = 0;
+        shields = 0;
+        return this;
+    }
 }

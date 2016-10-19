@@ -6,21 +6,22 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import org.bk.EntityFactory;
+import org.bk.Game;
 import org.bk.component.*;
-import org.bk.spec.ProjectileSpec;
 
-import static org.bk.component.Mapper.MOVEMENT;
-import static org.bk.component.Mapper.TRANSFORM;
-import static org.bk.component.Mapper.MOUNTS;
+import static org.bk.component.Mapper.*;
 
 /**
  * Created by dante on 15.10.2016.
  */
 public class WeaponSystem extends IteratingSystem {
     private static final float MAX_PROJECTILE_LIFETIME = 20;
+    private final Game game;
 
-    public WeaponSystem(int priority) {
+    public WeaponSystem(Game game, int priority) {
         super(Family.all(Mounts.class, Transform.class).get(), priority);
+        this.game = game;
     }
 
     @Override
@@ -29,16 +30,16 @@ public class WeaponSystem extends IteratingSystem {
         for (Mounts.Weapon weapon: mounts.weapons) {
             weapon.cooldown = Math.max(0, weapon.cooldown - deltaTime);
             if (weapon.cooldown > 0 || !weapon.firing) {
-                return;
+                continue;
             }
             weapon.cooldown = weapon.cooldownPerShot;
-            if (weapon.projectileSpec != null) {
-                spawnProjectile(weapon, entity, weapon.projectileSpec);
+            if (weapon.projectileDefinition != null) {
+                spawnProjectile(weapon, entity, weapon.projectileDefinition);
             }
         }
     }
 
-    private void spawnProjectile(Mounts.Weapon weapon, Entity owner, ProjectileSpec projectileSpec) {
+    private void spawnProjectile(Mounts.Weapon weapon, Entity owner, EntityFactory.EntityDefinitionKey projectileSpec) {
         if (projectileSpec == null) {
             Gdx.app.error(WeaponSystem.class.getSimpleName(), "No ProjectileSpec");
             return;
@@ -49,25 +50,16 @@ public class WeaponSystem extends IteratingSystem {
         }
         Transform sourceTransform = TRANSFORM.get(owner);
         Movement sourceMovement = MOVEMENT.get(owner);
-        Entity projectileEntity = new Entity();
-        Transform projectileTransform = new Transform();
+
+        Entity projectileEntity = game.spawn(weapon.projectileDefinition, Transform.class, Movement.class, Projectile.class, Physics.class);
+
+        Transform projectileTransform = TRANSFORM.get(projectileEntity);
         projectileTransform.orientRad = (sourceTransform.orientRad + weapon.orientRad) % MathUtils.PI2;
         projectileTransform.location.set(weapon.offset).rotateRad(sourceTransform.orientRad).add(sourceTransform.location);
-        projectileEntity.add(projectileTransform);
-        Projectile projectile = new Projectile();
+        Projectile projectile = PROJECTILE.get(projectileEntity);
         projectile.owner = owner;
-        projectile.yield = projectileSpec.yield;
-        projectileEntity.add(projectile);
-        Movement movement = new Movement();
+        Movement movement = MOVEMENT.get(projectileEntity);
         movement.maxVelocity = 2000;
-        movement.velocity.set(Vector2.X).rotateRad(sourceTransform.orientRad).scl(projectileSpec.initialSpeed).add(sourceMovement.velocity);
-        projectileEntity.add(movement);
-        Body body = new Body();
-        body.dimension.set(projectileSpec.dimension);
-        projectileEntity.add(body);
-        LifeTime lifeTime = new LifeTime();
-        lifeTime.remaining = Math.min(MAX_PROJECTILE_LIFETIME, projectileSpec.lifeTime);
-        projectileEntity.add(lifeTime);
-        getEngine().addEntity(projectileEntity);
+        movement.velocity.set(Vector2.X).rotateRad(sourceTransform.orientRad).scl(projectile.initialSpeed).add(sourceMovement.velocity);
     }
 }

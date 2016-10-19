@@ -14,6 +14,7 @@ public class Assets {
     public final TextureRegion flare_placeholder;
     public final TextureRegion projectile_placeholder;
     public final TextureRegion ui_radar;
+    public final TextureRegion asteroid_placeholder;
     public TextureRegion ship_placeholder;
     public TextureRegion planet_placeholder;
     public TextureRegion bg_star;
@@ -27,6 +28,7 @@ public class Assets {
         flare_placeholder = tr("effect/small+1");
         projectile_placeholder = tr("projectile/ion bolt~0");
         ui_radar = tr("ui/radar_placeholder");
+        asteroid_placeholder = tr("asteroid/asteroid_placeholder");
         debugFont = new BitmapFont();
     }
 
