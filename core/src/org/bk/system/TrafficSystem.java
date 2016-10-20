@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.RandomXS128;
 import org.bk.Game;
-import org.bk.ai.SteeringUtil;
 import org.bk.component.*;
 
 import static org.bk.component.Mapper.STEERING;
@@ -50,23 +49,23 @@ public class TrafficSystem extends EntitySystem {
             for (int i = rnd.nextInt(3) + 1; i > 0; i--) {
                 Entity target = planetEntities.random();
                 Entity entity = game.spawn("ship", Transform.class, Movement.class);
+                Persistence persistence = getEngine().createComponent(Persistence.class);
+                persistence.temporary = true;
+                entity.add(persistence);
                 AIControlled aiControlled = getEngine().createComponent(AIControlled.class);
                 entity.add(aiControlled);
                 if (rnd.nextFloat() < 0.5f) {
                     TRANSFORM.get(entity).location.set(TRANSFORM.get(target).location);
                     Landing landing = getEngine().createComponent(Landing.class);
-                    landing.isLiftingOff = true;
+                    landing.landingDirection = Landing.LandingDirection.DEPART;
                     landing.duration = 3;
                     landing.timeRemaining = landing.duration;
                     landing.target = target;
                     entity.add(landing);
                     aiControlled.behaviorTree = game.behaviors.patrol(entity, getEngine());
                 } else {
-                    Steering steering = STEERING.get(entity);
                     TRANSFORM.get(entity).location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
-                    steering.targetLocation = SteeringUtil.toLocation(TRANSFORM.get(target).location);
-                    steering.targetEntity = target;
-                    aiControlled.behaviorTree = game.behaviors.land(entity);
+                    aiControlled.behaviorTree = game.behaviors.land(entity, getEngine());
                 }
             }
         }

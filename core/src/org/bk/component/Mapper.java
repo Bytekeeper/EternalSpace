@@ -21,4 +21,9 @@ public class Mapper {
     public static final ComponentMapper<Landing> LANDING = ComponentMapper.getFor(Landing.class);
     public static final ComponentMapper<Asteroid> ASTEROID = ComponentMapper.getFor(Asteroid.class);
     public static final ComponentMapper<Physics> PHYSICS = ComponentMapper.getFor(Physics.class);
+    public static final ComponentMapper<Persistence> PERSISTENCE = ComponentMapper.getFor(Persistence.class);
+    public static final ComponentMapper<Character> CHARACTER = ComponentMapper.getFor(Character.class);
+    public static final ComponentMapper<Faction> FACTION = ComponentMapper.getFor(Faction.class);
+    public static final ComponentMapper<Owned> OWNED = ComponentMapper.getFor(Owned.class);
+    public static final ComponentMapper<Jumping> JUMPING = ComponentMapper.getFor(Jumping.class);
 }

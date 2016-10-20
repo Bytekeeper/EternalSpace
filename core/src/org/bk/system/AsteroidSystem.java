@@ -4,12 +4,16 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.signals.Listener;
+import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import org.bk.Game;
 import org.bk.component.Asteroid;
 import org.bk.component.Movement;
+import org.bk.component.Persistence;
 import org.bk.component.Transform;
 
 import static org.bk.component.Mapper.MOVEMENT;
@@ -25,7 +29,6 @@ public class AsteroidSystem extends IteratingSystem {
     private static final float MIN_ASTEROID_SPEED = 50;
     private static final float MAX_ASTEROID_SPEED = 300;
     private final Game game;
-    private boolean refresh = true;
 
     public AsteroidSystem(Game game, int priority) {
         super(Family.all(Asteroid.class, Transform.class).get(), priority);
@@ -33,14 +36,29 @@ public class AsteroidSystem extends IteratingSystem {
     }
 
     @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<SystemPopulateSystem.SystemKey>() {
+            @Override
+            public void receive(Signal<SystemPopulateSystem.SystemKey> signal, SystemPopulateSystem.SystemKey object) {
+                Gdx.app.log(AsteroidSystem.class.getSimpleName(), "Setting up initial asteroid deployment");
+                Vector3 cameraPosition = game.viewport.getCamera().position;
+                int toSpawn = 20 - getEntities().size();
+                while (toSpawn-- > 0) {
+                    spawnAsteroid(cameraPosition,  0, MAX_ASTEROID_DISTANCE);
+                }
+            }
+        });
+    }
+
+    @Override
     public void update(float deltaTime) {
         Vector3 cameraPosition = game.viewport.getCamera().position;
         int toSpawn = 20 - getEntities().size();
         while (toSpawn-- > 0) {
-            spawnAsteroid(cameraPosition, refresh ? 0 : MIN_ASTEROID_DISTANCE, MAX_ASTEROID_DISTANCE);
+            spawnAsteroid(cameraPosition, MIN_ASTEROID_DISTANCE, MAX_ASTEROID_DISTANCE);
         }
         super.update(deltaTime);
-        refresh = false;
     }
 
     private void spawnAsteroid(Vector3 cameraPosition, float minAsteroidDistance, float maxAsteroidDistance) {

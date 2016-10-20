@@ -20,7 +20,7 @@ public class SteeringUtil {
 
     public static SteeringAcceleration<Vector2> applySteering(SteeringBehavior<Vector2> behavior, Steerable<Vector2> steerable, Steering steering) {
         behavior.calculateSteering(tsa);
-        if (tsa.linear.len() > MathUtils.FLOAT_ROUNDING_ERROR) {
+        if (tsa.linear.len2() > 5) {
             float delta = ((tsa.linear.angleRad() - steerable.getOrientation() + 3 * MathUtils.PI) % MathUtils.PI2) - MathUtils.PI;
             steering.turn = MathUtils.clamp(delta * 3, -1, 1);
             if (Math.abs(delta) < 0.1f) {
@@ -28,6 +28,8 @@ public class SteeringUtil {
                 thrust *= tsa.linear.len() / steerable.getMaxLinearAcceleration();
                 steering.thrust = MathUtils.clamp(thrust, 0, 1);
             }
+        } else {
+            steering.turn = MathUtils.clamp(tsa.angular / steerable.getMaxAngularAcceleration(), -1, 1);
         }
         return tsa;
     }
@@ -63,6 +65,11 @@ public class SteeringUtil {
             @Override
             public float getMaxAngularSpeed() {
                 return movement.angularThrust / physics.physicsBody.getMass() / physics.physicsBody.getAngularDamping() / physics.physicsBody.getAngularDamping();
+            }
+
+            @Override
+            public float getMaxAngularAcceleration() {
+                return getMaxAngularSpeed();
             }
 
             @Override

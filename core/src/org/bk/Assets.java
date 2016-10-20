@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.I18NBundle;
 
 /**
  * Created by dante on 13.10.2016.
@@ -15,6 +17,8 @@ public class Assets {
     public final TextureRegion projectile_placeholder;
     public final TextureRegion ui_radar;
     public final TextureRegion asteroid_placeholder;
+    public final Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+    public final I18NBundle localization;
     public TextureRegion ship_placeholder;
     public TextureRegion planet_placeholder;
     public TextureRegion bg_star;
@@ -30,6 +34,7 @@ public class Assets {
         ui_radar = tr("ui/radar_placeholder");
         asteroid_placeholder = tr("asteroid/asteroid_placeholder");
         debugFont = new BitmapFont();
+        localization = I18NBundle.createBundle(Gdx.files.internal("messages"));
     }
 
     private TextureRegion tr(String name) {

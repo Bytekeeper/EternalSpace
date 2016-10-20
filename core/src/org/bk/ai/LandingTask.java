@@ -17,16 +17,11 @@ import static org.bk.component.Mapper.TRANSFORM;
 public class LandingTask extends LeafTask<Entity> {
     @Override
     public Status execute() {
-        Transform transform = TRANSFORM.get(getObject());
         Steering steering = STEERING.get(getObject());
-        if (steering.targetEntity == null || transform.location.dst2(steering.targetLocation.getPosition()) > 30) {
+        if (steering.modeTargetEntity == null) {
             return Status.FAILED;
         }
-        Landing landing = LANDING.get(getObject());
-        if (landing == null) {
-            steering.land = true;
-            return Status.RUNNING;
-        }
+        steering.mode = Steering.SteeringMode.LANDING;
         return Status.SUCCEEDED;
     }
 

@@ -7,7 +7,6 @@ import com.badlogic.gdx.ai.btree.branch.Parallel;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.leaf.Wait;
 import org.bk.ai.LandingTask;
-import org.bk.ai.MoveToTask;
 import org.bk.ai.PatrolTask;
 import org.bk.ai.task.RandomLandingSpotTask;
 
@@ -16,13 +15,12 @@ import org.bk.ai.task.RandomLandingSpotTask;
  */
 public class Behaviors {
 
-    public BehaviorTree<Entity> land(Entity owner) {
+    public BehaviorTree<Entity> land(Entity owner, Engine engine) {
         BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
-        Sequence<Entity> root = new Sequence<Entity>();
-        root.addChild(new MoveToTask());
-        root.addChild(new LandingTask());
-
-        tree.addChild(root);
+        Sequence<Entity> sequence = new Sequence<Entity>();
+        sequence.addChild(new RandomLandingSpotTask(engine));
+        sequence.addChild(new LandingTask());
+        tree.addChild(sequence);
         tree.setObject(owner);
         return tree;
     }
@@ -36,7 +34,6 @@ public class Behaviors {
         root.addChild(patrolTree);
         root.addChild(new RandomLandingSpotTask(engine));
         Sequence<Entity> land = new Sequence<Entity>();
-        land.addChild(new MoveToTask());
         land.addChild(new LandingTask());
         root.addChild(land);
         tree.addChild(root);

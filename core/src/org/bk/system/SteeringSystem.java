@@ -1,14 +1,11 @@
 package org.bk.system;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.sun.org.apache.bcel.internal.generic.LAND;
-import org.bk.ai.SteeringUtil;
 import org.bk.component.*;
 
 import static org.bk.component.Mapper.*;
@@ -28,29 +25,34 @@ public class SteeringSystem extends IteratingSystem {
         Steering steering = STEERING.get(entity);
         Movement movement = MOVEMENT.get(entity);
         Transform transform = TRANSFORM.get(entity);
-        Physics physics = PHYSICS.get(entity);
-
-        ensureSteerable(steering, movement, transform, physics);
 
         tv.set(Vector2.X).rotateRad(transform.orientRad).scl(MathUtils.clamp(steering.thrust, -1, 1) * movement.linearThrust);
         movement.linearAccel.add(tv);
         movement.angularAccel += MathUtils.clamp(steering.turn, -1, 1) * movement.angularThrust;
 
-        if (steering.land && movement.velocity.len2() < 100) {
+        if (steering.mode == Steering.SteeringMode.LANDING && movement.velocity.len2() < 100) {
             assert !LANDING.has(entity);
             Touching touching = TOUCHING.get(entity);
             if (touching != null) {
                 for (Entity e : touching.touchList) {
                     if (PLANET.has(e)) {
-                        steering.land = false;
                         Landing landing = getEngine().createComponent(Landing.class);
-                        landing.isLiftingOff = false;
+                        landing.landingDirection = Landing.LandingDirection.LANDING;
                         landing.duration = landing.timeRemaining = 2;
                         landing.target = e;
                         entity.add(landing);
                     }
                 }
             }
+        }
+        if (steering.mode == Steering.SteeringMode.JUMPING && movement.velocity.len2() < 20 &&
+                Math.abs(transform.orientRad - getEngine().getSystem(SystemPopulateSystem.class).orientationToward(steering.jumpTo)) < 0.01) {
+            Jumping jumping = getEngine().createComponent(Jumping.class);
+            jumping.sourceOrTargetSystem = steering.jumpTo;
+            jumping.timeRemaining = Jumping.JUMP_DURATION / 2;
+            jumping.direction = Jumping.JumpDirection.DEPART;
+            jumping.referencePoint.set(transform.location);
+            entity.add(jumping);
         }
         Mounts mounts = MOUNTS.get(entity);
         if (mounts != null) {
@@ -60,12 +62,6 @@ public class SteeringSystem extends IteratingSystem {
         }
         steering.thrust = 0;
         steering.turn = 0;
-    }
-
-    private void ensureSteerable(Steering steering, Movement movement, Transform transform, Physics physics) {
-        if (steering.steerable == null) {
-            steering.steerable = SteeringUtil.toSteeringBehavior(movement, transform, physics);
-        }
     }
 
     @Override

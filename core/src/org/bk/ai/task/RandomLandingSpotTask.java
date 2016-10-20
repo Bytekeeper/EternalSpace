@@ -3,7 +3,6 @@ package org.bk.ai.task;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import org.bk.ai.SteeringUtil;
@@ -28,10 +27,13 @@ public class RandomLandingSpotTask extends LeafTask<Entity> {
     @Override
     public Status execute() {
         Steering steering = Mapper.STEERING.get(getObject());
-        if (steering.targetEntity == null || !PLANET.has(steering.targetEntity)) {
+        if (steering.modeTargetEntity == null || !PLANET.has(steering.modeTargetEntity)) {
             Entity entity = engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get()).random();
-            steering.targetEntity = entity;
-            steering.targetLocation = SteeringUtil.toLocation(TRANSFORM.get(entity).location);
+            if (entity == null) {
+                return Status.FAILED;
+            }
+            steering.modeTargetEntity = entity;
+            steering.mode = Steering.SteeringMode.LANDING;
         }
         return Status.SUCCEEDED;
     }

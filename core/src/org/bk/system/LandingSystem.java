@@ -1,18 +1,15 @@
 package org.bk.system;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import org.bk.component.Landing;
+import org.bk.component.Persistence;
 import org.bk.component.Physics;
 import org.bk.component.Steering;
-import org.bk.component.Transform;
 
-import static org.bk.component.Mapper.LANDING;
-import static org.bk.component.Mapper.PHYSICS;
-import static org.bk.component.Mapper.STEERING;
+import static org.bk.component.Mapper.*;
 
 /**
  * Created by dante on 18.10.2016.
@@ -33,9 +30,10 @@ public class LandingSystem extends IteratingSystem {
             entity.remove(Steering.class);
             landing.hasSteering = true;
         }
-        landing.timeRemaining -= deltaTime;
+        landing.timeRemaining = Math.max(0, landing.timeRemaining - deltaTime);
         if (landing.timeRemaining <= 0) {
-            if (landing.isLiftingOff) {
+            Persistence persistence = PERSISTENCE.get(entity);
+            if (landing.landingDirection == Landing.LandingDirection.DEPART) {
                 if (landing.hasPhysics) {
                     entity.add(getEngine().createComponent(Physics.class));
                     landing.hasPhysics = false;
@@ -45,8 +43,10 @@ public class LandingSystem extends IteratingSystem {
                     landing.hasSteering = true;
                 }
                 entity.remove(Landing.class);
-            } else {
+            } else if (persistence != null && persistence.temporary){
                 getEngine().removeEntity(entity);
+            } else {
+                landing.landed = true;
             }
         }
     }

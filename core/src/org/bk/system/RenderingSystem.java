@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.sun.org.apache.bcel.internal.generic.LAND;
 import org.bk.Assets;
@@ -23,6 +24,8 @@ import static org.bk.component.Mapper.*;
  * Created by dante on 15.10.2016.
  */
 public class RenderingSystem extends EntitySystem {
+    public static final int STAR_BORDER = 200;
+    public static final int STAR_BORDER2 = STAR_BORDER * 2;
     private final Assets assets;
     private final SpriteBatch batch;
     private ImmutableArray<Entity> shipEntities;
@@ -93,6 +96,8 @@ public class RenderingSystem extends EntitySystem {
                     }
                 }
             }
+        } else if (landing.landed) {
+            return;
         }
         Body body = BODY.get(entity);
         ta.setToTranslation(transform.location);
@@ -100,7 +105,7 @@ public class RenderingSystem extends EntitySystem {
         tv.set(body.dimension);
         if (landing != null) {
             float scale = landing.timeRemaining / landing.duration;
-            if (landing.isLiftingOff) {
+            if (landing.landingDirection == Landing.LandingDirection.DEPART) {
                 scale = 1 - scale;
             }
             tv.scl(scale);
@@ -120,13 +125,13 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void updateStarBackground() {
-        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 2000;
+        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 1500;
         if (stars.size != starAmount) {
             stars.clear();
             for (int i = 0; i < starAmount; i++) {
                 Star star = new Star();
-                tv.set(rnd.nextFloat() * (Gdx.graphics.getWidth() + 100) - 50,
-                        rnd.nextFloat() * (Gdx.graphics.getHeight() + 100) - 50);
+                tv.set(rnd.nextFloat() * (Gdx.graphics.getWidth() + STAR_BORDER2) - STAR_BORDER,
+                        rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER);
                 game.viewport.unproject(tv);
                 star.position.set(tv);
                 star.brightness = rnd.nextFloat() * 0.7f + 0.3f;
@@ -136,15 +141,15 @@ public class RenderingSystem extends EntitySystem {
         for (Star star : stars) {
             tv.set(star.position);
             game.viewport.project(tv);
-            if (tv.x < -50 || tv.x > Gdx.graphics.getWidth() + 50) {
-                tv.x = Math.signum(Gdx.graphics.getWidth() / 2 - tv.x) * (Gdx.graphics.getWidth() / 2 + 50 * rnd.nextFloat()) + Gdx.graphics.getWidth() / 2;
-                tv.y = rnd.nextFloat() * (Gdx.graphics.getHeight() + 100) - 50;
+            if (tv.x < -STAR_BORDER || tv.x > Gdx.graphics.getWidth() + STAR_BORDER) {
+                tv.x = Math.signum(Gdx.graphics.getWidth() / 2 - tv.x) * (Gdx.graphics.getWidth() / 2 + STAR_BORDER * rnd.nextFloat()) + Gdx.graphics.getWidth() / 2;
+                tv.y = rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER;
                 game.viewport.unproject(tv);
                 star.position.set(tv);
                 star.brightness = rnd.nextFloat() * 0.7f + 0.3f;
-            } else if (tv.y < -50 || tv.y > Gdx.graphics.getHeight() + 50) {
-                tv.x = rnd.nextFloat() * (Gdx.graphics.getWidth() + 100) - 50;
-                tv.y = -Math.signum(Gdx.graphics.getHeight() / 2 - tv.y) * (Gdx.graphics.getHeight() / 2 + 50 * rnd.nextFloat()) + Gdx.graphics.getHeight() / 2;
+            } else if (tv.y < -STAR_BORDER || tv.y > Gdx.graphics.getHeight() + STAR_BORDER) {
+                tv.x = rnd.nextFloat() * (Gdx.graphics.getWidth() + STAR_BORDER2) - STAR_BORDER;
+                tv.y = -Math.signum(Gdx.graphics.getHeight() / 2 - tv.y) * (Gdx.graphics.getHeight() / 2 + STAR_BORDER * rnd.nextFloat()) + Gdx.graphics.getHeight() / 2;
                 game.viewport.unproject(tv);
                 star.position.set(tv);
                 star.brightness = rnd.nextFloat() * 0.7f + 0.3f;

@@ -1,7 +1,9 @@
 package org.bk.system;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
@@ -52,14 +54,20 @@ public class WeaponSystem extends IteratingSystem {
         Movement sourceMovement = MOVEMENT.get(owner);
 
         Entity projectileEntity = game.spawn(weapon.projectileDefinition, Transform.class, Movement.class, Projectile.class, Physics.class);
-
+        Owned owned = getEngine().createComponent(Owned.class);
+        owned.owner = owner;
+        projectileEntity.add(owned);
         Transform projectileTransform = TRANSFORM.get(projectileEntity);
         projectileTransform.orientRad = (sourceTransform.orientRad + weapon.orientRad) % MathUtils.PI2;
         projectileTransform.location.set(weapon.offset).rotateRad(sourceTransform.orientRad).add(sourceTransform.location);
         Projectile projectile = PROJECTILE.get(projectileEntity);
-        projectile.owner = owner;
         Movement movement = MOVEMENT.get(projectileEntity);
         movement.maxVelocity = 2000;
         movement.velocity.set(Vector2.X).rotateRad(sourceTransform.orientRad).scl(projectile.initialSpeed).add(sourceMovement.velocity);
+    }
+
+    @Override
+    public PooledEngine getEngine() {
+        return (PooledEngine) super.getEngine();
     }
 }

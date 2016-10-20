@@ -22,7 +22,7 @@ import static org.bk.component.Mapper.*;
  * Created by dante on 16.10.2016.
  */
 public class AISystem extends IteratingSystem {
-    private final static boolean DEBUG = true;
+    private final static boolean DEBUG = false;
     private final SpriteBatch uiBatch;
     private final Assets assets;
     private int line;
@@ -59,7 +59,12 @@ public class AISystem extends IteratingSystem {
                 physics == null || physics.physicsBody == null) {
             return;
         }
-        AI_CONTROLLED.get(entity).behaviorTree.step();
+        AIControlled aiControlled = AI_CONTROLLED.get(entity);
+        if (aiControlled.behaviorTree == null) {
+            Gdx.app.debug(AISystem.class.getSimpleName(), "AI entity without behavior!");
+            return;
+        }
+        aiControlled.behaviorTree.step();
         if (DEBUG) {
             Transform transform = TRANSFORM.get(entity);
             assets.debugFont.draw(uiBatch, String.format("loc = (%1.1f, %1.1f) turn = %1.1f thrust = %1.1f",

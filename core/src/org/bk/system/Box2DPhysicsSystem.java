@@ -32,6 +32,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
     private final Vector2 tv = new Vector2();
     private float nextStep;
+    private FactionSystem factionSystem;
 
     public Box2DPhysicsSystem(int priority) {
         super(priority);
@@ -53,6 +54,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        factionSystem = getEngine().getSystem(FactionSystem.class);
         for (Entity entity: entities) {
             Physics physics = PHYSICS.get(entity);
 
@@ -82,7 +84,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             }
         }
         nextStep -= Math.min(deltaTime, 0.1f);
-        while (nextStep <= 0) {
+        while (nextStep < 0) {
             nextStep += 1 / 60f;
             world.step(1 / 60f, 6, 2);
         }
@@ -90,8 +92,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
             Physics physics = PHYSICS.get(entity);
             Transform transform = TRANSFORM.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
-            transform.orientRad = physicsBody.getAngle() % MathUtils.PI2;
+            transform.orientRad = (physicsBody.getAngle() + MathUtils.PI2) % MathUtils.PI2;
             transform.location.set(physicsBody.getPosition()).scl(B2W);
+            physics.physicsBody.setTransform(transform.location, transform.orientRad);
             Movement movement = MOVEMENT.get(entity);
             if (movement != null) {
                 movement.velocity.set(physicsBody.getLinearVelocity()).scl(B2W);
@@ -217,17 +220,17 @@ public class Box2DPhysicsSystem extends EntitySystem {
             if (collide) {
                 Entity entityA = (Entity) fixtureA.getBody().getUserData();
                 Entity entityB = (Entity) fixtureB.getBody().getUserData();
-                Projectile projA = PROJECTILE.get(entityA);
-                Projectile projB = PROJECTILE.get(entityB);
-                if (projA != null && projB != null) {
-                    if (projA.owner == projB.owner) {
-                        return false;
-                    }
+                Owned ownedA = OWNED.get(entityA);
+                Owned ownedB = OWNED.get(entityB);
+                if (ownedA != null) {
+                    entityA = ownedA.owner;
                 }
-                if (projA != null && projA.owner == entityB) {
-                    return false;
+                if (ownedB != null) {
+                    entityB = ownedB.owner;
                 }
-                if (projB != null && projB.owner == entityA) {
+                if (entityA != null && entityB != null &&
+                        CHARACTER.has(entityA) && CHARACTER.has(entityB) &&
+                        !factionSystem.areEnemies(entityA, entityB)) {
                     return false;
                 }
                 return true;
