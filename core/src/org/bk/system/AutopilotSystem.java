@@ -20,14 +20,12 @@ import static org.bk.component.Mapper.*;
 /**
  * Created by dante on 20.10.2016.
  */
-public class SteeringModeSystem extends IteratingSystem {
+public class AutopilotSystem extends IteratingSystem {
     private final Arrive<Vector2> steerToLandingSpot = new Arrive<Vector2>(null, null);
     private final Stop stop = new Stop(null);
 
-    private SteeringAcceleration<Vector2> tsa = new SteeringAcceleration<Vector2>(new Vector2());
-
-    public SteeringModeSystem(int priority) {
-        super(Family.all(Steering.class, Transform.class, Movement.class).get(), priority);
+    public AutopilotSystem(int priority) {
+        super(Family.all(Steering.class, Transform.class, Movement.class, Physics.class).get(), priority);
     }
 
     @Override
@@ -43,8 +41,6 @@ public class SteeringModeSystem extends IteratingSystem {
         ensureSteerable(steering, movement, transform, physics);
 
         switch (steering.mode) {
-            case FREE_FLIGHT:
-                break;
             case LANDING:
                 if (steering.modeTargetEntity == null) {
                     steering.mode = Steering.SteeringMode.FREE_FLIGHT;
@@ -67,6 +63,4 @@ public class SteeringModeSystem extends IteratingSystem {
             steering.steerable = SteeringUtil.toSteeringBehavior(movement, transform, physics);
         }
     }
-
-
 }

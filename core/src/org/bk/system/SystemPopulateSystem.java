@@ -22,6 +22,7 @@ public class SystemPopulateSystem extends EntitySystem {
     private SystemKey currentSystem;
     private ImmutableArray<Entity> allTransformEntities;
     public final Signal<SystemKey> systemChanged = new Signal<SystemKey>();
+    private boolean dispatchOnNextUpdate;
 
     public SystemPopulateSystem(Game game, int priority) {
         super(priority);
@@ -36,13 +37,17 @@ public class SystemPopulateSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
+        if (dispatchOnNextUpdate) {
+            systemChanged.dispatch(currentSystem);
+            dispatchOnNextUpdate = false;
+        }
         Persistence playerPersistence = PERSISTENCE.get(game.player);
         if (playerPersistence.system != currentSystem) {
             currentSystem = playerPersistence.system;
             Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + currentSystem.name);
             removeAllEntitiesNotInSystem();
             game.addEntitiesOf(currentSystem);
-            systemChanged.dispatch(currentSystem);
+            dispatchOnNextUpdate = true;
         }
     }
 

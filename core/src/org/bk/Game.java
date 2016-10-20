@@ -7,13 +7,11 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.GdxAI;
-import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import org.bk.ai.SteeringUtil;
 import org.bk.component.*;
 import org.bk.component.Character;
 import org.bk.screen.PlanetScreen;
@@ -60,20 +58,20 @@ public class Game extends com.badlogic.gdx.Game {
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         engine = new PooledEngine();
         engine.addSystem(new AISystem(this, 0));
-        engine.addSystem(new SteeringModeSystem(1));
-        engine.addSystem(new SteeringSystem(2));
+        engine.addSystem(new AutopilotSystem(1));
+        engine.addSystem(new ApplySteeringSystem(2));
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(4));
         engine.addSystem(new Box2DPhysicsSystem(5));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
-        engine.addSystem(new TrafficSystem(this, 7));
         engine.addSystem(new JumpingSystem(8));
         engine.addSystem(new LandingSystem(8));
         engine.addSystem(new HealthSystem(8));
         engine.addSystem(new FactionSystem(1000));
         engine.addSystem(new SystemPopulateSystem(this, 1000));
-        engine.addSystem(new AsteroidSystem(this, 1000));
+        engine.addSystem(new AsteroidSystem(this, 1001));
+        engine.addSystem(new TrafficSystem(this, 1001));
 
         entityFactory = new EntityFactory(engine);
 

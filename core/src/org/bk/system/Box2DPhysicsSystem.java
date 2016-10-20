@@ -92,7 +92,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             Physics physics = PHYSICS.get(entity);
             Transform transform = TRANSFORM.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
-            transform.orientRad = (physicsBody.getAngle() + MathUtils.PI2) % MathUtils.PI2;
+            transform.orientRad = (physicsBody.getAngle() % MathUtils.PI2 + MathUtils.PI2) % MathUtils.PI2;
             transform.location.set(physicsBody.getPosition()).scl(B2W);
             physics.physicsBody.setTransform(transform.location, transform.orientRad);
             Movement movement = MOVEMENT.get(entity);

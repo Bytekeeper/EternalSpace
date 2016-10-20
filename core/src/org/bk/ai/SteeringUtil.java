@@ -20,7 +20,7 @@ public class SteeringUtil {
 
     public static SteeringAcceleration<Vector2> applySteering(SteeringBehavior<Vector2> behavior, Steerable<Vector2> steerable, Steering steering) {
         behavior.calculateSteering(tsa);
-        if (tsa.linear.len2() > 5) {
+        if (tsa.linear.len2() > 10) {
             float delta = ((tsa.linear.angleRad() - steerable.getOrientation() + 3 * MathUtils.PI) % MathUtils.PI2) - MathUtils.PI;
             steering.turn = MathUtils.clamp(delta * 3, -1, 1);
             if (Math.abs(delta) < 0.1f) {
