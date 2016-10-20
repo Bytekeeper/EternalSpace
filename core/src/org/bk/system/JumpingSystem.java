@@ -6,6 +6,8 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import org.bk.Game;
+import org.bk.SolarSystems;
 import org.bk.component.*;
 
 import static org.bk.component.Mapper.*;
@@ -15,9 +17,11 @@ import static org.bk.component.Mapper.*;
  */
 public class JumpingSystem extends IteratingSystem {
     private final Vector2 tv = new Vector2();
+    private final Game game;
 
-    public JumpingSystem(int priority) {
+    public JumpingSystem(Game game, int priority) {
         super(Family.all(Jumping.class, Transform.class, Persistence.class).get(), priority);
+        this.game = game;
     }
 
     @Override
@@ -33,14 +37,14 @@ public class JumpingSystem extends IteratingSystem {
         }
         Transform transform = TRANSFORM.get(entity);
         if (jumping.direction == Jumping.JumpDirection.DEPART) {
-            float targetOrientation = getEngine().getSystem(SystemPopulateSystem.class).orientationToward(jumping.sourceOrTargetSystem);
+            float targetOrientation = game.systems.orientationToward(jumping.sourceOrTargetSystem);
             transform.orientRad = targetOrientation;
             tv.set(Vector2.X).setAngleRad(targetOrientation);
             float timePassed = Jumping.JUMP_DURATION / 2 - jumping.timeRemaining;
             float dst = timePassed * timePassed * timePassed * 400;
             transform.location.set(tv).scl(dst).add(jumping.referencePoint);
         } else {
-            float targetOrientation = getEngine().getSystem(SystemPopulateSystem.class).orientationFrom(jumping.sourceOrTargetSystem);
+            float targetOrientation = game.systems.orientationFrom(jumping.sourceOrTargetSystem);
             transform.orientRad = targetOrientation;
             tv.set(Vector2.X).setAngleRad(targetOrientation);
             float dst = jumping.timeRemaining * jumping.timeRemaining * jumping.timeRemaining * 400;
@@ -51,7 +55,7 @@ public class JumpingSystem extends IteratingSystem {
             if (jumping.direction == Jumping.JumpDirection.DEPART) {
                 jumping.direction = Jumping.JumpDirection.ARRIVE;
                 Persistence persistence = PERSISTENCE.get(entity);
-                SystemPopulateSystem.SystemKey comingFrom = persistence.system;
+                SolarSystems.SystemKey comingFrom = persistence.system;
                 persistence.system = jumping.sourceOrTargetSystem;
                 jumping.sourceOrTargetSystem = comingFrom;
                 jumping.timeRemaining = Jumping.JUMP_DURATION / 2;

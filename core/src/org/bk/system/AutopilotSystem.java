@@ -3,10 +3,8 @@ package org.bk.system;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.ai.steer.SteeringAcceleration;
-import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
+import org.bk.Game;
 import org.bk.ai.Arrive;
 import org.bk.ai.SteeringUtil;
 import org.bk.ai.task.Stop;
@@ -23,9 +21,11 @@ import static org.bk.component.Mapper.*;
 public class AutopilotSystem extends IteratingSystem {
     private final Arrive<Vector2> steerToLandingSpot = new Arrive<Vector2>(null, null);
     private final Stop stop = new Stop(null);
+    private final Game game;
 
-    public AutopilotSystem(int priority) {
+    public AutopilotSystem(Game game, int priority) {
         super(Family.all(Steering.class, Transform.class, Movement.class, Physics.class).get(), priority);
+        this.game = game;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class AutopilotSystem extends IteratingSystem {
                 break;
             case JUMPING:
                 stop.setOwner(steering.steerable).
-                        setOrientation(getEngine().getSystem(SystemPopulateSystem.class).orientationToward(steering.jumpTo));
+                        setOrientation(game.systems.orientationToward(steering.jumpTo));
                 SteeringUtil.applySteering(stop, steering.steerable, steering);
                 break;
         }

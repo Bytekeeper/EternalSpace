@@ -3,6 +3,7 @@ package org.bk.component;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
+import org.bk.SolarSystems;
 import org.bk.system.SystemPopulateSystem;
 
 /**
@@ -10,7 +11,7 @@ import org.bk.system.SystemPopulateSystem;
  */
 public class Jumping implements Component, Pool.Poolable {
     public static final float JUMP_DURATION = 5;
-    public SystemPopulateSystem.SystemKey sourceOrTargetSystem;
+    public SolarSystems.SystemKey sourceOrTargetSystem;
     public float timeRemaining;
     public JumpDirection direction = JumpDirection.DEPART;
     public boolean hasPhysics;

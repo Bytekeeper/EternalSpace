@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
+import org.bk.SolarSystems;
 import org.bk.system.SystemPopulateSystem;
 
 /**
@@ -14,7 +15,7 @@ public class Steering implements Component, Pool.Poolable {
     public float thrust;
     public float turn;
     public SteeringMode mode = SteeringMode.FREE_FLIGHT;
-    public SystemPopulateSystem.SystemKey jumpTo;
+    public SolarSystems.SystemKey jumpTo;
     public Steerable<Vector2> steerable;
     public Entity modeTargetEntity;
     public boolean primaryFire;

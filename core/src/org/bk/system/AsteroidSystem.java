@@ -11,6 +11,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import org.bk.Game;
+import org.bk.SolarSystems;
 import org.bk.component.Asteroid;
 import org.bk.component.Movement;
 import org.bk.component.Persistence;
@@ -38,9 +39,9 @@ public class AsteroidSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<SystemPopulateSystem.SystemKey>() {
+        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<SolarSystems.SystemKey>() {
             @Override
-            public void receive(Signal<SystemPopulateSystem.SystemKey> signal, SystemPopulateSystem.SystemKey object) {
+            public void receive(Signal<SolarSystems.SystemKey> signal, SolarSystems.SystemKey object) {
                 Gdx.app.log(AsteroidSystem.class.getSimpleName(), "Setting up initial asteroid deployment");
                 Vector3 cameraPosition = game.viewport.getCamera().position;
                 int toSpawn = 20 - getEntities().size();

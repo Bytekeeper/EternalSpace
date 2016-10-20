@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import org.bk.Game;
 import org.bk.component.*;
 
 import static org.bk.component.Mapper.*;
@@ -17,9 +18,11 @@ public class ApplySteeringSystem extends IteratingSystem {
     public static final int ACTION_VELOCITY_THRESHOLD2 = 10;
     public static final double ACTION_DELTA_ANGLE_THRESHOLD = 0.01;
     private final Vector2 tv = new Vector2();
+    private final Game game;
 
-    public ApplySteeringSystem(int priority) {
+    public ApplySteeringSystem(Game game, int priority) {
         super(Family.all(Movement.class, Steering.class, Transform.class).get(), priority);
+        this.game = game;
     }
 
     @Override
@@ -53,7 +56,7 @@ public class ApplySteeringSystem extends IteratingSystem {
     }
 
     private void tryJumping(Entity entity, Movement movement, Steering steering, Transform transform) {
-        float targetOrientation = getEngine().getSystem(SystemPopulateSystem.class).orientationToward(steering.jumpTo);
+        float targetOrientation = game.systems.orientationToward(steering.jumpTo);
         if (movement.velocity.len2() > ACTION_VELOCITY_THRESHOLD2 ||
                 Math.abs(transform.orientRad - targetOrientation) > ACTION_DELTA_ANGLE_THRESHOLD) {
             return;

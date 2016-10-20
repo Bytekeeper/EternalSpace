@@ -7,8 +7,8 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.MathUtils;
 import org.bk.Game;
+import org.bk.SolarSystems;
 import org.bk.component.Persistence;
 import org.bk.component.Transform;
 
@@ -19,9 +19,8 @@ import static org.bk.component.Mapper.PERSISTENCE;
  */
 public class SystemPopulateSystem extends EntitySystem {
     private Game game;
-    private SystemKey currentSystem;
     private ImmutableArray<Entity> allTransformEntities;
-    public final Signal<SystemKey> systemChanged = new Signal<SystemKey>();
+    public final Signal<SolarSystems.SystemKey> systemChanged = new Signal<SolarSystems.SystemKey>();
     private boolean dispatchOnNextUpdate;
 
     public SystemPopulateSystem(Game game, int priority) {
@@ -38,15 +37,15 @@ public class SystemPopulateSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         if (dispatchOnNextUpdate) {
-            systemChanged.dispatch(currentSystem);
+            systemChanged.dispatch(game.currentSystem);
             dispatchOnNextUpdate = false;
         }
         Persistence playerPersistence = PERSISTENCE.get(game.player);
-        if (playerPersistence.system != currentSystem) {
-            currentSystem = playerPersistence.system;
-            Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + currentSystem.name);
+        if (playerPersistence.system != game.currentSystem) {
+            game.currentSystem = playerPersistence.system;
+            Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem.name);
             removeAllEntitiesNotInSystem();
-            game.addEntitiesOf(currentSystem);
+            game.populateCurrentSystem();
             dispatchOnNextUpdate = true;
         }
     }
@@ -54,32 +53,12 @@ public class SystemPopulateSystem extends EntitySystem {
     private void removeAllEntitiesNotInSystem() {
         for (Entity entity: allTransformEntities) {
             Persistence persistence = PERSISTENCE.get(entity);
-            if (persistence != null && persistence.system == currentSystem) {
+            if (persistence != null && persistence.system == game.currentSystem) {
                 continue;
             }
             if (persistence == null || persistence.temporary) {
                 getEngine().removeEntity(entity);
             }
-        }
-    }
-
-    public SystemKey key(String name) {
-        return new SystemKey(name);
-    }
-
-    public float orientationToward(SystemKey target) {
-        return MathUtils.PI / 3;
-    }
-
-    public float orientationFrom(SystemKey sourceOrTargetSystem) {
-        return (orientationToward(sourceOrTargetSystem) + MathUtils.PI) % MathUtils.PI2;
-    }
-
-    public static class SystemKey {
-        public final String name;
-
-        SystemKey(String name) {
-            this.name = name;
         }
     }
 }

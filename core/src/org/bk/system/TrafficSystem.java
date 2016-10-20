@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector3;
 import org.bk.Game;
+import org.bk.SolarSystems;
 import org.bk.component.*;
 
 import static org.bk.component.Mapper.STEERING;
@@ -33,9 +34,9 @@ public class TrafficSystem extends EntitySystem {
         super.addedToEngine(engine);
         planetEntities = engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Ship.class).get());
-        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<SystemPopulateSystem.SystemKey>() {
+        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<SolarSystems.SystemKey>() {
             @Override
-            public void receive(Signal<SystemPopulateSystem.SystemKey> signal, SystemPopulateSystem.SystemKey object) {
+            public void receive(Signal<SolarSystems.SystemKey> signal, SolarSystems.SystemKey object) {
                 Gdx.app.log(TrafficSystem.class.getSimpleName(), "Setting up initial traffic deployment");
                 int toSpawn = 5 - shipEntities.size();
                 while (toSpawn-- > 0) {

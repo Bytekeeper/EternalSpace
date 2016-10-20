@@ -26,12 +26,14 @@ public class Game extends com.badlogic.gdx.Game {
     public Assets assets;
     public Behaviors behaviors;
     public EntityFactory entityFactory;
+    public SolarSystems systems;
     PooledEngine engine;
     public Entity player;
     public int width;
     public int height;
     public Stage stage;
     public PlanetScreen planetScreen;
+    public SolarSystems.SystemKey currentSystem;
 
     @Override
     public void resize(int width, int height) {
@@ -50,6 +52,7 @@ public class Game extends com.badlogic.gdx.Game {
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         assets = new Assets();
         behaviors = new Behaviors();
+        systems = new SolarSystems();
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         stage = new Stage(new ScreenViewport(), uiBatch);
@@ -58,14 +61,14 @@ public class Game extends com.badlogic.gdx.Game {
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         engine = new PooledEngine();
         engine.addSystem(new AISystem(this, 0));
-        engine.addSystem(new AutopilotSystem(1));
-        engine.addSystem(new ApplySteeringSystem(2));
+        engine.addSystem(new AutopilotSystem(this, 1));
+        engine.addSystem(new ApplySteeringSystem(this, 2));
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(4));
         engine.addSystem(new Box2DPhysicsSystem(5));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
-        engine.addSystem(new JumpingSystem(8));
+        engine.addSystem(new JumpingSystem(this, 8));
         engine.addSystem(new LandingSystem(8));
         engine.addSystem(new HealthSystem(8));
         engine.addSystem(new FactionSystem(1000));
@@ -77,7 +80,7 @@ public class Game extends com.badlogic.gdx.Game {
 
         player = spawn("ship");
         Persistence persistence = engine.createComponent(Persistence.class);
-        persistence.system = engine.getSystem(SystemPopulateSystem.class).key("initial");
+        persistence.system = systems.key("initial");
         player.add(persistence);
         player.add(engine.createComponent(Character.class));
 
@@ -131,7 +134,7 @@ public class Game extends com.badlogic.gdx.Game {
             }
             if (Gdx.input.isKeyPressed(Keys.J)) {
                 steering.mode = Steering.SteeringMode.JUMPING;
-                steering.jumpTo = engine.getSystem(SystemPopulateSystem.class).key("second");
+                steering.jumpTo = systems.key("second");
             }
             if (Gdx.input.isKeyPressed(Keys.L)) {
                 Entity planet = engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get()).random();
@@ -171,8 +174,8 @@ public class Game extends com.badlogic.gdx.Game {
         engine.removeAllEntities();
     }
 
-    public void addEntitiesOf(SystemPopulateSystem.SystemKey system) {
-        if ("initial".equals(system.name)) {
+    public void populateCurrentSystem() {
+        if ("initial".equals(currentSystem.name)) {
             spawn("planet");
             TRANSFORM.get(spawn("planet")).location.set(2000, 1000);
         } else {
