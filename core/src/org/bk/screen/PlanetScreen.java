@@ -33,7 +33,6 @@ public class PlanetScreen extends ScreenAdapter {
                 Landing landing = LANDING.get(game.player);
                 landing.landingDirection = Landing.LandingDirection.DEPART;
                 landing.landed = false;
-                landing.timeRemaining = landing.duration = 2;
             }
         });
         window.add(departButton);

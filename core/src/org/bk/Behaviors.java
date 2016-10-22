@@ -6,8 +6,11 @@ import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.branch.Parallel;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.leaf.Wait;
+import com.badlogic.gdx.ai.steer.SteeringBehavior;
+import com.badlogic.gdx.math.Vector2;
 import org.bk.ai.LandingTask;
 import org.bk.ai.PatrolTask;
+import org.bk.ai.task.JumpTask;
 import org.bk.ai.task.RandomLandingSpotTask;
 
 /**
@@ -38,6 +41,13 @@ public class Behaviors {
         root.addChild(land);
         tree.addChild(root);
         tree.setObject(owner);
+        return tree;
+    }
+
+    public BehaviorTree<Entity> jump(Entity entity) {
+        BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
+        tree.addChild(new JumpTask());
+        tree.setObject(entity);
         return tree;
     }
 }

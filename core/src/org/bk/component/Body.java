@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
  */
 public class Body implements Component {
     public final Vector2 dimension = new Vector2();
+    public String graphics;
 
     public Body reset() {
         dimension.setZero();

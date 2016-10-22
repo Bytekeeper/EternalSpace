@@ -8,7 +8,6 @@ import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import org.bk.Game;
-import org.bk.SolarSystems;
 import org.bk.component.Persistence;
 import org.bk.component.Transform;
 
@@ -20,7 +19,7 @@ import static org.bk.component.Mapper.PERSISTENCE;
 public class SystemPopulateSystem extends EntitySystem {
     private Game game;
     private ImmutableArray<Entity> allTransformEntities;
-    public final Signal<SolarSystems.SystemKey> systemChanged = new Signal<SolarSystems.SystemKey>();
+    public final Signal<String> systemChanged = new Signal<String>();
     private boolean dispatchOnNextUpdate;
 
     public SystemPopulateSystem(Game game, int priority) {
@@ -43,7 +42,7 @@ public class SystemPopulateSystem extends EntitySystem {
         Persistence playerPersistence = PERSISTENCE.get(game.player);
         if (playerPersistence.system != game.currentSystem) {
             game.currentSystem = playerPersistence.system;
-            Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem.name);
+            Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem);
             removeAllEntitiesNotInSystem();
             game.populateCurrentSystem();
             dispatchOnNextUpdate = true;

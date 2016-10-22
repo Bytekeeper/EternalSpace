@@ -1,6 +1,5 @@
 package org.bk.system;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -8,7 +7,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import org.bk.EntityFactory;
 import org.bk.Game;
 import org.bk.component.*;
 
@@ -35,14 +33,14 @@ public class WeaponSystem extends IteratingSystem {
                 continue;
             }
             weapon.cooldown = weapon.cooldownPerShot;
-            if (weapon.projectileDefinition != null) {
-                spawnProjectile(weapon, entity, weapon.projectileDefinition);
+            if (weapon.projectileName != null) {
+                spawnProjectile(weapon, entity);
             }
         }
     }
 
-    private void spawnProjectile(Mounts.Weapon weapon, Entity owner, EntityFactory.EntityDefinitionKey projectileSpec) {
-        if (projectileSpec == null) {
+    private void spawnProjectile(Mounts.Weapon weapon, Entity owner) {
+        if (weapon.projectileName == null) {
             Gdx.app.error(WeaponSystem.class.getSimpleName(), "No ProjectileSpec");
             return;
         }
@@ -53,7 +51,7 @@ public class WeaponSystem extends IteratingSystem {
         Transform sourceTransform = TRANSFORM.get(owner);
         Movement sourceMovement = MOVEMENT.get(owner);
 
-        Entity projectileEntity = game.spawn(weapon.projectileDefinition, Transform.class, Movement.class, Projectile.class, Physics.class);
+        Entity projectileEntity = game.spawn(weapon.projectileName, Transform.class, Movement.class, Projectile.class, Physics.class);
         Owned owned = getEngine().createComponent(Owned.class);
         owned.owner = owner;
         projectileEntity.add(owned);

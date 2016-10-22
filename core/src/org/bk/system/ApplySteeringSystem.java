@@ -64,7 +64,6 @@ public class ApplySteeringSystem extends IteratingSystem {
 
         Jumping jumping = getEngine().createComponent(Jumping.class);
         jumping.sourceOrTargetSystem = steering.jumpTo;
-        jumping.timeRemaining = Jumping.JUMP_DURATION / 2;
         jumping.direction = Jumping.JumpDirection.DEPART;
         jumping.referencePoint.set(transform.location);
         entity.add(jumping);
@@ -80,7 +79,6 @@ public class ApplySteeringSystem extends IteratingSystem {
                 if (PLANET.has(e)) {
                     Landing landing = getEngine().createComponent(Landing.class);
                     landing.landingDirection = Landing.LandingDirection.LANDING;
-                    landing.duration = landing.timeRemaining = 2;
                     landing.target = e;
                     entity.add(landing);
                 }

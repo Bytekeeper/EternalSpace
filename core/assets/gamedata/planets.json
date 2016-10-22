@@ -1,0 +1,21 @@
+{
+  "planet": {
+    class: Entity,
+    components: [
+      {
+        class: Body,
+        dimension: {x: 190, y: 190},
+        graphics: "planet/forest2"
+      },
+      {
+        class: Transform
+      },
+      {
+        class: Planet
+      },
+      {
+        class: Physics
+      }
+    ]
+  }
+}

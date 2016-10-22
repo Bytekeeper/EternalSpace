@@ -11,8 +11,8 @@ import com.badlogic.gdx.utils.Pool;
  * Created by dante on 16.10.2016.
  */
 public class AIControlled implements Component, Pool.Poolable {
-    public BehaviorTree<Entity> behaviorTree;
-    public SteeringBehavior<Vector2> behavior;
+    public transient BehaviorTree<Entity> behaviorTree;
+    public transient SteeringBehavior<Vector2> behavior;
 
     @Override
     public void reset() {

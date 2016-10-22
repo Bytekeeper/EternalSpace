@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
+import org.bk.ai.SteeringUtil;
 import org.bk.component.Body;
 import org.bk.component.*;
 import org.bk.component.Transform;
@@ -43,8 +44,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     @Override
     public void addedToEngine(Engine engine) {
-        entities = engine.getEntitiesFor(Family.all(Transform.class, Physics.class).get());
-        engine.addEntityListener(Family.all(Transform.class, Physics.class).get(), new MyEntityListener());
+        Family family = Family.all(Transform.class, Physics.class).get();
+        entities = engine.getEntitiesFor(family);
+        engine.addEntityListener(family, new MyEntityListener());
     }
 
     @Override
@@ -57,7 +59,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
         factionSystem = getEngine().getSystem(FactionSystem.class);
         for (Entity entity: entities) {
             Physics physics = PHYSICS.get(entity);
-
             Transform transform = TRANSFORM.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
             tv.set(physicsBody.getPosition()).scl(B2W);
@@ -110,6 +111,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
         @Override
         public void entityAdded(Entity entity) {
             Transform transform = TRANSFORM.get(entity);
+            transform.steerableLocation = SteeringUtil.toLocation(transform.location);
 
             bodyDef.type = BodyDef.BodyType.DynamicBody;
             if (SHIP.has(entity)) {

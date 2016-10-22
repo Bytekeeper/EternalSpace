@@ -20,12 +20,12 @@ import org.bk.system.*;
 import static org.bk.component.Mapper.*;
 
 public class Game extends com.badlogic.gdx.Game {
+    public static final float SQRT_2 = (float) Math.sqrt(2);
     public Viewport viewport;
     public SpriteBatch batch;
     public SpriteBatch uiBatch;
     public Assets assets;
     public Behaviors behaviors;
-    public EntityFactory entityFactory;
     public SolarSystems systems;
     PooledEngine engine;
     public Entity player;
@@ -33,7 +33,7 @@ public class Game extends com.badlogic.gdx.Game {
     public int height;
     public Stage stage;
     public PlanetScreen planetScreen;
-    public SolarSystems.SystemKey currentSystem;
+    public String currentSystem;
 
     @Override
     public void resize(int width, int height) {
@@ -52,7 +52,7 @@ public class Game extends com.badlogic.gdx.Game {
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         assets = new Assets();
         behaviors = new Behaviors();
-        systems = new SolarSystems();
+        systems = new SolarSystems(this);
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         stage = new Stage(new ScreenViewport(), uiBatch);
@@ -76,13 +76,16 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new AsteroidSystem(this, 1001));
         engine.addSystem(new TrafficSystem(this, 1001));
 
-        entityFactory = new EntityFactory(engine);
+        assets.gameData.setEngine(engine);
 
-        player = spawn("ship");
+        player = spawn("falcon");
         Persistence persistence = engine.createComponent(Persistence.class);
-        persistence.system = systems.key("initial");
+        persistence.system = "initial";
         player.add(persistence);
         player.add(engine.createComponent(Character.class));
+
+        currentSystem = "initial";
+        populateCurrentSystem();
 
         Gdx.input.setInputProcessor(stage);
     }
@@ -134,7 +137,7 @@ public class Game extends com.badlogic.gdx.Game {
             }
             if (Gdx.input.isKeyPressed(Keys.J)) {
                 steering.mode = Steering.SteeringMode.JUMPING;
-                steering.jumpTo = systems.key("second");
+                steering.jumpTo = "second";
             }
             if (Gdx.input.isKeyPressed(Keys.L)) {
                 Entity planet = engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get()).random();
@@ -148,11 +151,7 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public Entity spawn(String entityDefinitionKey, Class<? extends Component>... expectedComponents) {
-        return spawn(entityFactory.key(entityDefinitionKey), expectedComponents);
-    }
-
-    public Entity spawn(EntityFactory.EntityDefinitionKey entityDefinitionKey, Class<? extends Component>... expectedComponents) {
-        Entity entity = entityFactory.create(entityDefinitionKey);
+        Entity entity = assets.gameData.fabricateEntity(entityDefinitionKey);
         engine.addEntity(entity);
         return entity;
     }
@@ -175,13 +174,6 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void populateCurrentSystem() {
-        if ("initial".equals(currentSystem.name)) {
-            spawn("planet");
-            TRANSFORM.get(spawn("planet")).location.set(2000, 1000);
-        } else {
-            for (int i = 0; i < 10; i++) {
-                TRANSFORM.get(spawn("planet")).location.setToRandomDirection().scl(i * 300);
-            }
-        }
+        systems.populateCurrentSystem();
     }
 }

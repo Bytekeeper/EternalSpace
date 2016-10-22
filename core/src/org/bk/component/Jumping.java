@@ -10,20 +10,17 @@ import org.bk.system.SystemPopulateSystem;
  * Created by dante on 20.10.2016.
  */
 public class Jumping implements Component, Pool.Poolable {
-    public static final float JUMP_DURATION = 5;
-    public SolarSystems.SystemKey sourceOrTargetSystem;
-    public float timeRemaining;
+    public static final float JUMP_DURATION = 8;
+    public String sourceOrTargetSystem;
+    public float timeRemaining = JUMP_DURATION / 2;
     public JumpDirection direction = JumpDirection.DEPART;
-    public boolean hasPhysics;
-    public boolean hasSteering;
     public final Vector2 referencePoint = new Vector2();
 
     @Override
     public void reset() {
-        timeRemaining = 0;
+        timeRemaining = JUMP_DURATION / 2;
         sourceOrTargetSystem = null;
         direction = JumpDirection.DEPART;
-        hasPhysics = hasSteering = false;
         referencePoint.setZero();
     }
 

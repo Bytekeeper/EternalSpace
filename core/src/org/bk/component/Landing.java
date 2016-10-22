@@ -8,18 +8,16 @@ import com.badlogic.gdx.utils.Pool;
  * Created by dante on 18.10.2016.
  */
 public class Landing implements Component, Pool.Poolable {
+    public static final float LAND_OR_LIFTOFF_DURATION = 2;
     public LandingDirection landingDirection = LandingDirection.LANDING;
-    public float duration;
-    public float timeRemaining;
+    public float timeRemaining = LAND_OR_LIFTOFF_DURATION;
     public Entity target;
-    public boolean hasPhysics;
-    public boolean hasSteering;
     public boolean landed;
 
     @Override
     public void reset() {
-        landed = hasPhysics = hasSteering = false;
-        duration = timeRemaining = 0;
+        landed = false;
+        timeRemaining = LAND_OR_LIFTOFF_DURATION;
         target = null;
         landingDirection = LandingDirection.LANDING;
     }

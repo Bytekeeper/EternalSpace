@@ -1,0 +1,25 @@
+{
+  "asteroid": {
+    class: Entity,
+    components: [
+      {
+        class: Asteroid
+      },
+      {
+        class: Body,
+        dimension: {x: 45, y: 45},
+        graphics: "asteroid/asteroid_placeholder"
+      },
+      {
+        class: Movement,
+        maxVelocity: 500
+      },
+      {
+        class: Physics
+      },
+      {
+        class: Transform
+      }
+    ]
+  }
+}

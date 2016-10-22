@@ -12,12 +12,13 @@ import org.bk.ai.SteeringUtil;
  */
 public class Transform implements Component {
     public final Vector2 location = new Vector2();
-    public final Location<Vector2> steerableLocation = SteeringUtil.toLocation(location);
+    public transient Location<Vector2> steerableLocation;
     public float orientRad;
 
     public Transform reset() {
         location.setZero();
         orientRad = 0;
+        steerableLocation = null;
         return this;
     }
 }

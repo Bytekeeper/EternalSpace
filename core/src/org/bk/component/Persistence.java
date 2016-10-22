@@ -10,7 +10,7 @@ import org.bk.system.SystemPopulateSystem;
  */
 public class Persistence implements Component, Pool.Poolable {
     public boolean temporary;
-    public SolarSystems.SystemKey system;
+    public String system;
 
     @Override
     public void reset() {

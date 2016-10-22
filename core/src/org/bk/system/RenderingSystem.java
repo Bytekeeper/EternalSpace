@@ -10,14 +10,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.sun.org.apache.bcel.internal.generic.LAND;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.component.*;
 import org.bk.graphics.Radar;
 
+import static org.bk.Game.SQRT_2;
 import static org.bk.component.Mapper.*;
 
 /**
@@ -61,16 +60,16 @@ public class RenderingSystem extends EntitySystem {
         updateStarBackground();
 
         for (Entity entity : planetEntities) {
-            drawEntityWithBody(entity, assets.planet_placeholder);
+            drawEntityWithBody(entity);
         }
         for (Entity entity : asteroidEntities) {
-            drawEntityWithBody(entity, assets.asteroid_placeholder);
+            drawEntityWithBody(entity);
         }
         for (Entity entity : shipEntities) {
-            drawEntityWithBody(entity, assets.ship_placeholder);
+            drawEntityWithBody(entity);
         }
         for (Entity entity : projectileEntities) {
-            drawEntityWithBody(entity, assets.projectile_placeholder);
+            drawEntityWithBody(entity);
         }
         batch.end();
         game.uiBatch.begin();
@@ -79,19 +78,25 @@ public class RenderingSystem extends EntitySystem {
         game.uiBatch.end();
     }
 
-    private void drawEntityWithBody(Entity entity, TextureRegion textureRegion) {
+    private void drawEntityWithBody(Entity entity) {
         Transform transform = TRANSFORM.get(entity);
+        Body body = BODY.get(entity);
+
+        Vector2 location = transform.location;
+        if (!game.viewport.getCamera().frustum.boundsInFrustum(location.x, location.y, 0, body.dimension.x / SQRT_2, body.dimension.y / SQRT_2, 1000)) {
+            return;
+        }
         Landing landing = LANDING.get(entity);
         if (landing == null) {
             Mounts mounts = MOUNTS.get(entity);
             if (mounts != null) {
                 Movement movement = MOVEMENT.get(entity);
                 if (movement != null & movement.linearAccel.len2() > 0) {
-                    for (Vector2 thruster : mounts.thrusters) {
-                        tv.set(thruster).rotateRad(transform.orientRad).add(transform.location);
+                    for (Mounts.Thruster thruster : mounts.thrusters) {
+                        tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);
                         float hbx = 8;
                         float hby = 40;
-                        batch.draw(assets.flare_placeholder, tv.x - hbx, tv.y - hby, hbx, hby,
+                        batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
                                 hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
                     }
                 }
@@ -99,17 +104,17 @@ public class RenderingSystem extends EntitySystem {
         } else if (landing.landed) {
             return;
         }
-        Body body = BODY.get(entity);
-        ta.setToTranslation(transform.location);
+        ta.setToTranslation(location);
         ta.rotateRad(transform.orientRad);
         tv.set(body.dimension);
         if (landing != null) {
-            float scale = landing.timeRemaining / landing.duration;
+            float scale = landing.timeRemaining / Landing.LAND_OR_LIFTOFF_DURATION;
             if (landing.landingDirection == Landing.LandingDirection.DEPART) {
                 scale = 1 - scale;
             }
             tv.scl(scale);
         }
+        TextureRegion textureRegion = assets.textures.get(body.graphics);
         draw(transform, tv, textureRegion);
     }
 
@@ -155,7 +160,7 @@ public class RenderingSystem extends EntitySystem {
                 star.brightness = rnd.nextFloat() * 0.7f + 0.3f;
             }
             batch.setColor(star.brightness, star.brightness, star.brightness, 1);
-            batch.draw(assets.bg_star, star.position.x, star.position.y, 3, 3);
+            batch.draw(assets.textures.get("particle"), star.position.x, star.position.y, 3, 3);
         }
         batch.setColor(Color.WHITE);
     }

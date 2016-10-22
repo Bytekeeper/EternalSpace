@@ -29,18 +29,18 @@ public class Radar {
     }
 
     public void drawBackground() {
-        batch.draw(assets.ui_radar, bounds.x, bounds.y, bounds.getWidth(), bounds.getHeight());
+        batch.draw(assets.textures.get("ui/radar_placeholder"), bounds.x, bounds.y, bounds.getWidth(), bounds.getHeight());
     }
 
     public void drawShip(Entity entity) {
         determineDrawPosition(entity);
-        batch.draw(assets.bg_star, tv2.x - 2, tv2.y - 2, 4, 4);
+        batch.draw(assets.textures.get("particle"), tv2.x - 2, tv2.y - 2, 4, 4);
     }
 
     public void drawPlanet(Entity entity) {
         determineDrawPosition(entity);
         batch.setColor(Color.OLIVE);
-        batch.draw(assets.bg_star, tv2.x - 5, tv2.y - 5, 10, 10);
+        batch.draw(assets.textures.get("particle"), tv2.x - 5, tv2.y - 5, 10, 10);
         batch.setColor(Color.WHITE);
     }
 

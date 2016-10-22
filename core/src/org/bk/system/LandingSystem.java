@@ -21,29 +21,17 @@ public class LandingSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        entity.remove(Physics.class);
+        entity.remove(Steering.class);
         Landing landing = LANDING.get(entity);
-        if (PHYSICS.has(entity)) {
-            entity.remove(Physics.class);
-            landing.hasPhysics = true;
-        }
-        if (STEERING.has(entity)) {
-            entity.remove(Steering.class);
-            landing.hasSteering = true;
-        }
         landing.timeRemaining = Math.max(0, landing.timeRemaining - deltaTime);
         if (landing.timeRemaining <= 0) {
             Persistence persistence = PERSISTENCE.get(entity);
             if (landing.landingDirection == Landing.LandingDirection.DEPART) {
-                if (landing.hasPhysics) {
-                    entity.add(getEngine().createComponent(Physics.class));
-                    landing.hasPhysics = false;
-                }
-                if (landing.hasSteering) {
-                    entity.add(getEngine().createComponent(Steering.class));
-                    landing.hasSteering = true;
-                }
+                entity.add(getEngine().createComponent(Physics.class));
+                entity.add(getEngine().createComponent(Steering.class));
                 entity.remove(Landing.class);
-            } else if (persistence != null && persistence.temporary){
+            } else if (persistence != null && persistence.temporary) {
                 getEngine().removeEntity(entity);
             } else {
                 landing.landed = true;

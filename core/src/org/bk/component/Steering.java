@@ -15,7 +15,7 @@ public class Steering implements Component, Pool.Poolable {
     public float thrust;
     public float turn;
     public SteeringMode mode = SteeringMode.FREE_FLIGHT;
-    public SolarSystems.SystemKey jumpTo;
+    public String jumpTo;
     public Steerable<Vector2> steerable;
     public Entity modeTargetEntity;
     public boolean primaryFire;

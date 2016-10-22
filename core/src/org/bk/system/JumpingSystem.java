@@ -27,14 +27,8 @@ public class JumpingSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         Jumping jumping = JUMPING.get(entity);
-        if (STEERING.has(entity)) {
-            jumping.hasSteering = true;
-            entity.remove(Steering.class);
-        }
-        if (PHYSICS.has(entity)) {
-            jumping.hasPhysics = true;
-            entity.remove(Physics.class);
-        }
+        entity.remove(Steering.class);
+        entity.remove(Physics.class);
         Transform transform = TRANSFORM.get(entity);
         if (jumping.direction == Jumping.JumpDirection.DEPART) {
             float targetOrientation = game.systems.orientationToward(jumping.sourceOrTargetSystem);
@@ -53,20 +47,20 @@ public class JumpingSystem extends IteratingSystem {
         jumping.timeRemaining -= deltaTime;
         if (jumping.timeRemaining < 0) {
             if (jumping.direction == Jumping.JumpDirection.DEPART) {
-                jumping.direction = Jumping.JumpDirection.ARRIVE;
                 Persistence persistence = PERSISTENCE.get(entity);
-                SolarSystems.SystemKey comingFrom = persistence.system;
-                persistence.system = jumping.sourceOrTargetSystem;
-                jumping.sourceOrTargetSystem = comingFrom;
-                jumping.timeRemaining = Jumping.JUMP_DURATION / 2;
-                jumping.referencePoint.setToRandomDirection().scl(MathUtils.random(0, 800));
+                if (persistence == null || persistence.temporary) {
+                    getEngine().removeEntity(entity);
+                } else {
+                    jumping.direction = Jumping.JumpDirection.ARRIVE;
+                    String comingFrom = persistence.system;
+                    persistence.system = jumping.sourceOrTargetSystem;
+                    jumping.sourceOrTargetSystem = comingFrom;
+                    jumping.timeRemaining = Jumping.JUMP_DURATION / 2;
+                    jumping.referencePoint.setToRandomDirection().scl(MathUtils.random(0, 800));
+                }
             } else {
-                if (jumping.hasPhysics) {
-                    entity.add(getEngine().createComponent(Physics.class));
-                }
-                if (jumping.hasSteering) {
-                    entity.add(getEngine().createComponent(Steering.class));
-                }
+                entity.add(getEngine().createComponent(Physics.class));
+                entity.add(getEngine().createComponent(Steering.class));
                 entity.remove(Jumping.class);
             }
         }

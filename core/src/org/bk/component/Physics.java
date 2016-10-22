@@ -11,7 +11,9 @@ public class Physics implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
-        physicsBody.getWorld().destroyBody(physicsBody);
+        if (physicsBody != null) {
+            physicsBody.getWorld().destroyBody(physicsBody);
+        }
         physicsBody = null;
     }
 }
