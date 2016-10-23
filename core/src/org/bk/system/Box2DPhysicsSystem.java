@@ -1,8 +1,6 @@
 package org.bk.system;
 
 import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.signals.Listener;
-import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
@@ -150,7 +148,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 fixtureDef.filter.categoryBits = CATEGORY_WEAPON;
                 fixtureDef.filter.maskBits = CATEGORY_DEBRIS | CATEGORY_SHIPS | CATEGORY_WEAPON;
                 fixtureDef.isSensor = true;
-            } else if (PLANET.has(entity)) {
+            } else if (CELESTIAL.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_POI;
                 fixtureDef.filter.maskBits = CATEGORY_SHIPS;
                 fixtureDef.isSensor = true;

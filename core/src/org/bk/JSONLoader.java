@@ -37,7 +37,7 @@ public class JSONLoader<T> extends AsynchronousAssetLoader<T, JSONLoader.GameDat
         json.addClassTag("Entity", EntityDef.class);
         json.addClassTag("System", SystemDef.class);
         List<Class<? extends Component>> compontentClasses = Arrays.asList(Body.class, Physics.class, Movement.class, Ship.class, Steering.class,
-                Transform.class, Health.class, Mounts.class, Planet.class, Asteroid.class, Projectile.class, LifeTime.class, Orbiting.class);
+                Transform.class, Health.class, Mounts.class, Celestial.class, Asteroid.class, Projectile.class, LifeTime.class, Orbiting.class);
         for (Class<?> c: compontentClasses) {
             json.addClassTag(c.getSimpleName(), c);
         }

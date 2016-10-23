@@ -56,7 +56,7 @@ public class ApplySteeringSystem extends IteratingSystem {
     }
 
     private void tryJumping(Entity entity, Movement movement, Steering steering, Transform transform) {
-        float targetOrientation = game.systems.orientationToward(steering.jumpTo);
+        float targetOrientation = 1;
         if (movement.velocity.len2() > ACTION_VELOCITY_THRESHOLD2 ||
                 Math.abs(transform.orientRad - targetOrientation) > ACTION_DELTA_ANGLE_THRESHOLD) {
             return;
@@ -76,7 +76,7 @@ public class ApplySteeringSystem extends IteratingSystem {
         Touching touching = TOUCHING.get(entity);
         if (touching != null) {
             for (Entity e : touching.touchList) {
-                if (PLANET.has(e)) {
+                if (CELESTIAL.has(e)) {
                     Landing landing = getEngine().createComponent(Landing.class);
                     landing.landingDirection = Landing.LandingDirection.LANDING;
                     landing.target = e;

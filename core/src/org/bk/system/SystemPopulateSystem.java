@@ -36,12 +36,12 @@ public class SystemPopulateSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         if (dispatchOnNextUpdate) {
-            systemChanged.dispatch(game.currentSystem);
+            systemChanged.dispatch(game.currentSystem.name);
             dispatchOnNextUpdate = false;
         }
         Persistence playerPersistence = PERSISTENCE.get(game.player);
-        if (playerPersistence.system != game.currentSystem) {
-            game.currentSystem = playerPersistence.system;
+        if (game.currentSystem == null || playerPersistence.system != game.currentSystem.name) {
+            game.switchSystem(playerPersistence.system);
             Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem);
             removeAllEntitiesNotInSystem();
             game.populateCurrentSystem();
@@ -52,7 +52,7 @@ public class SystemPopulateSystem extends EntitySystem {
     private void removeAllEntitiesNotInSystem() {
         for (Entity entity: allTransformEntities) {
             Persistence persistence = PERSISTENCE.get(entity);
-            if (persistence != null && persistence.system == game.currentSystem) {
+            if (persistence != null && persistence.system == game.currentSystem.name) {
                 continue;
             }
             if (persistence == null || persistence.temporary) {

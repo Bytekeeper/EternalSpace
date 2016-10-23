@@ -5,8 +5,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
-import org.bk.SolarSystems;
-import org.bk.system.SystemPopulateSystem;
 
 /**
  * Created by dante on 16.10.2016.

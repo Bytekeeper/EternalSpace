@@ -70,7 +70,7 @@ public class GameData {
     }
 
     private void copyComponentsIntoEntity(Array<Component> components, Entity entity) {
-        for (Component component: components) {
+        for (Component component : components) {
             entity.add(kryo.copy(component));
         }
     }
@@ -85,16 +85,22 @@ public class GameData {
             Entity entity;
             if (entityInstance.id != null) {
                 entity = getOrCreateEntity(kryo, entityInstance.id);
-                copyComponentsIntoEntity(getEntityDef(entityInstance.name).components, entity);
-                engine.addEntity(entity);
             } else {
-                entity = fabricateEntity(entityInstance.name);
+                entity = engine.createEntity();
             }
+            copyComponentsIntoEntity(getEntityDef(entityInstance.name).components, entity);
             kryo.setDefaultSerializer(MergingSerializer.class);
             copyComponentsIntoEntity(entityInstance.components, entity);
             kryo.setDefaultSerializer(FieldSerializer.class);
+            engine.addEntity(entity);
         }
         kryo.getContext().clear();
+    }
+
+    public SystemDef getSystem(String system) {
+        SystemDef result = (SystemDef) definitions.get(system);
+        result.name = system;
+        return result;
     }
 
     public static class MergingSerializer<T> extends FieldSerializer<T> {

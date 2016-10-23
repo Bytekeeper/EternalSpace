@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 public class SystemDef {
     public String name;
     public Vector2 position;
+    public float asteroidDensity;
     public Array<EntityInstance> contains;
 
     public static class EntityInstance {

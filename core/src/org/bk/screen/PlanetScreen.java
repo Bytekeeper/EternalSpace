@@ -24,7 +24,7 @@ public class PlanetScreen extends ScreenAdapter {
         Skin skin = game.assets.skin;
         Table root = new Table(skin);
         root.setFillParent(true);
-        Window window = new Window("Planet", skin);
+        Window window = new Window("Celestial", skin);
         window.setMovable(false);
         TextButton departButton = new TextButton(game.msg("depart"), skin);
         departButton.addListener(new ChangeListener() {

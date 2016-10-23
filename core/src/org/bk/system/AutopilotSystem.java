@@ -52,7 +52,7 @@ public class AutopilotSystem extends IteratingSystem {
                 break;
             case JUMPING:
                 stop.setOwner(steering.steerable).
-                        setOrientation(game.systems.orientationToward(steering.jumpTo));
+                        setOrientation(1);
                 SteeringUtil.applySteering(stop, steering.steerable, steering);
                 break;
         }

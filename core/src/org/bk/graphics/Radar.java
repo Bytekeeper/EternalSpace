@@ -3,18 +3,22 @@ package org.bk.graphics;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Assets;
 import org.bk.Game;
+import org.bk.component.Celestial;
+import org.bk.component.Jumping;
 import org.bk.component.Transform;
 
-import static org.bk.component.Mapper.TRANSFORM;
+import static org.bk.component.Mapper.*;
 
 /**
  * Created by dante on 16.10.2016.
  */
 public class Radar {
+    private static final float CELESTIAL_SCALE = 1f;
     private static final float BORDER = 20;
     public final Rectangle bounds = new Rectangle();
     public final Vector2 position = new Vector2();
@@ -34,13 +38,24 @@ public class Radar {
 
     public void drawShip(Entity entity) {
         determineDrawPosition(entity);
+        Jumping jumping = JUMPING.get(entity);
+        if (jumping != null) {
+            float t = jumping.direction == Jumping.JumpDirection.DEPART ? (Jumping.JUMP_DURATION / 2 - jumping.timeRemaining) : jumping.timeRemaining;
+            tv.set(tv2).rotate90(1).nor().scl(MathUtils.cos(t * 50) * t * t / 5);
+            tv2.add(tv);
+        }
         batch.draw(assets.textures.get("particle"), tv2.x - 2, tv2.y - 2, 4, 4);
     }
 
-    public void drawPlanet(Entity entity) {
+    public void drawCelestial(Entity entity) {
         determineDrawPosition(entity);
-        batch.setColor(Color.OLIVE);
-        batch.draw(assets.textures.get("particle"), tv2.x - 5, tv2.y - 5, 10, 10);
+        Celestial celestial = CELESTIAL.get(entity);
+        batch.setColor(celestial.radarColor);
+        tv.set(BODY.get(entity).dimension);
+        tv.x = (float) Math.log(tv.x);
+        tv.y = (float) Math.log(tv.y);
+        tv.scl(CELESTIAL_SCALE);
+        batch.draw(assets.textures.get("particle"), tv2.x - tv.x, tv2.y - tv.y, tv.x * 2, tv.y * 2);
         batch.setColor(Color.WHITE);
     }
 

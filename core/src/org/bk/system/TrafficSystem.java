@@ -8,9 +8,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
 import org.bk.Game;
-import org.bk.SolarSystems;
 import org.bk.component.*;
 
+import static org.bk.component.Mapper.MOVEMENT;
 import static org.bk.component.Mapper.TRANSFORM;
 
 /**
@@ -31,7 +31,7 @@ public class TrafficSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        planetEntities = engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get());
+        planetEntities = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Ship.class).get());
         engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<String>() {
             @Override
@@ -39,7 +39,7 @@ public class TrafficSystem extends EntitySystem {
                 Gdx.app.log(TrafficSystem.class.getSimpleName(), "Setting up initial traffic deployment");
                 int toSpawn = 15 - shipEntities.size();
                 while (toSpawn-- > 0) {
-                    spawnShip();
+                    spawnShip(true);
                 }
             }
         });
@@ -61,12 +61,12 @@ public class TrafficSystem extends EntitySystem {
         if (nextSpawn < 0) {
             setSpawnTimer();
             for (int i = rnd.nextInt(3) + 1; i > 0; i--) {
-                spawnShip();
+                spawnShip(false);
             }
         }
     }
 
-    private void spawnShip() {
+    private void spawnShip(boolean initialDeployment) {
         Entity target = planetEntities.random();
         Entity entity = game.spawn("falcon", Transform.class, Movement.class);
         Persistence persistence = getEngine().createComponent(Persistence.class);
@@ -74,27 +74,37 @@ public class TrafficSystem extends EntitySystem {
         entity.add(persistence);
         AIControlled aiControlled = getEngine().createComponent(AIControlled.class);
         entity.add(aiControlled);
-        if (target != null && rnd.nextFloat() < 0.7f) {
-            TRANSFORM.get(entity).location.set(TRANSFORM.get(target).location);
-            Landing landing = getEngine().createComponent(Landing.class);
-            landing.landingDirection = Landing.LandingDirection.DEPART;
-            landing.target = target;
-            entity.add(landing);
+        Transform transform = TRANSFORM.get(entity);
+        transform.orientRad = MathUtils.random(-MathUtils.PI, MathUtils.PI);
+        if (target != null && (initialDeployment || rnd.nextFloat() < 0.7f)) {
+            if (!initialDeployment || rnd.nextFloat() < 0.2f) {
+                transform.location.set(TRANSFORM.get(target).location);
+                Landing landing = getEngine().createComponent(Landing.class);
+                landing.landingDirection = Landing.LandingDirection.DEPART;
+                landing.target = target;
+                entity.add(landing);
+                entity.remove(Physics.class);
+                entity.remove(Steering.class);
+            } else {
+                Movement movement = MOVEMENT.get(entity);
+                transform.location.set(TRANSFORM.get(target).location).add(MathUtils.random(-1000, 1000), MathUtils.random(-1000, 1000));
+                movement.velocity.setToRandomDirection().scl(MathUtils.random(0, movement.maxVelocity));
+            }
             if (rnd.nextFloat() < 0.5f) {
                 aiControlled.behaviorTree = game.behaviors.patrol(entity, getEngine());
             } else {
                 aiControlled.behaviorTree = game.behaviors.jump(entity);
             }
         } else {
-            TRANSFORM.get(entity).location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
+            transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
             Jumping jumping = getEngine().createComponent(Jumping.class);
             jumping.referencePoint.setToRandomDirection().scl(MathUtils.random(0, 800));
             jumping.direction = Jumping.JumpDirection.ARRIVE;
             jumping.sourceOrTargetSystem = "other";
             entity.add(jumping);
             aiControlled.behaviorTree = game.behaviors.land(entity, getEngine());
+            entity.remove(Physics.class);
+            entity.remove(Steering.class);
         }
-        entity.remove(Physics.class);
-        entity.remove(Steering.class);
     }
 }

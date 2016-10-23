@@ -17,7 +17,7 @@ public class Mapper {
     public static final ComponentMapper<Health> HEALTH = ComponentMapper.getFor(Health.class);
     public static final ComponentMapper<Steering> STEERING = ComponentMapper.getFor(Steering.class);
     public static final ComponentMapper<AIControlled> AI_CONTROLLED = ComponentMapper.getFor(AIControlled.class);
-    public static final ComponentMapper<Planet> PLANET = ComponentMapper.getFor(Planet.class);
+    public static final ComponentMapper<Celestial> CELESTIAL = ComponentMapper.getFor(Celestial.class);
     public static final ComponentMapper<Landing> LANDING = ComponentMapper.getFor(Landing.class);
     public static final ComponentMapper<Asteroid> ASTEROID = ComponentMapper.getFor(Asteroid.class);
     public static final ComponentMapper<Physics> PHYSICS = ComponentMapper.getFor(Physics.class);

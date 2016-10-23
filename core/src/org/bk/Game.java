@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bk.component.*;
 import org.bk.component.Character;
+import org.bk.data.GameData;
+import org.bk.data.SystemDef;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
 
@@ -26,14 +28,13 @@ public class Game extends com.badlogic.gdx.Game {
     public SpriteBatch uiBatch;
     public Assets assets;
     public Behaviors behaviors;
-    public SolarSystems systems;
     PooledEngine engine;
     public Entity player;
     public int width;
     public int height;
     public Stage stage;
     public PlanetScreen planetScreen;
-    public String currentSystem;
+    public SystemDef currentSystem;
 
     @Override
     public void resize(int width, int height) {
@@ -52,7 +53,6 @@ public class Game extends com.badlogic.gdx.Game {
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         assets = new Assets();
         behaviors = new Behaviors();
-        systems = new SolarSystems(this);
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         stage = new Stage(new ScreenViewport(), uiBatch);
@@ -60,22 +60,25 @@ public class Game extends com.badlogic.gdx.Game {
         batch.getProjectionMatrix().setToOrtho2D(-Gdx.graphics.getWidth() / 2, -Gdx.graphics.getHeight() / 2,
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         engine = new PooledEngine();
+        engine.addSystem(new SystemPopulateSystem(this, 0));
+
         engine.addSystem(new AISystem(this, 0));
         engine.addSystem(new AutopilotSystem(this, 1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(4));
-        engine.addSystem(new OrbitingSystem(4));
         engine.addSystem(new Box2DPhysicsSystem(5));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
-        engine.addSystem(new JumpingSystem(this, 8));
-        engine.addSystem(new LandingSystem(8));
         engine.addSystem(new HealthSystem(8));
         engine.addSystem(new FactionSystem(1000));
-        engine.addSystem(new SystemPopulateSystem(this, 1000));
-        engine.addSystem(new AsteroidSystem(this, 1001));
-        engine.addSystem(new TrafficSystem(this, 1001));
+
+        engine.addSystem(new AsteroidSystem(this, 9000));
+        engine.addSystem(new TrafficSystem(this, 9000));
+
+        engine.addSystem(new OrbitingSystem(10000));
+        engine.addSystem(new LandingSystem(10000));
+        engine.addSystem(new JumpingSystem(this, 10000));
 
         assets.gameData.setEngine(engine);
 
@@ -84,9 +87,6 @@ public class Game extends com.badlogic.gdx.Game {
         persistence.system = "Thorin";
         player.add(persistence);
         player.add(engine.createComponent(Character.class));
-
-        currentSystem = "Thorin";
-        populateCurrentSystem();
 
         Gdx.input.setInputProcessor(stage);
     }
@@ -144,7 +144,7 @@ public class Game extends com.badlogic.gdx.Game {
                 Entity planet = null;
                 float bestDst2 = Float.POSITIVE_INFINITY;
                 Transform playerTransform = TRANSFORM.get(this.player);
-                for (Entity entity : engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get())) {
+                for (Entity entity : engine.getEntitiesFor(Family.all(Celestial.class, Transform.class).get())) {
                     float dst2 = TRANSFORM.get(entity).location.dst2(playerTransform.location);
                     if (dst2 < bestDst2) {
                         bestDst2 = dst2;
@@ -183,6 +183,13 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void populateCurrentSystem() {
-        assets.gameData.fabricateSystem(currentSystem);
+        assets.gameData.fabricateSystem(currentSystem.name);
+    }
+
+    public void switchSystem(String system) {
+        currentSystem = assets.gameData.getSystem(system);
+        if (currentSystem == null) {
+            throw new IllegalStateException("Can't find system " + system + " to switch to.");
+        }
     }
 }

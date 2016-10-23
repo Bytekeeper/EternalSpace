@@ -11,6 +11,8 @@ public class Orbiting implements Component, Pool.Poolable {
     public float distance;
     public float speed;
     public Entity entity;
+    public boolean tidalLock;
+    public float tidalOrientation;
 
     @Override
     public void reset() {

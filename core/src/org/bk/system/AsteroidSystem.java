@@ -11,7 +11,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import org.bk.Game;
-import org.bk.SolarSystems;
 import org.bk.component.Asteroid;
 import org.bk.component.Movement;
 import org.bk.component.Transform;
@@ -23,6 +22,7 @@ import static org.bk.component.Mapper.TRANSFORM;
  * Created by dante on 19.10.2016.
  */
 public class AsteroidSystem extends IteratingSystem {
+    private static final int MAX_DENSITY_ASTEROIDS = 200;
     private static final float MAX_ASTEROID_DISTANCE = 2000;
     private static final float MAX_ASTEROID_DISTANCE2 = MAX_ASTEROID_DISTANCE * MAX_ASTEROID_DISTANCE;
     private static final float MIN_ASTEROID_DISTANCE = 1000;
@@ -43,7 +43,7 @@ public class AsteroidSystem extends IteratingSystem {
             public void receive(Signal<String> signal, String object) {
                 Gdx.app.log(AsteroidSystem.class.getSimpleName(), "Setting up initial asteroid deployment");
                 Vector3 cameraPosition = game.viewport.getCamera().position;
-                int toSpawn = 20 - getEntities().size();
+                int toSpawn = (int) (MAX_DENSITY_ASTEROIDS * game.currentSystem.asteroidDensity - getEntities().size());
                 while (toSpawn-- > 0) {
                     spawnAsteroid(cameraPosition,  0, MAX_ASTEROID_DISTANCE);
                 }
@@ -54,7 +54,7 @@ public class AsteroidSystem extends IteratingSystem {
     @Override
     public void update(float deltaTime) {
         Vector3 cameraPosition = game.viewport.getCamera().position;
-        int toSpawn = 20 - getEntities().size();
+        int toSpawn = (int) (MAX_DENSITY_ASTEROIDS * game.currentSystem.asteroidDensity - getEntities().size());
         while (toSpawn-- > 0) {
             spawnAsteroid(cameraPosition, MIN_ASTEROID_DISTANCE, MAX_ASTEROID_DISTANCE);
         }

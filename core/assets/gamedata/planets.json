@@ -11,7 +11,8 @@
         class: Transform
       },
       {
-        class: Planet
+        class: Celestial,
+        radarColor: {r: 0.3, g: 0.8, b: 0.5, a: 1}
       },
       {
         class: Physics
@@ -30,7 +31,8 @@
         class: Transform
       },
       {
-        class: Planet
+        class: Celestial,
+        radarColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
       },
       {
         class: Physics

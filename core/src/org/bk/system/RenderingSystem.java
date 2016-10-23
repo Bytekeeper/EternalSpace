@@ -48,7 +48,7 @@ public class RenderingSystem extends EntitySystem {
 
     @Override
     public void addedToEngine(Engine engine) {
-        planetEntities = engine.getEntitiesFor(Family.all(Planet.class, Transform.class, Body.class).get());
+        planetEntities = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class, Body.class).get());
         asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Ship.class, Transform.class, Body.class).get());
         projectileEntities = engine.getEntitiesFor(Family.all(Projectile.class, Transform.class, Body.class).get());
@@ -122,7 +122,7 @@ public class RenderingSystem extends EntitySystem {
         radar.position.set(TRANSFORM.get(game.player).location);
         radar.drawBackground();
         for (Entity entity : planetEntities) {
-            radar.drawPlanet(entity);
+            radar.drawCelestial(entity);
         }
         for (Entity entity : shipEntities) {
             radar.drawShip(entity);

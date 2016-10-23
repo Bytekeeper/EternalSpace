@@ -5,6 +5,7 @@
       x: 0,
       y: 0
     },
+    asteroidDensity: 0.2,
     contains: [
       {
         name: "planet",
@@ -38,6 +39,7 @@
       x: 0,
       y: 0
     },
+    asteroidDensity: 1,
     contains: [
       {
         name: "planet",
@@ -94,7 +96,8 @@
             class: Orbiting,
             distance: 500,
             speed: 80,
-            entity: "prime"
+            entity: "prime",
+            tidalLock: true
           }
         ]
       }

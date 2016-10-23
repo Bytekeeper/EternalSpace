@@ -35,6 +35,9 @@ public class OrbitingSystem extends IteratingSystem {
         }
         float rotation = orbiting.speed / MathUtils.PI2 / orbiting.distance * deltaTime;
         tv.rotateRad(rotation).setLength(orbiting.distance);
+        if (orbiting.tidalLock) {
+            transform.orientRad = tv.angleRad() + orbiting.tidalOrientation;
+        }
         transform.location.set(orbitAround).add(tv);
     }
 }
