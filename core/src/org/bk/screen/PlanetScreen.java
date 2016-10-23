@@ -32,6 +32,7 @@ public class PlanetScreen extends ScreenAdapter {
             public void changed(ChangeEvent event, Actor actor) {
                 Landing landing = LANDING.get(game.player);
                 landing.landingDirection = Landing.LandingDirection.DEPART;
+                landing.timeRemaining = Landing.LAND_OR_LIFTOFF_DURATION;
                 landing.landed = false;
             }
         });

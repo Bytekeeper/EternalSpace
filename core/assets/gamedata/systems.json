@@ -1,0 +1,103 @@
+{
+  "Thorin": {
+    class: System,
+    position: {
+      x: 0,
+      y: 0
+    },
+    contains: [
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: 200,
+              y: 100
+            }
+          }
+        ]
+      },
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: 2000,
+              y: -500
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Arcos": {
+    class: System,
+    position: {
+      x: 0,
+      y: 0
+    },
+    contains: [
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: -200,
+              y: 100
+            }
+          }
+        ]
+      },
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: 2000,
+              y: 1000
+            }
+          }
+        ]
+      },
+      {
+        id: "prime",
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: -5000,
+              y: 2000
+            }
+          }
+        ]
+      },
+      {
+        name: "earth_moon",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: -5000,
+              y: 2000
+            }
+          },
+          {
+            class: Movement,
+            maxVelocity: 200
+          },
+          {
+            class: Orbiting,
+            distance: 500,
+            speed: 80,
+            entity: "prime"
+          }
+        ]
+      }
+    ]
+  }
+}

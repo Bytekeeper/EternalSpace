@@ -26,4 +26,5 @@ public class Mapper {
     public static final ComponentMapper<Faction> FACTION = ComponentMapper.getFor(Faction.class);
     public static final ComponentMapper<Owned> OWNED = ComponentMapper.getFor(Owned.class);
     public static final ComponentMapper<Jumping> JUMPING = ComponentMapper.getFor(Jumping.class);
+    public static final ComponentMapper<Orbiting> ORBITING = ComponentMapper.getFor(Orbiting.class);
 }

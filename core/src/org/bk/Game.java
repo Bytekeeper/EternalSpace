@@ -65,6 +65,7 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new ApplySteeringSystem(this, 2));
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(4));
+        engine.addSystem(new OrbitingSystem(4));
         engine.addSystem(new Box2DPhysicsSystem(5));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
@@ -80,11 +81,11 @@ public class Game extends com.badlogic.gdx.Game {
 
         player = spawn("falcon");
         Persistence persistence = engine.createComponent(Persistence.class);
-        persistence.system = "initial";
+        persistence.system = "Thorin";
         player.add(persistence);
         player.add(engine.createComponent(Character.class));
 
-        currentSystem = "initial";
+        currentSystem = "Thorin";
         populateCurrentSystem();
 
         Gdx.input.setInputProcessor(stage);
@@ -137,10 +138,20 @@ public class Game extends com.badlogic.gdx.Game {
             }
             if (Gdx.input.isKeyPressed(Keys.J)) {
                 steering.mode = Steering.SteeringMode.JUMPING;
-                steering.jumpTo = "second";
+                steering.jumpTo = "Arcos";
             }
             if (Gdx.input.isKeyPressed(Keys.L)) {
-                Entity planet = engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get()).random();
+                Entity planet = null;
+                float bestDst2 = Float.POSITIVE_INFINITY;
+                Transform playerTransform = TRANSFORM.get(this.player);
+                for (Entity entity : engine.getEntitiesFor(Family.all(Planet.class, Transform.class).get())) {
+                    float dst2 = TRANSFORM.get(entity).location.dst2(playerTransform.location);
+                    if (dst2 < bestDst2) {
+                        bestDst2 = dst2;
+                        planet = entity;
+                    }
+                }
+
                 if (planet != null) {
                     steering.modeTargetEntity = planet;
                     steering.mode = Steering.SteeringMode.LANDING;
@@ -151,9 +162,7 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public Entity spawn(String entityDefinitionKey, Class<? extends Component>... expectedComponents) {
-        Entity entity = assets.gameData.fabricateEntity(entityDefinitionKey);
-        engine.addEntity(entity);
-        return entity;
+        return assets.gameData.fabricateEntity(entityDefinitionKey);
     }
 
     @Override
@@ -174,6 +183,6 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void populateCurrentSystem() {
-        systems.populateCurrentSystem();
+        assets.gameData.fabricateSystem(currentSystem);
     }
 }

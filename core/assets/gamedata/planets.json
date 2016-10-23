@@ -17,5 +17,24 @@
         class: Physics
       }
     ]
+  },
+  "earth_moon": {
+    class: Entity,
+    components: [
+      {
+        class: Body,
+        dimension: {x: 64, y: 64},
+        graphics: "planet/earth_moon"
+      },
+      {
+        class: Transform
+      },
+      {
+        class: Planet
+      },
+      {
+        class: Physics
+      }
+    ]
   }
 }
