@@ -9,6 +9,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -38,6 +39,7 @@ public class Game extends com.badlogic.gdx.Game {
     public SolarSystem currentSystem;
     public GameData gameData;
     private MapScreen mapScreen;
+    private float flashTimer, lastFlashTime;
 
     @Override
     public void resize(int width, int height) {
@@ -101,14 +103,17 @@ public class Game extends com.badlogic.gdx.Game {
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        float deltaTime = Gdx.graphics.getDeltaTime();
+
+        flashTimer = Math.max(flashTimer - deltaTime, 0);
+        float c = MathUtils.lerp(0, 1, flashTimer / lastFlashTime);
+        Gdx.gl.glClearColor(c, c, c, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         handlePlayerInput();
         Transform transform = TRANSFORM.get(player);
         viewport.getCamera().position.set(transform.location, 0);
         viewport.getCamera().update();
         batch.setProjectionMatrix(viewport.getCamera().combined);
-        float deltaTime = Gdx.graphics.getDeltaTime();
         GdxAI.getTimepiece().update(deltaTime);
         engine.update(deltaTime);
 
@@ -198,5 +203,9 @@ public class Game extends com.badlogic.gdx.Game {
 
     public void populateCurrentSystem() {
         assets.gameData.spawnSystem(currentSystem.name);
+    }
+
+    public void flash(float time) {
+        lastFlashTime = flashTimer = time;
     }
 }

@@ -24,8 +24,10 @@ public class Assets {
     public final Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
     public final I18NBundle localization;
     public final Sound snd_thrust;
+    public final Sound snd_hyperdrive_engage;
     public final GameData gameData;
     public final BitmapFont hudFont;
+    public final Sound snd_hyperdrive_shutdown;
     public BitmapFont debugFont;
     private final AssetManager assetManager;
     public ObjectMap<String, TextureRegion> textures = new ObjectMap<String, TextureRegion>();
@@ -34,8 +36,9 @@ public class Assets {
         assetManager = new AssetManager();
         assetManager.setLoader(GameData.class, new JSONLoader<GameData>(GameData.class, new InternalFileHandleResolver()));
         assetManager.setLoader(ObjectMap.class, new JSONLoader<ObjectMap>(ObjectMap.class, new InternalFileHandleResolver()));
-        AssetDescriptor<Sound> thrustAsset = new AssetDescriptor<Sound>("sound/ship/thrust.ogg", Sound.class);
-        assetManager.load(thrustAsset);
+        AssetDescriptor<Sound> thrustAsset = loadSound("sound/ship/thrust.ogg");
+        AssetDescriptor<Sound> hyperDriveEngage = loadSound("sound/ship/hyperdrive_engage.ogg");
+        AssetDescriptor<Sound> hyperDriveShutdown = loadSound("sound/ship/hyperdrive_shutdown.ogg");
         AssetDescriptor<GameData> gameData = new AssetDescriptor<GameData>("gamedata/gamedata.json", GameData.class);
         assetManager.load(gameData);
         AssetDescriptor<TextureAtlas> atlasAssetDescriptor = new AssetDescriptor<TextureAtlas>("textures.atlas", TextureAtlas.class);
@@ -50,6 +53,8 @@ public class Assets {
         debugFont = new BitmapFont();
         localization = I18NBundle.createBundle(Gdx.files.internal("messages"));
         snd_thrust = assetManager.get(thrustAsset);
+        snd_hyperdrive_engage = assetManager.get(hyperDriveEngage);
+        snd_hyperdrive_shutdown = assetManager.get(hyperDriveShutdown);
         this.gameData = assetManager.get(gameData);
         for (String toLoad: this.gameData.imports) {
             assetManager.load("gamedata/" + toLoad + ".json", ObjectMap.class);
@@ -60,6 +65,12 @@ public class Assets {
             this.gameData.addAll(definitions);
         }
         hudFont = skin.getFont("default-font");
+    }
+
+    private AssetDescriptor<Sound> loadSound(String fileName) {
+        AssetDescriptor<Sound> hyperDriveEngage = new AssetDescriptor<Sound>(fileName, Sound.class);
+        assetManager.load(hyperDriveEngage);
+        return hyperDriveEngage;
     }
 
     private TextureRegion tr(String name) {

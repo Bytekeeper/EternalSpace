@@ -63,7 +63,9 @@ public class ApplySteeringSystem extends IteratingSystem {
                 Math.abs(Util.deltaAngle(transform.orientRad, targetOrientation)) > ACTION_DELTA_ANGLE_THRESHOLD) {
             return;
         }
-
+        if (entity == game.player) {
+            game.assets.snd_hyperdrive_engage.play();
+        }
         Jumping jumping = getEngine().createComponent(Jumping.class);
         jumping.sourceOrTargetSystem = steering.jumpTo;
         jumping.direction = Jumping.JumpDirection.DEPART;

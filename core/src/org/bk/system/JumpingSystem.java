@@ -50,6 +50,10 @@ public class JumpingSystem extends IteratingSystem {
                 if (persistence == null || persistence.temporary) {
                     getEngine().removeEntity(entity);
                 } else {
+                    if (entity == game.player) {
+                        game.flash(0.2f);
+                        game.assets.snd_hyperdrive_shutdown.play();
+                    }
                     jumping.direction = Jumping.JumpDirection.ARRIVE;
                     SolarSystem comingFrom = persistence.system;
                     persistence.system = jumping.sourceOrTargetSystem;
