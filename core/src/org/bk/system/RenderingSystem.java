@@ -23,7 +23,7 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 15.10.2016.
  */
 public class RenderingSystem extends EntitySystem {
-    public static final int STAR_BORDER = 200;
+    public static final int STAR_BORDER = 500;
     public static final int STAR_BORDER2 = STAR_BORDER * 2;
     private final Assets assets;
     private final SpriteBatch batch;
@@ -73,9 +73,21 @@ public class RenderingSystem extends EntitySystem {
         }
         batch.end();
         game.uiBatch.begin();
-        radar.bounds.set(0, game.height - 256, 256, 256);
-        drawRadar();
+        drawHUD();
         game.uiBatch.end();
+    }
+
+    private void drawHUD() {
+        game.uiBatch.setColor(Color.WHITE);
+        drawRadar();
+        drawJumpTarget();
+    }
+
+    private void drawJumpTarget() {
+        Steering steering = STEERING.get(game.player);
+        if (steering != null && steering.jumpTo != null) {
+            assets.hudFont.draw(game.uiBatch, steering.jumpTo.name, 220, game.height - assets.hudFont.getLineHeight());
+        }
     }
 
     private void drawEntityWithBody(Entity entity) {
@@ -119,6 +131,7 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void drawRadar() {
+        radar.bounds.set(0, game.height - 256, 256, 256);
         radar.position.set(TRANSFORM.get(game.player).location);
         radar.drawBackground();
         for (Entity entity : planetEntities) {

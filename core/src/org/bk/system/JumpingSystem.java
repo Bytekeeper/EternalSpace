@@ -31,13 +31,13 @@ public class JumpingSystem extends IteratingSystem {
         entity.remove(Physics.class);
         Transform transform = TRANSFORM.get(entity);
         if (jumping.direction == Jumping.JumpDirection.DEPART) {
-            transform.orientRad = tv.set(game.currentSystem.position).sub(jumping.sourceOrTargetSystem.position).angleRad();
+            transform.orientRad = tv.set(jumping.sourceOrTargetSystem.position).sub(game.currentSystem.position).angleRad();
             tv.set(Vector2.X).setAngleRad(transform.orientRad);
             float timePassed = Jumping.JUMP_DURATION / 2 - jumping.timeRemaining;
             float dst = timePassed * timePassed * timePassed * 500;
             transform.location.set(tv).scl(dst).add(jumping.referencePoint);
         } else {
-            float targetOrientation = tv.set(jumping.sourceOrTargetSystem.position).sub(game.currentSystem.position).angleRad();
+            float targetOrientation = tv.set(game.currentSystem.position).sub(jumping.sourceOrTargetSystem.position).angleRad();
             transform.orientRad = targetOrientation;
             tv.set(Vector2.X).setAngleRad(targetOrientation);
             float dst = jumping.timeRemaining * jumping.timeRemaining * jumping.timeRemaining * 500;

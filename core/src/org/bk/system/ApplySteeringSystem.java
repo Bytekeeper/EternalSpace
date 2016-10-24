@@ -7,6 +7,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
+import org.bk.Util;
 import org.bk.data.component.*;
 
 import static org.bk.data.component.Mapper.*;
@@ -56,10 +57,10 @@ public class ApplySteeringSystem extends IteratingSystem {
     }
 
     private void tryJumping(Entity entity, Movement movement, Steering steering, Transform transform) {
-        tv.set(game.currentSystem.position).sub(steering.jumpTo.position).angleRad();
+        tv.set(steering.jumpTo.position).sub(game.currentSystem.position).angleRad();
         float targetOrientation = tv.angleRad();
         if (movement.velocity.len2() > ACTION_VELOCITY_THRESHOLD2 ||
-                Math.abs(transform.orientRad - targetOrientation) > ACTION_DELTA_ANGLE_THRESHOLD) {
+                Math.abs(Util.deltaAngle(transform.orientRad, targetOrientation)) > ACTION_DELTA_ANGLE_THRESHOLD) {
             return;
         }
 

@@ -20,6 +20,7 @@ public class GameData {
     private Kryo kryo = new Kryo();
     private PooledEngine engine;
     private ObjectMap<String, Object> definitions = new ObjectMap<String, Object>();
+    private Array<SolarSystem> systems = new Array<SolarSystem>();
 
     public GameData() {
         kryo.setInstantiatorStrategy(new InstantiatorStrategy() {
@@ -47,6 +48,14 @@ public class GameData {
 
     public void addAll(ObjectMap<String, Object> definitions) {
         this.definitions.putAll(definitions);
+        for (ObjectMap.Entry<String, Object> entry : definitions.entries()) {
+            Object value = entry.value;
+            if (value instanceof SolarSystem) {
+                SolarSystem solarSystem = (SolarSystem) value;
+                systems.add(solarSystem);
+                (solarSystem).name = entry.key;
+            }
+        }
     }
 
     public Entity spawnEntity(String name) {
@@ -88,6 +97,10 @@ public class GameData {
         SolarSystem result = (SolarSystem) definitions.get(system);
         result.name = system;
         return result;
+    }
+
+    public Array<SolarSystem> getSystems() {
+        return systems;
     }
 
     public static class MergingSerializer<T> extends FieldSerializer<T> {

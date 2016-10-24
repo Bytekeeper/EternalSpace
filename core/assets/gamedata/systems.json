@@ -37,7 +37,7 @@
     class: System,
     position: {
       x: 100,
-      y: 0
+      y: 50
     },
     asteroidDensity: 1,
     state: [
@@ -98,6 +98,52 @@
             speed: 80,
             entity: "prime",
             tidalLock: true
+          }
+        ]
+      }
+    ]
+  },
+  "Trident": {
+    class: System,
+    position: {
+      x: -100,
+      y: 150
+    },
+    asteroidDensity: 0.3,
+    state: [
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: -100,
+              y: 100
+            }
+          }
+        ]
+      },
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: 500,
+              y: -400
+            }
+          }
+        ]
+      },
+      {
+        name: "planet",
+        components: [
+          {
+            class: Transform,
+            location: {
+              x: 200,
+              y: -300
+            }
           }
         ]
       }

@@ -25,6 +25,7 @@ public class Assets {
     public final I18NBundle localization;
     public final Sound snd_thrust;
     public final GameData gameData;
+    public final BitmapFont hudFont;
     public BitmapFont debugFont;
     private final AssetManager assetManager;
     public ObjectMap<String, TextureRegion> textures = new ObjectMap<String, TextureRegion>();
@@ -58,6 +59,7 @@ public class Assets {
             ObjectMap<String, Object> definitions = assetManager.get("gamedata/" + toLoad + ".json", ObjectMap.class);
             this.gameData.addAll(definitions);
         }
+        hudFont = skin.getFont("default-font");
     }
 
     private TextureRegion tr(String name) {

@@ -16,6 +16,7 @@ import org.bk.data.component.*;
 import org.bk.data.component.Character;
 import org.bk.data.GameData;
 import org.bk.data.SolarSystem;
+import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
 
@@ -36,6 +37,7 @@ public class Game extends com.badlogic.gdx.Game {
     public PlanetScreen planetScreen;
     public SolarSystem currentSystem;
     public GameData gameData;
+    private MapScreen mapScreen;
 
     @Override
     public void resize(int width, int height) {
@@ -58,7 +60,7 @@ public class Game extends com.badlogic.gdx.Game {
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         stage = new Stage(new ScreenViewport(), uiBatch);
-        planetScreen = new PlanetScreen(this);
+        initScreens();
         batch.getProjectionMatrix().setToOrtho2D(-Gdx.graphics.getWidth() / 2, -Gdx.graphics.getHeight() / 2,
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         engine = new PooledEngine();
@@ -90,6 +92,11 @@ public class Game extends com.badlogic.gdx.Game {
         player.add(engine.createComponent(Character.class));
 
         Gdx.input.setInputProcessor(stage);
+    }
+
+    private void initScreens() {
+        planetScreen = new PlanetScreen(this);
+        mapScreen = new MapScreen(this);
     }
 
     @Override
@@ -137,9 +144,15 @@ public class Game extends com.badlogic.gdx.Game {
                 steering.turn = -1;
                 steering.mode = Steering.SteeringMode.FREE_FLIGHT;
             }
-            if (Gdx.input.isKeyPressed(Keys.J)) {
+            if (Gdx.input.isKeyPressed(Keys.J) && steering.jumpTo != null && steering.jumpTo != currentSystem) {
                 steering.mode = Steering.SteeringMode.JUMPING;
-                steering.jumpTo = gameData.getSystem("Arcos");
+            }
+            if (Gdx.input.isKeyJustPressed(Keys.M)) {
+                if (mapScreen != screen) {
+                    setScreen(mapScreen);
+                } else {
+                    setScreen(null);
+                }
             }
             if (Gdx.input.isKeyPressed(Keys.L)) {
                 Entity planet = null;

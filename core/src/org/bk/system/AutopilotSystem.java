@@ -52,7 +52,7 @@ public class AutopilotSystem extends IteratingSystem {
                 }
                 break;
             case JUMPING:
-                tv.set(game.currentSystem.position).sub(steering.jumpTo.position).angleRad();
+                tv.set(steering.jumpTo.position).sub(game.currentSystem.position).angleRad();
                 stop.setOwner(steering.steerable).
                         setOrientation(tv.angleRad());
                 SteeringUtil.applySteering(stop, steering.steerable, steering);
