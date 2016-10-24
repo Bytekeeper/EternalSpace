@@ -2,21 +2,15 @@ package org.bk.system;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.btree.BehaviorTree;
-import com.badlogic.gdx.ai.steer.Steerable;
-import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import org.bk.Assets;
 import org.bk.Game;
-import org.bk.component.*;
+import org.bk.data.component.*;
 
-import static org.bk.ai.SteeringUtil.applySteering;
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 16.10.2016.

@@ -13,11 +13,11 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import org.bk.Assets;
 import org.bk.Game;
-import org.bk.component.*;
+import org.bk.data.component.*;
 import org.bk.graphics.Radar;
 
 import static org.bk.Game.SQRT_2;
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 15.10.2016.
@@ -130,7 +130,7 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void updateStarBackground() {
-        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 1500;
+        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 500;
         if (stars.size != starAmount) {
             stars.clear();
             for (int i = 0; i < starAmount; i++) {
@@ -139,7 +139,7 @@ public class RenderingSystem extends EntitySystem {
                         rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER);
                 game.viewport.unproject(tv);
                 star.position.set(tv);
-                star.brightness = rnd.nextFloat() * 0.7f + 0.3f;
+                star.brightness = brightness();
                 stars.add(star);
             }
         }
@@ -151,18 +151,22 @@ public class RenderingSystem extends EntitySystem {
                 tv.y = rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER;
                 game.viewport.unproject(tv);
                 star.position.set(tv);
-                star.brightness = rnd.nextFloat() * 0.7f + 0.3f;
+                star.brightness = brightness();
             } else if (tv.y < -STAR_BORDER || tv.y > Gdx.graphics.getHeight() + STAR_BORDER) {
                 tv.x = rnd.nextFloat() * (Gdx.graphics.getWidth() + STAR_BORDER2) - STAR_BORDER;
                 tv.y = -Math.signum(Gdx.graphics.getHeight() / 2 - tv.y) * (Gdx.graphics.getHeight() / 2 + STAR_BORDER * rnd.nextFloat()) + Gdx.graphics.getHeight() / 2;
                 game.viewport.unproject(tv);
                 star.position.set(tv);
-                star.brightness = rnd.nextFloat() * 0.7f + 0.3f;
+                star.brightness = brightness();
             }
             batch.setColor(star.brightness, star.brightness, star.brightness, 1);
             batch.draw(assets.textures.get("particle"), star.position.x, star.position.y, 3, 3);
         }
         batch.setColor(Color.WHITE);
+    }
+
+    private float brightness() {
+        return rnd.nextFloat() * 0.3f + 0.3f;
     }
 
     private void draw(Transform transform, Vector2 dimension, TextureRegion textureRegion) {

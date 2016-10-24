@@ -8,11 +8,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Assets;
 import org.bk.Game;
-import org.bk.component.Celestial;
-import org.bk.component.Jumping;
-import org.bk.component.Transform;
+import org.bk.data.component.Celestial;
+import org.bk.data.component.Jumping;
+import org.bk.data.component.Transform;
 
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 16.10.2016.
@@ -41,7 +41,7 @@ public class Radar {
         Jumping jumping = JUMPING.get(entity);
         if (jumping != null) {
             float t = jumping.direction == Jumping.JumpDirection.DEPART ? (Jumping.JUMP_DURATION / 2 - jumping.timeRemaining) : jumping.timeRemaining;
-            tv.set(tv2).rotate90(1).nor().scl(MathUtils.cos(t * 50) * t * t / 5);
+            tv.setAngleRad(TRANSFORM.get(entity).orientRad + MathUtils.PI / 2).nor().scl(MathUtils.cos(t * 50) * t * t / 5);
             tv2.add(tv);
         }
         batch.draw(assets.textures.get("particle"), tv2.x - 2, tv2.y - 2, 4, 4);

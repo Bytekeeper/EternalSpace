@@ -5,9 +5,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import org.bk.Game;
-import org.bk.component.Landing;
+import org.bk.data.component.Landing;
 
-import static org.bk.component.Mapper.LANDING;
+import static org.bk.data.component.Mapper.LANDING;
 
 /**
  * Created by dante on 19.10.2016.

@@ -6,11 +6,10 @@ import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.branch.Parallel;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.leaf.Wait;
-import com.badlogic.gdx.ai.steer.SteeringBehavior;
-import com.badlogic.gdx.math.Vector2;
-import org.bk.ai.LandingTask;
-import org.bk.ai.PatrolTask;
+import org.bk.ai.task.LandingTask;
+import org.bk.ai.task.PatrolTask;
 import org.bk.ai.task.JumpTask;
+import org.bk.ai.task.RandomJumpTargetTask;
 import org.bk.ai.task.RandomLandingSpotTask;
 
 /**
@@ -44,10 +43,14 @@ public class Behaviors {
         return tree;
     }
 
-    public BehaviorTree<Entity> jump(Entity entity) {
+    public BehaviorTree<Entity> jump(Entity entity, Game game) {
         BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
-        tree.addChild(new JumpTask());
+        Sequence<Entity> root = new Sequence<Entity>();
+        root.addChild(new RandomJumpTargetTask(game));
+        root.addChild(new JumpTask());
+
         tree.setObject(entity);
+        tree.addChild(root);
         return tree;
     }
 }

@@ -8,11 +8,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import org.bk.ai.SteeringUtil;
-import org.bk.component.Body;
-import org.bk.component.*;
-import org.bk.component.Transform;
+import org.bk.data.component.Body;
+import org.bk.data.component.*;
+import org.bk.data.component.Character;
+import org.bk.data.component.Transform;
 
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 10.10.2016.
@@ -31,7 +32,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
     private final Vector2 tv = new Vector2();
     private float nextStep;
-    private FactionSystem factionSystem;
 
     public Box2DPhysicsSystem(int priority) {
         super(priority);
@@ -54,7 +54,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        factionSystem = getEngine().getSystem(FactionSystem.class);
         for (Entity entity: entities) {
             Physics physics = PHYSICS.get(entity);
             Transform transform = TRANSFORM.get(entity);
@@ -228,10 +227,10 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 if (ownedB != null) {
                     entityB = ownedB.owner;
                 }
-                if (entityA != null && entityB != null &&
-                        CHARACTER.has(entityA) && CHARACTER.has(entityB) &&
-                        !factionSystem.areEnemies(entityA, entityB)) {
-                    return false;
+                Character characterA = CHARACTER.get(entityA);
+                Character characterB = CHARACTER.get(entityB);
+                if (characterA != null && characterB != null) {
+                    return characterA != characterB && characterA.faction.isEnemy(characterB.faction);
                 }
                 return true;
             }

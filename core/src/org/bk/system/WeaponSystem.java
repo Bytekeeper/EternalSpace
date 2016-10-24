@@ -8,9 +8,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
-import org.bk.component.*;
+import org.bk.data.component.*;
 
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 15.10.2016.
@@ -32,6 +32,7 @@ public class WeaponSystem extends IteratingSystem {
             if (weapon.cooldown > 0 || !weapon.firing) {
                 continue;
             }
+            weapon.firing = false;
             weapon.cooldown = weapon.cooldownPerShot;
             if (weapon.projectileName != null) {
                 spawnProjectile(weapon, entity);

@@ -3,9 +3,9 @@ package org.bk.system;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import org.bk.component.LifeTime;
+import org.bk.data.component.LifeTime;
 
-import static org.bk.component.Mapper.LIFE_TIME;
+import static org.bk.data.component.Mapper.LIFE_TIME;
 
 /**
  * Created by dante on 16.10.2016.

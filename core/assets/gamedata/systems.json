@@ -6,7 +6,7 @@
       y: 0
     },
     asteroidDensity: 0.2,
-    contains: [
+    state: [
       {
         name: "planet",
         components: [
@@ -36,11 +36,11 @@
   "Arcos": {
     class: System,
     position: {
-      x: 0,
+      x: 100,
       y: 0
     },
     asteroidDensity: 1,
-    contains: [
+    state: [
       {
         name: "planet",
         components: [

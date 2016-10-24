@@ -8,12 +8,12 @@ import org.bk.Game;
 import org.bk.ai.Arrive;
 import org.bk.ai.SteeringUtil;
 import org.bk.ai.task.Stop;
-import org.bk.component.Movement;
-import org.bk.component.Physics;
-import org.bk.component.Steering;
-import org.bk.component.Transform;
+import org.bk.data.component.Movement;
+import org.bk.data.component.Physics;
+import org.bk.data.component.Steering;
+import org.bk.data.component.Transform;
 
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 20.10.2016.
@@ -22,6 +22,7 @@ public class AutopilotSystem extends IteratingSystem {
     private final Arrive<Vector2> steerToLandingSpot = new Arrive<Vector2>(null, null);
     private final Stop stop = new Stop(null);
     private final Game game;
+    private final Vector2 tv = new Vector2();
 
     public AutopilotSystem(Game game, int priority) {
         super(Family.all(Steering.class, Transform.class, Movement.class, Physics.class).get(), priority);
@@ -51,8 +52,9 @@ public class AutopilotSystem extends IteratingSystem {
                 }
                 break;
             case JUMPING:
+                tv.set(game.currentSystem.position).sub(steering.jumpTo.position).angleRad();
                 stop.setOwner(steering.steerable).
-                        setOrientation(1);
+                        setOrientation(tv.angleRad());
                 SteeringUtil.applySteering(stop, steering.steerable, steering);
                 break;
         }

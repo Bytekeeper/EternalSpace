@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.esotericsoftware.kryo.serializers.FieldSerializerConfig;
+import com.sun.webkit.graphics.Ref;
 import org.objenesis.instantiator.ObjectInstantiator;
 import org.objenesis.strategy.InstantiatorStrategy;
 
@@ -37,6 +38,7 @@ public class GameData {
                 return fallback.newInstantiatorOf(type);
             }
         });
+        kryo.setDefaultSerializer(MergingSerializer.class);
     }
 
     public void setEngine(PooledEngine engine) {
@@ -47,58 +49,43 @@ public class GameData {
         this.definitions.putAll(definitions);
     }
 
-    public Entity fabricateEntity(String name) {
-        EntityDef sourceEntity = getEntityDef(name);
-        Entity entity = copyComponentIntoNewEntity(sourceEntity.components);
+    public Entity spawnEntity(String name) {
+        EntityTemplate template = getEntityTemplate(name);
+        Entity entity = engine.createEntity();
+        template.applyTo(kryo, entity, null);
+        engine.addEntity(entity);
         return entity;
     }
 
-    private EntityDef getEntityDef(String name) {
-        EntityDef sourceEntity = (EntityDef) definitions.get(name);
+    private EntityTemplate getEntityTemplate(String name) {
+        EntityTemplate sourceEntity = (EntityTemplate) definitions.get(name);
         if (sourceEntity == null) {
             throw new IllegalStateException("No such entity: " + name);
         }
         return sourceEntity;
     }
 
-    private Entity copyComponentIntoNewEntity(Array<Component> components) {
-
-        Entity entity = engine.createEntity();
-        copyComponentsIntoEntity(components, entity);
-        engine.addEntity(entity);
-        return entity;
-    }
-
-    private void copyComponentsIntoEntity(Array<Component> components, Entity entity) {
-        for (Component component : components) {
-            entity.add(kryo.copy(component));
-        }
-    }
-
-    public void fabricateSystem(String name) {
-        SystemDef systemDef = (SystemDef) definitions.get(name);
-        if (systemDef == null) {
+    public void spawnSystem(String name) {
+        SolarSystem solarSystem = (SolarSystem) definitions.get(name);
+        if (solarSystem == null) {
             throw new IllegalStateException("No such system: " + name);
         }
-        kryo.getContext().put("engine", engine);
-        for (SystemDef.EntityInstance entityInstance : systemDef.contains) {
+        kryo.getContext().put("gameData", this);
+        for (EntityInstance entityInstance : solarSystem.state) {
             Entity entity;
             if (entityInstance.id != null) {
                 entity = getOrCreateEntity(kryo, entityInstance.id);
             } else {
                 entity = engine.createEntity();
             }
-            copyComponentsIntoEntity(getEntityDef(entityInstance.name).components, entity);
-            kryo.setDefaultSerializer(MergingSerializer.class);
-            copyComponentsIntoEntity(entityInstance.components, entity);
-            kryo.setDefaultSerializer(FieldSerializer.class);
+            getEntityTemplate(entityInstance.name).applyTo(kryo, entity, entityInstance.components);
             engine.addEntity(entity);
         }
         kryo.getContext().clear();
     }
 
-    public SystemDef getSystem(String system) {
-        SystemDef result = (SystemDef) definitions.get(system);
+    public SolarSystem getSystem(String system) {
+        SolarSystem result = (SolarSystem) definitions.get(system);
         result.name = system;
         return result;
     }
@@ -117,15 +104,12 @@ public class GameData {
         }
 
         @Override
-        protected T createCopy(Kryo kryo, T original) {
-            return (original instanceof Component) ? original : super.createCopy(kryo, original);
-        }
-
-        @Override
         public T copy(Kryo kryo, T original) {
             if (original instanceof EntityRef) {
                 EntityRef ref = (EntityRef) original;
                 return (T) getOrCreateEntity(kryo, ref.id);
+            } else if (original instanceof FactionRef) {
+                return (T) gameData(kryo).definitions.get(((FactionRef) original).id);
             }
             return super.copy(kryo, original);
         }
@@ -134,14 +118,51 @@ public class GameData {
     private static Entity getOrCreateEntity(Kryo kryo, String id) {
         Entity result = (Entity) kryo.getContext().get("_" + id);
         if (result == null) {
-            PooledEngine engine = (PooledEngine) kryo.getContext().get("engine");
+            PooledEngine engine = getEngine(kryo);
             result = engine.createEntity();
             kryo.getContext().put("_" + id, result);
         }
         return result;
     }
 
-    public static class EntityRef extends Entity {
+    private static PooledEngine getEngine(Kryo kryo) {
+        return gameData(kryo).engine;
+    }
+
+    private static GameData gameData(Kryo kryo) {
+        return (GameData) kryo.getContext().get("gameData");
+    }
+
+    public interface Reference {
+        String getId();
+        void setId(String id);
+    }
+
+    public static class EntityRef extends Entity implements Reference {
         public String id;
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public void setId(String id) {
+            this.id = id;
+        }
+    }
+
+    public static class FactionRef extends Faction implements Reference {
+        public String id;
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public void setId(String id) {
+            this.id = id;
+        }
     }
 }

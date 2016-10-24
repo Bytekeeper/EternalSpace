@@ -8,10 +8,10 @@ import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import org.bk.Game;
-import org.bk.component.Persistence;
-import org.bk.component.Transform;
+import org.bk.data.component.Persistence;
+import org.bk.data.component.Transform;
 
-import static org.bk.component.Mapper.PERSISTENCE;
+import static org.bk.data.component.Mapper.PERSISTENCE;
 
 /**
  * Created by dante on 20.10.2016.
@@ -40,8 +40,8 @@ public class SystemPopulateSystem extends EntitySystem {
             dispatchOnNextUpdate = false;
         }
         Persistence playerPersistence = PERSISTENCE.get(game.player);
-        if (game.currentSystem == null || playerPersistence.system != game.currentSystem.name) {
-            game.switchSystem(playerPersistence.system);
+        if (game.currentSystem == null || playerPersistence.system != game.currentSystem) {
+            game.currentSystem = playerPersistence.system;
             Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem);
             removeAllEntitiesNotInSystem();
             game.populateCurrentSystem();
@@ -52,7 +52,7 @@ public class SystemPopulateSystem extends EntitySystem {
     private void removeAllEntitiesNotInSystem() {
         for (Entity entity: allTransformEntities) {
             Persistence persistence = PERSISTENCE.get(entity);
-            if (persistence != null && persistence.system == game.currentSystem.name) {
+            if (persistence != null && persistence.system == game.currentSystem) {
                 continue;
             }
             if (persistence == null || persistence.temporary) {

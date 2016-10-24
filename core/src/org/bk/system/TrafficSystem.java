@@ -8,10 +8,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
 import org.bk.Game;
-import org.bk.component.*;
+import org.bk.data.component.*;
 
-import static org.bk.component.Mapper.MOVEMENT;
-import static org.bk.component.Mapper.TRANSFORM;
+import static org.bk.data.component.Mapper.MOVEMENT;
+import static org.bk.data.component.Mapper.TRANSFORM;
 
 /**
  * Created by dante on 18.10.2016.
@@ -20,7 +20,7 @@ public class TrafficSystem extends EntitySystem {
     private final Game game;
     private RandomXS128 rnd = new RandomXS128();
     private float nextSpawn;
-    private ImmutableArray<Entity> planetEntities;
+    private ImmutableArray<Entity> entitiesToLandOn;
     private ImmutableArray<Entity> shipEntities;
 
     public TrafficSystem(Game game, int priority) {
@@ -31,7 +31,7 @@ public class TrafficSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        planetEntities = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class).get());
+        entitiesToLandOn = engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Ship.class).get());
         engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<String>() {
             @Override
@@ -67,7 +67,7 @@ public class TrafficSystem extends EntitySystem {
     }
 
     private void spawnShip(boolean initialDeployment) {
-        Entity target = planetEntities.random();
+        Entity target = entitiesToLandOn.random();
         Entity entity = game.spawn("falcon", Transform.class, Movement.class);
         Persistence persistence = getEngine().createComponent(Persistence.class);
         persistence.temporary = true;
@@ -93,14 +93,14 @@ public class TrafficSystem extends EntitySystem {
             if (rnd.nextFloat() < 0.5f) {
                 aiControlled.behaviorTree = game.behaviors.patrol(entity, getEngine());
             } else {
-                aiControlled.behaviorTree = game.behaviors.jump(entity);
+                aiControlled.behaviorTree = game.behaviors.jump(entity, game);
             }
         } else {
             transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
             Jumping jumping = getEngine().createComponent(Jumping.class);
             jumping.referencePoint.setToRandomDirection().scl(MathUtils.random(0, 800));
             jumping.direction = Jumping.JumpDirection.ARRIVE;
-            jumping.sourceOrTargetSystem = "other";
+            jumping.sourceOrTargetSystem = game.gameData.getSystem("Thorin");
             entity.add(jumping);
             aiControlled.behaviorTree = game.behaviors.land(entity, getEngine());
             entity.remove(Physics.class);

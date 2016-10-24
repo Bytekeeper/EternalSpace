@@ -4,12 +4,12 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
-import org.bk.component.Landing;
-import org.bk.component.Persistence;
-import org.bk.component.Physics;
-import org.bk.component.Steering;
+import org.bk.data.component.Landing;
+import org.bk.data.component.Persistence;
+import org.bk.data.component.Physics;
+import org.bk.data.component.Steering;
 
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 18.10.2016.

@@ -11,12 +11,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import org.bk.Game;
-import org.bk.component.Asteroid;
-import org.bk.component.Movement;
-import org.bk.component.Transform;
+import org.bk.data.component.Asteroid;
+import org.bk.data.component.Movement;
+import org.bk.data.component.Transform;
 
-import static org.bk.component.Mapper.MOVEMENT;
-import static org.bk.component.Mapper.TRANSFORM;
+import static org.bk.data.component.Mapper.MOVEMENT;
+import static org.bk.data.component.Mapper.TRANSFORM;
 
 /**
  * Created by dante on 19.10.2016.

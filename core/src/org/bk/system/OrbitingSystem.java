@@ -5,14 +5,12 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import org.bk.component.Movement;
-import org.bk.component.Orbiting;
-import org.bk.component.Transform;
-import org.omg.CORBA.ORB;
+import org.bk.data.component.Movement;
+import org.bk.data.component.Orbiting;
+import org.bk.data.component.Transform;
 
-import static org.bk.component.Mapper.MOVEMENT;
-import static org.bk.component.Mapper.ORBITING;
-import static org.bk.component.Mapper.TRANSFORM;
+import static org.bk.data.component.Mapper.ORBITING;
+import static org.bk.data.component.Mapper.TRANSFORM;
 
 /**
  * Created by dante on 23.10.2016.

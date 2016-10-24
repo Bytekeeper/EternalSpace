@@ -3,9 +3,9 @@ package org.bk.system;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import org.bk.component.Health;
+import org.bk.data.component.Health;
 
-import static org.bk.component.Mapper.HEALTH;
+import static org.bk.data.component.Mapper.HEALTH;
 
 /**
  * Created by dante on 16.10.2016.

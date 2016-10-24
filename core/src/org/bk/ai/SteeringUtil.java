@@ -7,10 +7,10 @@ import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import org.bk.component.Movement;
-import org.bk.component.Physics;
-import org.bk.component.Steering;
-import org.bk.component.Transform;
+import org.bk.data.component.Movement;
+import org.bk.data.component.Physics;
+import org.bk.data.component.Steering;
+import org.bk.data.component.Transform;
 
 /**
  * Created by dante on 16.10.2016.

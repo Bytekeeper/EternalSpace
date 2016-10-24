@@ -16,6 +16,9 @@
       },
       {
         class: Physics
+      },
+      {
+        class: LandingPlace
       }
     ]
   },

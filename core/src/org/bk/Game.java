@@ -12,14 +12,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import org.bk.component.*;
-import org.bk.component.Character;
+import org.bk.data.component.*;
+import org.bk.data.component.Character;
 import org.bk.data.GameData;
-import org.bk.data.SystemDef;
+import org.bk.data.SolarSystem;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
 
-import static org.bk.component.Mapper.*;
+import static org.bk.data.component.Mapper.*;
 
 public class Game extends com.badlogic.gdx.Game {
     public static final float SQRT_2 = (float) Math.sqrt(2);
@@ -34,7 +34,8 @@ public class Game extends com.badlogic.gdx.Game {
     public int height;
     public Stage stage;
     public PlanetScreen planetScreen;
-    public SystemDef currentSystem;
+    public SolarSystem currentSystem;
+    public GameData gameData;
 
     @Override
     public void resize(int width, int height) {
@@ -52,6 +53,7 @@ public class Game extends com.badlogic.gdx.Game {
         viewport = new ScreenViewport();
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         assets = new Assets();
+        gameData = assets.gameData;
         behaviors = new Behaviors();
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
@@ -71,7 +73,6 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
         engine.addSystem(new HealthSystem(8));
-        engine.addSystem(new FactionSystem(1000));
 
         engine.addSystem(new AsteroidSystem(this, 9000));
         engine.addSystem(new TrafficSystem(this, 9000));
@@ -84,7 +85,7 @@ public class Game extends com.badlogic.gdx.Game {
 
         player = spawn("falcon");
         Persistence persistence = engine.createComponent(Persistence.class);
-        persistence.system = "Thorin";
+        persistence.system = gameData.getSystem("Thorin");
         player.add(persistence);
         player.add(engine.createComponent(Character.class));
 
@@ -138,13 +139,13 @@ public class Game extends com.badlogic.gdx.Game {
             }
             if (Gdx.input.isKeyPressed(Keys.J)) {
                 steering.mode = Steering.SteeringMode.JUMPING;
-                steering.jumpTo = "Arcos";
+                steering.jumpTo = gameData.getSystem("Arcos");
             }
             if (Gdx.input.isKeyPressed(Keys.L)) {
                 Entity planet = null;
                 float bestDst2 = Float.POSITIVE_INFINITY;
                 Transform playerTransform = TRANSFORM.get(this.player);
-                for (Entity entity : engine.getEntitiesFor(Family.all(Celestial.class, Transform.class).get())) {
+                for (Entity entity : engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get())) {
                     float dst2 = TRANSFORM.get(entity).location.dst2(playerTransform.location);
                     if (dst2 < bestDst2) {
                         bestDst2 = dst2;
@@ -162,7 +163,7 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public Entity spawn(String entityDefinitionKey, Class<? extends Component>... expectedComponents) {
-        return assets.gameData.fabricateEntity(entityDefinitionKey);
+        return assets.gameData.spawnEntity(entityDefinitionKey);
     }
 
     @Override
@@ -183,13 +184,6 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void populateCurrentSystem() {
-        assets.gameData.fabricateSystem(currentSystem.name);
-    }
-
-    public void switchSystem(String system) {
-        currentSystem = assets.gameData.getSystem(system);
-        if (currentSystem == null) {
-            throw new IllegalStateException("Can't find system " + system + " to switch to.");
-        }
+        assets.gameData.spawnSystem(currentSystem.name);
     }
 }

@@ -11,10 +11,9 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import org.bk.component.*;
-import org.bk.data.EntityDef;
-import org.bk.data.GameData;
-import org.bk.data.SystemDef;
+import org.bk.data.component.*;
+import org.bk.data.*;
+import org.bk.data.Faction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,25 +33,16 @@ public class JSONLoader<T> extends AsynchronousAssetLoader<T, JSONLoader.GameDat
     @Override
     public void loadAsync(AssetManager manager, String fileName, FileHandle file, GameDataParameters<T> parameter) {
         Json json = new Json();
-        json.addClassTag("Entity", EntityDef.class);
-        json.addClassTag("System", SystemDef.class);
+        json.addClassTag("Entity", EntityTemplate.class);
+        json.addClassTag("System", SolarSystem.class);
         List<Class<? extends Component>> compontentClasses = Arrays.asList(Body.class, Physics.class, Movement.class, Ship.class, Steering.class,
-                Transform.class, Health.class, Mounts.class, Celestial.class, Asteroid.class, Projectile.class, LifeTime.class, Orbiting.class);
+                Transform.class, Health.class, Mounts.class, Celestial.class, Asteroid.class, Projectile.class, LifeTime.class, Orbiting.class,
+                LandingPlace.class);
         for (Class<?> c: compontentClasses) {
             json.addClassTag(c.getSimpleName(), c);
         }
-        json.setSerializer(Entity.class, new Json.Serializer<Entity>() {
-            @Override
-            public void write(Json json, Entity object, Class knownType) {
-            }
-
-            @Override
-            public Entity read(Json json, JsonValue jsonData, Class type) {
-                GameData.EntityRef entityRef = new GameData.EntityRef();
-                entityRef.id = jsonData.asString();
-                return entityRef;
-            }
-        });
+        json.setSerializer(Entity.class, new ReferenceSerializer<Entity>(GameData.EntityRef.class));
+        json.setSerializer(Faction.class, new ReferenceSerializer<Faction>(GameData.FactionRef.class));
         loaded = json.fromJson(classToLoad, file);
     }
 
@@ -69,5 +59,29 @@ public class JSONLoader<T> extends AsynchronousAssetLoader<T, JSONLoader.GameDat
     }
 
     public static class GameDataParameters<T> extends AssetLoaderParameters<T> {
+    }
+
+    public static class ReferenceSerializer<T> implements Json.Serializer<T> {
+        private final Class<? extends T> _class;
+
+        public ReferenceSerializer(Class<? extends T> aClass) {
+            _class = aClass;
+        }
+
+        @Override
+        public void write(Json json, T object, Class knownType) {
+
+        }
+
+        @Override
+        public T read(Json json, JsonValue jsonData, Class type) {
+            try {
+                T instance = _class.newInstance();
+                ((GameData.Reference) instance).setId(jsonData.asString());
+                return instance;
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 }

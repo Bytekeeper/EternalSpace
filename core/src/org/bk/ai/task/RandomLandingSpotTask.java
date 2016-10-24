@@ -5,12 +5,10 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
-import org.bk.component.Mapper;
-import org.bk.component.Celestial;
-import org.bk.component.Steering;
-import org.bk.component.Transform;
+import org.bk.data.component.*;
 
-import static org.bk.component.Mapper.CELESTIAL;
+import static org.bk.data.component.Mapper.CELESTIAL;
+import static org.bk.data.component.Mapper.LANDING_PLACE;
 
 /**
  * Created by dante on 18.10.2016.
@@ -25,8 +23,8 @@ public class RandomLandingSpotTask extends LeafTask<Entity> {
     @Override
     public Status execute() {
         Steering steering = Mapper.STEERING.get(getObject());
-        if (steering.modeTargetEntity == null || !CELESTIAL.has(steering.modeTargetEntity)) {
-            Entity entity = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class).get()).random();
+        if (steering.modeTargetEntity == null || !LANDING_PLACE.has(steering.modeTargetEntity)) {
+            Entity entity = engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get()).random();
             if (entity == null) {
                 return Status.FAILED;
             }
