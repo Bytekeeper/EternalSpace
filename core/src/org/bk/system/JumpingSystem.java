@@ -16,6 +16,7 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 20.10.2016.
  */
 public class JumpingSystem extends IteratingSystem {
+    public static final int JUMP_SCALE = 800;
     private final Vector2 tv = new Vector2();
     private final Game game;
 
@@ -34,13 +35,13 @@ public class JumpingSystem extends IteratingSystem {
             transform.orientRad = tv.set(jumping.sourceOrTargetSystem.position).sub(game.currentSystem.position).angleRad();
             tv.set(Vector2.X).setAngleRad(transform.orientRad);
             float timePassed = Jumping.JUMP_DURATION / 2 - jumping.timeRemaining;
-            float dst = timePassed * timePassed * timePassed * 500;
+            float dst = timePassed * timePassed * timePassed * JUMP_SCALE;
             transform.location.set(tv).scl(dst).add(jumping.referencePoint);
         } else {
             float targetOrientation = tv.set(game.currentSystem.position).sub(jumping.sourceOrTargetSystem.position).angleRad();
             transform.orientRad = targetOrientation;
             tv.set(Vector2.X).setAngleRad(targetOrientation);
-            float dst = jumping.timeRemaining * jumping.timeRemaining * jumping.timeRemaining * 500;
+            float dst = jumping.timeRemaining * jumping.timeRemaining * jumping.timeRemaining * JUMP_SCALE;
             transform.location.set(tv).scl(-dst).add(jumping.referencePoint);
         }
         jumping.timeRemaining -= deltaTime;
@@ -72,5 +73,21 @@ public class JumpingSystem extends IteratingSystem {
     @Override
     public PooledEngine getEngine() {
         return (PooledEngine) super.getEngine();
+    }
+
+    public void depart(Entity entity, Vector2 from, SolarSystem target) {
+        Jumping jumping = getEngine().createComponent(Jumping.class);
+        jumping.sourceOrTargetSystem = target;
+        jumping.direction = Jumping.JumpDirection.DEPART;
+        jumping.referencePoint.set(from);
+        entity.add(jumping);
+    }
+
+    public void arrive(Entity entity, Vector2 to, SolarSystem fromSystem) {
+        Jumping jumping = getEngine().createComponent(Jumping.class);
+        jumping.referencePoint.set(to);
+        jumping.direction = Jumping.JumpDirection.ARRIVE;
+        jumping.sourceOrTargetSystem = fromSystem;
+        entity.add(jumping);
     }
 }

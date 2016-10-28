@@ -23,7 +23,7 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 15.10.2016.
  */
 public class RenderingSystem extends EntitySystem {
-    public static final int STAR_BORDER = 500;
+    public static final int STAR_BORDER = 200;
     public static final int STAR_BORDER2 = STAR_BORDER * 2;
     private final Assets assets;
     private final SpriteBatch batch;
@@ -143,7 +143,7 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void updateStarBackground() {
-        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 500;
+        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 600;
         if (stars.size != starAmount) {
             stars.clear();
             for (int i = 0; i < starAmount; i++) {
@@ -160,14 +160,15 @@ public class RenderingSystem extends EntitySystem {
             tv.set(star.position);
             game.viewport.project(tv);
             if (tv.x < -STAR_BORDER || tv.x > Gdx.graphics.getWidth() + STAR_BORDER) {
-                tv.x = Math.signum(Gdx.graphics.getWidth() / 2 - tv.x) * (Gdx.graphics.getWidth() / 2 + STAR_BORDER * rnd.nextFloat()) + Gdx.graphics.getWidth() / 2;
+                tv.x += Math.signum(Gdx.graphics.getWidth() / 2 - tv.x) * (Gdx.graphics.getWidth() + STAR_BORDER * (1 + rnd.nextFloat()));
                 tv.y = rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER;
                 game.viewport.unproject(tv);
                 star.position.set(tv);
                 star.brightness = brightness();
             } else if (tv.y < -STAR_BORDER || tv.y > Gdx.graphics.getHeight() + STAR_BORDER) {
                 tv.x = rnd.nextFloat() * (Gdx.graphics.getWidth() + STAR_BORDER2) - STAR_BORDER;
-                tv.y = -Math.signum(Gdx.graphics.getHeight() / 2 - tv.y) * (Gdx.graphics.getHeight() / 2 + STAR_BORDER * rnd.nextFloat()) + Gdx.graphics.getHeight() / 2;
+                tv.y += Math.signum(Gdx.graphics.getHeight() / 2 - tv.y) * (Gdx.graphics.getHeight() + STAR_BORDER * ( 1 + rnd.nextFloat()));
+                tv.y = Gdx.graphics.getHeight() - tv.y;
                 game.viewport.unproject(tv);
                 star.position.set(tv);
                 star.brightness = brightness();
@@ -179,7 +180,7 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private float brightness() {
-        return rnd.nextFloat() * 0.3f + 0.3f;
+        return rnd.nextFloat() * 0.5f + 0.2f;
     }
 
     private void draw(Transform transform, Vector2 dimension, TextureRegion textureRegion) {

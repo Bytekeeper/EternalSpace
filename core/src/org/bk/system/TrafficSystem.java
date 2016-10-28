@@ -7,6 +7,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
+import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.component.*;
 
@@ -22,6 +23,7 @@ public class TrafficSystem extends EntitySystem {
     private float nextSpawn;
     private ImmutableArray<Entity> entitiesToLandOn;
     private ImmutableArray<Entity> shipEntities;
+    private final Vector2 tv = new Vector2();
 
     public TrafficSystem(Game game, int priority) {
         super(priority);
@@ -97,11 +99,8 @@ public class TrafficSystem extends EntitySystem {
             }
         } else {
             transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
-            Jumping jumping = getEngine().createComponent(Jumping.class);
-            jumping.referencePoint.setToRandomDirection().scl(MathUtils.random(0, 800));
-            jumping.direction = Jumping.JumpDirection.ARRIVE;
-            jumping.sourceOrTargetSystem = game.gameData.getSystem("Thorin");
-            entity.add(jumping);
+            getEngine().getSystem(JumpingSystem.class).arrive(entity, tv.setToRandomDirection().scl(MathUtils.random(0, 800)),
+                    game.gameData.getSystems().random());
             aiControlled.behaviorTree = game.behaviors.land(entity, getEngine());
             entity.remove(Physics.class);
             entity.remove(Steering.class);

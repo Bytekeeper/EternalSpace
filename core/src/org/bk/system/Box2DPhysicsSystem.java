@@ -25,7 +25,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private static final short CATEGORY_WEAPON = 0x0008;
 
     private static final float W2B = 1f / 10;
-    private static final float B2W = 1f / W2B;
+    public static final float B2W = 1f / W2B;
     private final ContactListener myContactListener = new MyContactListener();
     private final ContactFilter myContactFilter = new MyContactFilter();
     private World world;
@@ -54,9 +54,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        for (Entity entity: entities) {
-            Physics physics = PHYSICS.get(entity);
+        for (Entity entity : entities) {
             Transform transform = TRANSFORM.get(entity);
+            Physics physics = PHYSICS.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
             tv.set(physicsBody.getPosition()).scl(B2W);
             if (transform.location.dst2(tv) > 0.1f ||
@@ -64,37 +64,41 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 tv.set(transform.location).scl(W2B);
                 physicsBody.setTransform(tv, transform.orientRad);
             }
-            Movement movement = MOVEMENT.get(entity);
-            if (movement != null) {
-                tv.set(movement.linearAccel).scl(W2B);
-                physicsBody.applyForceToCenter(tv, true);
-                physicsBody.applyTorque(movement.angularAccel, true);
-                movement.linearAccel.setZero();
-                movement.angularAccel = 0;
-                if (movement.velocity.len() > movement.maxVelocity) {
-                    float scale = movement.velocity.len() - movement.maxVelocity + 0.01f;
-                    tv.set(movement.velocity).nor().scl(-physicsBody.getMass() * scale / deltaTime * W2B);
-                    physicsBody.applyForceToCenter(tv.x, tv.y, true);
-                }
-                if (movement.maxVelocity == 0) {
-                    Gdx.app.error(Box2DPhysicsSystem.class.getSimpleName(), "No max velocity set for " + entity.getComponents());
-                }
-            }
         }
         nextStep -= Math.min(deltaTime, 0.1f);
         while (nextStep < 0) {
+            for (Entity entity : entities) {
+                Movement movement = MOVEMENT.get(entity);
+                if (movement != null) {
+                    Physics physics = PHYSICS.get(entity);
+                    com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
+                    tv.set(movement.linearAccel).scl(W2B);
+                    physicsBody.applyForceToCenter(tv, true);
+                    physicsBody.applyTorque(movement.angularAccel, true);
+                    if (movement.velocity.len() > movement.maxVelocity) {
+                        float scale = movement.velocity.len() - movement.maxVelocity + 0.01f;
+                        tv.set(movement.velocity).nor().scl(-physicsBody.getMass() * scale / deltaTime * W2B);
+                        physicsBody.applyForceToCenter(tv.x, tv.y, true);
+                    }
+                    if (movement.maxVelocity == 0) {
+                        Gdx.app.error(Box2DPhysicsSystem.class.getSimpleName(), "No max velocity set for " + entity.getComponents());
+                    }
+                }
+            }
             nextStep += 1 / 60f;
             world.step(1 / 60f, 6, 2);
         }
-        for (Entity entity: entities) {
+        for (Entity entity : entities) {
             Physics physics = PHYSICS.get(entity);
             Transform transform = TRANSFORM.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
             transform.orientRad = (physicsBody.getAngle() % MathUtils.PI2 + MathUtils.PI2) % MathUtils.PI2;
             transform.location.set(physicsBody.getPosition()).scl(B2W);
-            physics.physicsBody.setTransform(transform.location, transform.orientRad);
+            physics.physicsBody.setTransform(physicsBody.getPosition(), transform.orientRad);
             Movement movement = MOVEMENT.get(entity);
             if (movement != null) {
+                movement.linearAccel.setZero();
+                movement.angularAccel = 0;
                 movement.velocity.set(physicsBody.getLinearVelocity()).scl(B2W);
                 movement.angularVelocity = physicsBody.getAngularVelocity();
             }
@@ -138,6 +142,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
             fixtureDef.shape = circleShape;
             fixtureDef.density = 5f;
+//            fixtureDef.density = 1f;
             fixtureDef.friction = 0.5f;
             fixtureDef.restitution = 0.2f;
             if (SHIP.has(entity)) {

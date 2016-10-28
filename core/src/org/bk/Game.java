@@ -134,7 +134,19 @@ public class Game extends com.badlogic.gdx.Game {
         stage.draw();
     }
 
+    private float accelTimer = 1;
+    private float lastVel;
+
     private void handlePlayerInput() {
+        Movement movement = MOVEMENT.get(player);
+        float accel = (movement.velocity.len() - lastVel) / Gdx.graphics.getDeltaTime();
+        lastVel = movement.velocity.len();
+        accelTimer -= Gdx.graphics.getDeltaTime();
+        if (accelTimer < 0) {
+            accelTimer += 1;
+            Steering steering = STEERING.get(player);
+//            System.err.println(accel + " " + steering.steerable.getMaxLinearAcceleration() + " " + steering.steerable.getMaxAngularSpeed() + " " + PHYSICS.get(player).physicsBody.getAngularVelocity());
+        }
         Steering steering = STEERING.get(player);
         if (steering != null) {
             if (Gdx.input.isKeyPressed(Keys.UP)) {

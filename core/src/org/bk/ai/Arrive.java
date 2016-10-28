@@ -23,32 +23,15 @@ import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector;
+import com.badlogic.gdx.math.Vector2;
+import org.bk.Util;
 
-/**
- * {@code Arrive} behavior moves the agent towards a target position. It is similar to seek but it attempts to arrive at the target
- * position with a zero velocity.
- * <p>
- * {@code Arrive} behavior uses two radii. The {@code arrivalTolerance} lets the owner get near enough to the target without
- * letting small errors keep it in motion. The {@code decelerationRadius}, usually much larger than the previous one, specifies
- * when the incoming character will begin to slow down. The algorithm calculates an ideal speed for the owner. At the slowing-down
- * radius, this is equal to its maximum linear speed. At the target point, it is zero (we want to have zero speed when we arrive).
- * In between, the desired speed is an interpolated intermediate value, controlled by the distance from the target.
- * <p>
- * The direction toward the target is calculated and combined with the desired speed to give a target velocity. The algorithm
- * looks at the current velocity of the character and works out the acceleration needed to turn it into the target velocity. We
- * can't immediately change velocity, however, so the acceleration is calculated based on reaching the target velocity in a fixed
- * time scale known as {@code timeToTarget}. This is usually a small value; it defaults to 0.1 seconds which is a good starting
- * point.
- *
- * @param <T> Type of vector, either 2D or 3D, implementing the {@link Vector} interface
- * @author davebaol
- */
-public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
+public class Arrive extends SteeringBehavior<Vector2> {
 
     /**
      * The target to arrive to.
      */
-    protected Location<T> target;
+    protected Location<Vector2> target;
 
     /**
      * The tolerance for arriving at the target. It lets the owner get near enough to the target without letting small errors keep
@@ -61,12 +44,14 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
      */
     protected float timeToTarget = 0.1f;
 
+    private final Vector2 tv = new Vector2();
+
     /**
      * Creates an {@code Arrive} behavior for the specified owner.
      *
      * @param owner the owner of this behavior
      */
-    public Arrive(Steerable<T> owner) {
+    public Arrive(Steerable<Vector2> owner) {
         this(owner, null);
     }
 
@@ -76,41 +61,30 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
      * @param owner  the owner of this behavior
      * @param target the target of this behavior
      */
-    public Arrive(Steerable<T> owner, Location<T> target) {
+    public Arrive(Steerable<Vector2> owner, Location<Vector2> target) {
         super(owner);
         this.target = target;
     }
 
     @Override
-    protected SteeringAcceleration<T> calculateRealSteering(SteeringAcceleration<T> steering) {
+    protected SteeringAcceleration<Vector2> calculateRealSteering(SteeringAcceleration<Vector2> steering) {
         return arrive(steering, target.getPosition());
     }
 
-    protected SteeringAcceleration<T> arrive(SteeringAcceleration<T> steering, T targetPosition) {
-        // Get the direction and distance to the target
-        T toTarget = steering.linear.set(targetPosition).sub(owner.getPosition());
-        float distance = toTarget.len();
-
+    protected SteeringAcceleration<Vector2> arrive(SteeringAcceleration<Vector2> steering, Vector2 targetPosition) {
         Limiter actualLimiter = getActualLimiter();
-        // Go max speed
-        float targetSpeed = actualLimiter.getMaxLinearSpeed();
+        Vector2 toTarget = steering.linear;
+        float v = owner.getLinearVelocity().len();
 
-        float lookDelta = Math.abs((owner.vectorToAngle(owner.getLinearVelocity()) - owner.getOrientation() + 3 * MathUtils.PI) % MathUtils.PI2 - MathUtils.PI);
 
-        float t = (float) Math.sqrt(2 * distance / actualLimiter.getMaxLinearAcceleration()) + lookDelta / owner.getMaxAngularSpeed() + 3;
-        targetSpeed = 2 * distance / t;
+        float turnTime = MathUtils.PI / actualLimiter.getMaxAngularSpeed();
+        float radius = 0.5f * v * v / actualLimiter.getMaxLinearAcceleration() + turnTime * v;
+        tv.set(owner.getLinearVelocity()).nor().scl(radius);
+        tv.add(owner.getPosition());
+        toTarget.set(targetPosition).sub(tv);
 
-        // Target velocity combines speed and direction
-        T targetVelocity = toTarget.scl(targetSpeed / distance); // Optimized code for: toTarget.nor().scl(targetSpeed)
+        toTarget.setLength(actualLimiter.getMaxLinearAcceleration());
 
-        // Check if we are there, return no steering
-        if (distance <= arrivalTolerance && owner.getLinearVelocity().len2() < 10) {
-            targetVelocity.setZero();
-        } else {
-            // Acceleration tries to get to the target velocity without exceeding max acceleration
-            // Notice that steering.linear and targetVelocity are the same vector
-            targetVelocity.sub(owner.getLinearVelocity()).scl(1f / timeToTarget).limit(actualLimiter.getMaxLinearAcceleration());
-        }
         // No angular acceleration
         steering.angular = 0f;
 
@@ -121,7 +95,7 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
     /**
      * Returns the target to arrive to.
      */
-    public Location<T> getTarget() {
+    public Location<Vector2> getTarget() {
         return target;
     }
 
@@ -130,7 +104,7 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
      *
      * @return this behavior for chaining.
      */
-    public Arrive<T> setTarget(Location<T> target) {
+    public Arrive setTarget(Location<Vector2> target) {
         this.target = target;
         return this;
     }
@@ -149,7 +123,7 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
      *
      * @return this behavior for chaining.
      */
-    public Arrive<T> setArrivalTolerance(float arrivalTolerance) {
+    public Arrive setArrivalTolerance(float arrivalTolerance) {
         this.arrivalTolerance = arrivalTolerance;
         return this;
     }
@@ -166,7 +140,7 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
      *
      * @return this behavior for chaining.
      */
-    public Arrive<T> setTimeToTarget(float timeToTarget) {
+    public Arrive setTimeToTarget(float timeToTarget) {
         this.timeToTarget = timeToTarget;
         return this;
     }
@@ -176,13 +150,13 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
     //
 
     @Override
-    public Arrive<T> setOwner(Steerable<T> owner) {
+    public Arrive setOwner(Steerable<Vector2> owner) {
         this.owner = owner;
         return this;
     }
 
     @Override
-    public Arrive<T> setEnabled(boolean enabled) {
+    public Arrive setEnabled(boolean enabled) {
         this.enabled = enabled;
         return this;
     }
@@ -194,7 +168,7 @@ public class Arrive<T extends Vector<T>> extends SteeringBehavior<T> {
      * @return this behavior for chaining.
      */
     @Override
-    public Arrive<T> setLimiter(Limiter limiter) {
+    public Arrive setLimiter(Limiter limiter) {
         this.limiter = limiter;
         return this;
     }

@@ -7,10 +7,12 @@ import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import org.bk.Util;
 import org.bk.data.component.Movement;
 import org.bk.data.component.Physics;
 import org.bk.data.component.Steering;
 import org.bk.data.component.Transform;
+import org.bk.system.Box2DPhysicsSystem;
 
 /**
  * Created by dante on 16.10.2016.
@@ -21,7 +23,7 @@ public class SteeringUtil {
     public static SteeringAcceleration<Vector2> applySteering(SteeringBehavior<Vector2> behavior, Steerable<Vector2> steerable, Steering steering) {
         behavior.calculateSteering(tsa);
         if (tsa.linear.len2() > 2) {
-            float delta = ((tsa.linear.angleRad() - steerable.getOrientation() + 3 * MathUtils.PI) % MathUtils.PI2) - MathUtils.PI;
+            float delta = Util.deltaAngle(steerable.getOrientation(), tsa.linear.angleRad());
             steering.turn = Math.signum(delta) * Math.min(1, Math.abs(delta) * 15);
             if (Math.abs(delta) < 0.05f) {
                 float thrust = (0.05f - Math.abs(delta)) / 0.05f;
@@ -69,7 +71,7 @@ public class SteeringUtil {
 
             @Override
             public float getMaxAngularSpeed() {
-                return movement.angularThrust / physics.physicsBody.getMass() / physics.physicsBody.getAngularDamping() / physics.physicsBody.getAngularDamping();
+                return movement.angularThrust / physics.physicsBody.getMass() / physics.physicsBody.getAngularDamping() / 3.5f;
             }
 
             @Override

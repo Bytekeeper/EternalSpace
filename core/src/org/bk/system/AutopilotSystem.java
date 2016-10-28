@@ -3,6 +3,7 @@ package org.bk.system;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.ai.Arrive;
@@ -19,7 +20,7 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 20.10.2016.
  */
 public class AutopilotSystem extends IteratingSystem {
-    private final Arrive<Vector2> steerToLandingSpot = new Arrive<Vector2>(null, null);
+    private final Arrive steerToLandingSpot = new Arrive(null, null);
     private final Stop stop = new Stop(null);
     private final Game game;
     private final Vector2 tv = new Vector2();
@@ -41,21 +42,22 @@ public class AutopilotSystem extends IteratingSystem {
 
         ensureSteerable(steering, movement, transform, physics);
 
+        Steerable<Vector2> steerable = steering.steerable;
         switch (steering.mode) {
             case LANDING:
                 if (steering.modeTargetEntity == null) {
                     steering.mode = Steering.SteeringMode.FREE_FLIGHT;
                 } else {
-                    steerToLandingSpot.setOwner(steering.steerable).
+                    steerToLandingSpot.setOwner(steerable).
                             setTarget(TRANSFORM.get(steering.modeTargetEntity).steerableLocation);
-                    SteeringUtil.applySteering(steerToLandingSpot, steering.steerable, steering);
+                    SteeringUtil.applySteering(steerToLandingSpot, steerable, steering);
                 }
                 break;
             case JUMPING:
                 tv.set(steering.jumpTo.position).sub(game.currentSystem.position).angleRad();
-                stop.setOwner(steering.steerable).
+                stop.setOwner(steerable).
                         setOrientation(tv.angleRad());
-                SteeringUtil.applySteering(stop, steering.steerable, steering);
+                SteeringUtil.applySteering(stop, steerable, steering);
                 break;
         }
     }

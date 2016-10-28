@@ -66,11 +66,7 @@ public class ApplySteeringSystem extends IteratingSystem {
         if (entity == game.player) {
             game.assets.snd_hyperdrive_engage.play();
         }
-        Jumping jumping = getEngine().createComponent(Jumping.class);
-        jumping.sourceOrTargetSystem = steering.jumpTo;
-        jumping.direction = Jumping.JumpDirection.DEPART;
-        jumping.referencePoint.set(transform.location);
-        entity.add(jumping);
+        getEngine().getSystem(JumpingSystem.class).depart(entity, transform.location, steering.jumpTo);
     }
 
     private void tryLanding(Entity entity, Movement movement) {
