@@ -1,0 +1,14 @@
+system "Arcos" {
+    position 100 80
+
+    entity {
+        template "planet"
+        template {
+        }
+    }
+}
+
+template "planet" {
+    components [
+    ]
+}

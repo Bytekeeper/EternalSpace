@@ -7,10 +7,10 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.esotericsoftware.kryo.Kryo;
 
 /**
- * Template for one type of entity.
+ * Template for one template of entity.
  */
 public class EntityTemplate {
-    public Array<Component> components;
+    public Array<Component> components = new Array<Component>();
 
     public void applyTo(Kryo kryo, Entity entity, Array<Component> componentSpecializations) {
         ObjectSet<Class<? extends Component>> alreadySet = new ObjectSet<Class<? extends Component>>();

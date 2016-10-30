@@ -10,7 +10,8 @@ import com.esotericsoftware.kryo.Kryo;
  */
 public class SolarSystem {
     public String name;
-    public Vector2 position;
+    public final Vector2 position = new Vector2();
     public float asteroidDensity;
-    public Array<EntityInstance> state;
+    public Array<EntityInstance> entity = new Array<EntityInstance>();
+    public Array<JumpLink> links = new Array<JumpLink>();
 }

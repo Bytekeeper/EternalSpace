@@ -20,7 +20,7 @@ public class RandomJumpTargetTask extends LeafTask<Entity> {
 
     @Override
     public Status execute() {
-        SolarSystem solarSystem = game.gameData.getSystems().random();
+        SolarSystem solarSystem = game.gameData.getSystem().random();
         STEERING.get(getObject()).jumpTo = solarSystem;
         return Status.SUCCEEDED;
     }

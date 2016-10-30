@@ -2,8 +2,6 @@ package org.bk.screen;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -53,7 +51,7 @@ public class MapScreen extends ScreenAdapter {
         };
         Group mapView = new Group();
         ButtonGroup<CheckBox> buttonGroup = new ButtonGroup<CheckBox>();
-        for (SolarSystem solarSystem : game.gameData.getSystems()) {
+        for (SolarSystem solarSystem : game.gameData.getSystem()) {
             CheckBox checkBox = new CheckBox(solarSystem.name, game.assets.skin);
             checkBox.setPosition(solarSystem.position.x + 1000, solarSystem.position.y + 1000);
             checkBox.addListener(myChangeListener);

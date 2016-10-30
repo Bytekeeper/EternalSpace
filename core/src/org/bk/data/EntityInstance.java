@@ -8,6 +8,6 @@ import com.badlogic.gdx.utils.Array;
  */
 public class EntityInstance {
     public String id;
-    public String name;
+    public EntityTemplate template;
     public Array<Component> components;
 }

@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.esotericsoftware.kryo.serializers.FieldSerializerConfig;
-import com.sun.webkit.graphics.Ref;
 import org.objenesis.instantiator.ObjectInstantiator;
 import org.objenesis.strategy.InstantiatorStrategy;
 
@@ -19,10 +18,14 @@ public class GameData {
     public Array<String> imports;
     private Kryo kryo = new Kryo();
     private PooledEngine engine;
-    private ObjectMap<String, Object> definitions = new ObjectMap<String, Object>();
-    private Array<SolarSystem> systems = new Array<SolarSystem>();
+    public ObjectMap<String, SolarSystem> system = new ObjectMap<String, SolarSystem>();
+    public ObjectMap<String, EntityTemplate> template = new ObjectMap<String, EntityTemplate>();
+    private ObjectMap<String, Faction> factions = new ObjectMap<String, Faction>();
+    private Array<SolarSystem> systemArray = new Array<SolarSystem>(false, 10);
+    private Array<JumpLink> jumpLinks = new Array<JumpLink>();
 
     public GameData() {
+        kryo.getContext().put("gameData", this);
         kryo.setInstantiatorStrategy(new InstantiatorStrategy() {
             private InstantiatorStrategy fallback = new Kryo.DefaultInstantiatorStrategy();
 
@@ -47,13 +50,17 @@ public class GameData {
     }
 
     public void addAll(ObjectMap<String, Object> definitions) {
-        this.definitions.putAll(definitions);
         for (ObjectMap.Entry<String, Object> entry : definitions.entries()) {
             Object value = entry.value;
             if (value instanceof SolarSystem) {
                 SolarSystem solarSystem = (SolarSystem) value;
-                systems.add(solarSystem);
-                (solarSystem).name = entry.key;
+                solarSystem.name = entry.key;
+                system.put(entry.key, solarSystem);
+                systemArray.add(solarSystem);
+            } else if (value instanceof EntityTemplate) {
+                template.put(entry.key, (EntityTemplate) value);
+            } else if (value instanceof JumpLink) {
+                jumpLinks.add((JumpLink) value);
             }
         }
     }
@@ -67,7 +74,7 @@ public class GameData {
     }
 
     private EntityTemplate getEntityTemplate(String name) {
-        EntityTemplate sourceEntity = (EntityTemplate) definitions.get(name);
+        EntityTemplate sourceEntity = template.get(name);
         if (sourceEntity == null) {
             throw new IllegalStateException("No such entity: " + name);
         }
@@ -75,32 +82,28 @@ public class GameData {
     }
 
     public void spawnSystem(String name) {
-        SolarSystem solarSystem = (SolarSystem) definitions.get(name);
+        SolarSystem solarSystem = system.get(name);
         if (solarSystem == null) {
             throw new IllegalStateException("No such system: " + name);
         }
-        kryo.getContext().put("gameData", this);
-        for (EntityInstance entityInstance : solarSystem.state) {
+        for (EntityInstance entityInstance : solarSystem.entity) {
             Entity entity;
             if (entityInstance.id != null) {
                 entity = getOrCreateEntity(kryo, entityInstance.id);
             } else {
                 entity = engine.createEntity();
             }
-            getEntityTemplate(entityInstance.name).applyTo(kryo, entity, entityInstance.components);
+            entityInstance.template.applyTo(kryo, entity, entityInstance.components);
             engine.addEntity(entity);
         }
-        kryo.getContext().clear();
     }
 
     public SolarSystem getSystem(String system) {
-        SolarSystem result = (SolarSystem) definitions.get(system);
-        result.name = system;
-        return result;
+        return this.system.get(system);
     }
 
-    public Array<SolarSystem> getSystems() {
-        return systems;
+    public Array<SolarSystem> getSystem() {
+        return systemArray;
     }
 
     public static class MergingSerializer<T> extends FieldSerializer<T> {
@@ -122,7 +125,9 @@ public class GameData {
                 EntityRef ref = (EntityRef) original;
                 return (T) getOrCreateEntity(kryo, ref.id);
             } else if (original instanceof FactionRef) {
-                return (T) gameData(kryo).definitions.get(((FactionRef) original).id);
+                return (T) gameData(kryo).factions.get(((FactionRef) original).id);
+            } else if (original instanceof SolarSystemRef) {
+                return (T) gameData(kryo).system.get(((SolarSystemRef) original).getId());
             }
             return super.copy(kryo, original);
         }
@@ -167,6 +172,20 @@ public class GameData {
 
     public static class FactionRef extends Faction implements Reference {
         public String id;
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public void setId(String id) {
+            this.id = id;
+        }
+    }
+
+    public static class SolarSystemRef extends SolarSystem implements Reference {
+        private String id;
 
         @Override
         public String getId() {

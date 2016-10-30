@@ -100,7 +100,7 @@ public class TrafficSystem extends EntitySystem {
         } else {
             transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
             getEngine().getSystem(JumpingSystem.class).arrive(entity, tv.setToRandomDirection().scl(MathUtils.random(0, 800)),
-                    game.gameData.getSystems().random());
+                    game.gameData.getSystem().random());
             aiControlled.behaviorTree = game.behaviors.land(entity, getEngine());
             entity.remove(Physics.class);
             entity.remove(Steering.class);
