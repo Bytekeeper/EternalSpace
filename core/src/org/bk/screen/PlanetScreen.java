@@ -11,6 +11,8 @@ import org.bk.data.Mission;
 import org.bk.data.component.Landing;
 import org.bk.data.script.*;
 
+import java.io.StringReader;
+
 import static org.bk.data.component.Mapper.LANDING;
 
 /**
@@ -166,6 +168,12 @@ public class PlanetScreen extends ScreenAdapter {
                     return true;
                 }
             });
+            next();
+        }
+
+        @Override
+        public void visit(Change change) {
+            game.assets.scriptContext.load(new StringReader(change.script));
             next();
         }
 

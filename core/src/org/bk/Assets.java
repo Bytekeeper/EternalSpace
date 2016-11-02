@@ -31,6 +31,7 @@ public class Assets {
     public final GameData gameData;
     public final BitmapFont hudFont;
     public final Sound snd_hyperdrive_shutdown;
+    public final ScriptContext scriptContext;
     public BitmapFont debugFont;
     private final AssetManager assetManager;
     public ObjectMap<String, TextureRegion> textures = new ObjectMap<String, TextureRegion>();
@@ -57,8 +58,8 @@ public class Assets {
         this.gameData = new GameData();
         hudFont = skin.getFont("default-font");
 
-        ScriptContext scriptContext = new ScriptContext(this.gameData);
-        scriptContext.load(Gdx.files.internal("gamedata/system.def").read());
+        scriptContext = new ScriptContext(this.gameData);
+        scriptContext.load(Gdx.files.internal("gamedata/system.def").reader());
     }
 
     private AssetDescriptor<Sound> loadSound(String fileName) {

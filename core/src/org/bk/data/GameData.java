@@ -25,6 +25,7 @@ public class GameData implements Initializable {
     public ObjectMap<String, Mission> mission = new ObjectMap<String, Mission>();
     public Array<Mission> activeMission = new Array<Mission>();
     private ObjectMap<String, Faction> factions = new ObjectMap<String, Faction>();
+    public Entity player;
 
 
     public GameData() {
@@ -69,10 +70,6 @@ public class GameData implements Initializable {
             throw new IllegalStateException("No such entity: " + name);
         }
         return sourceEntity;
-    }
-
-    public SolarSystem getSystem(String name) {
-        return system.get(name);
     }
 
     public void spawnSystem(SolarSystem solarSystem) {

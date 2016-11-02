@@ -13,11 +13,13 @@ import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.esotericsoftware.kryo.Kryo;
 import org.bk.data.EntityTemplate;
 import org.bk.data.component.*;
+import org.bk.data.component.Character;
 import org.bk.data.script.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Arrays;
 
 /**
@@ -36,7 +38,7 @@ public class ScriptContext {
                 Transform.class, Body.class, Celestial.class, Physics.class,
                 LandingPlace.class, Orbiting.class, Ship.class, Movement.class,
                 Health.class, Steering.class, Mounts.class, Asteroid.class,
-                LifeTime.class, Projectile.class)) {
+                LifeTime.class, Projectile.class, Character.class, Persistence.class)) {
             registerClass(cc.getSimpleName(), cc);
         }
     }
@@ -45,8 +47,8 @@ public class ScriptContext {
         classForIdentifier.put(identifier, aClass);
     }
 
-    public void load(InputStream in) {
-        ScannerWithPushBack sc = new ScannerWithPushBack(new InputStreamReader(in));
+    public void load(Reader in) {
+        ScannerWithPushBack sc = new ScannerWithPushBack(in);
         try {
             executeScript(sc, root);
             root.afterFieldsSet();
@@ -155,6 +157,7 @@ public class ScriptContext {
                         instanceToUse = field.getType().newInstance();
                     }
                     executeBlock(sc, instanceToUse);
+                    field.set(context, instanceToUse);
                 } else {
                     Object ref = ref(field.getType(), next);
                     field.set(context, ref);
@@ -163,10 +166,24 @@ public class ScriptContext {
                 field.set(context, Float.parseFloat(sc.next()));
             } else if (field.getType() == Boolean.TYPE) {
                 field.set(context, Boolean.parseBoolean(sc.next()));
+            } else if (field.getType() == Long.TYPE) {
+                applyLong(sc, context, field);
             } else {
                 unexpectedToken(context, item);
             }
         }
+    }
+
+    private void applyLong(ScannerWithPushBack sc, Object context, Field field) throws ReflectionException {
+        long value;
+        String valueOrOp = sc.next();
+        if ("+".equals(valueOrOp)) {
+            value = ((Long) field.get(context)).longValue() + Long.parseLong(sc.next());
+        } else {
+            value = Long.parseLong(valueOrOp);
+        }
+
+        field.set(context, value);
     }
 
     private void unexpectedToken(Object context, String item) {
@@ -196,12 +213,40 @@ public class ScriptContext {
                 consume(sc, "{");
                 parseChoice(sc, choice);
                 itemToAdd = choice;
+            } else if ("change".equals(item)) {
+                Change change = new Change();
+                consume(sc, "{");
+                parseChange(sc, change);
+                itemToAdd = change;
             } else {
                 unexpectedToken(scripted, item);
                 itemToAdd = null;
             }
             scripted.items.add(itemToAdd);
         }
+    }
+
+    private void parseChange(ScannerWithPushBack sc, Change change) {
+        int openParens = 1;
+        StringBuilder script = new StringBuilder();
+        while (sc.hasNext()) {
+            String item = sc.next();
+            if ("}".equals(item)) {
+                openParens--;
+                if (openParens == 0) {
+                    break;
+                }
+            } else if ("{".equals(item)) {
+                openParens++;
+            }
+            if (script.length > 0) {
+                script.append(' ');
+            }
+            script.append('"');
+            script.append(item);
+            script.append('"');
+        }
+        change.script = script.toString();
     }
 
     private void parseChoice(ScannerWithPushBack sc, Choice choice) {
@@ -311,10 +356,10 @@ public class ScriptContext {
     }
 
     public static class ScannerWithPushBack {
-        private final InputStreamReader reader;
+        private final Reader reader;
         private Array<String> pushedBack = new Array<String>();
 
-        public ScannerWithPushBack(InputStreamReader reader) {
+        public ScannerWithPushBack(Reader reader) {
             this.reader = reader;
         }
 

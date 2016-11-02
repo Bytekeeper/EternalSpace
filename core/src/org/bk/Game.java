@@ -90,11 +90,8 @@ public class Game extends com.badlogic.gdx.Game {
 
         assets.gameData.setEngine(engine);
 
-        player = spawn("falcon");
-        Persistence persistence = engine.createComponent(Persistence.class);
-        persistence.system = gameData.getSystem("Arcos");
-        player.add(persistence);
-        player.add(engine.createComponent(Character.class));
+        player = assets.gameData.player;
+        engine.addEntity(player);
 
         Gdx.input.setInputProcessor(stage);
     }

@@ -8,4 +8,6 @@ public interface Visitor {
     void visit(Choice choice);
 
     void visit(Script script);
+
+    void visit(Change change);
 }

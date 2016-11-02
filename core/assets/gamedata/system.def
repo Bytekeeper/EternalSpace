@@ -229,6 +229,15 @@ mission "mission test" {
     failWhen {
     }
     offered {
+        change {
+            system "Theodem" {
+                entity - "Theodem prime" {
+                    Body {
+                        dimension 300 300
+                    }
+                }
+            }
+        }
         text {
             "Hello"
         }
@@ -282,3 +291,12 @@ mission "Mission 2" {
     }
 }
 
+player {
+    template "falcon"
+    Character {
+        credits + 1000
+    }
+    Persistence {
+        system "Arcos"
+    }
+}

@@ -15,6 +15,7 @@ import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.Mission;
 import org.bk.data.component.*;
+import org.bk.data.component.Character;
 import org.bk.graphics.Radar;
 
 import static org.bk.Game.SQRT_2;
@@ -83,6 +84,12 @@ public class RenderingSystem extends EntitySystem {
         drawRadar();
         drawJumpTarget();
         drawMissions();
+        drawCredits();
+    }
+
+    private void drawCredits() {
+        Character character = CHARACTER.get(game.player);
+        assets.hudFont.draw(game.uiBatch, character.credits + " C", game.width - 100, game.height - assets.hudFont.getLineHeight() * 2);
     }
 
     private void drawMissions() {
