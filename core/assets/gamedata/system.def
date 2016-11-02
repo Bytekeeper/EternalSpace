@@ -254,3 +254,31 @@ mission "mission test" {
     }
 }
 
+mission "Mission 2" {
+    title "Mission 2"
+    offerWhen {
+        completed "mission test"
+    }
+    succeedWhen {
+        at "Arcos prime"
+    }
+    offered {
+        text {
+            "Now that the first mission was a success."
+            "Let us see, if you can manage further missions."
+        }
+        choice {
+            accepted { "I certainly can!" }
+        }
+        text {
+            "I knew you could (you had no choice anyways)"
+        }
+    }
+    succeeded {
+        text {
+            "This was too easy."
+            "Far too easy"
+        }
+    }
+}
+

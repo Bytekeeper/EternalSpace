@@ -17,7 +17,7 @@ public class Orbiting implements Component, Pool.Poolable {
     @Override
     public void reset() {
         distance = 0;
-        speed= 0;
+        speed = 0;
         entity = null;
     }
 }

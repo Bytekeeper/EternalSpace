@@ -28,7 +28,7 @@ public class PlanetScreen extends ScreenAdapter {
         Skin skin = game.assets.skin;
         Table root = new Table(skin);
         root.setFillParent(true);
-        Window window = new Window("Celestial", skin);
+        final Window window = new Window("Celestial", skin);
         window.setMovable(false);
         TextButton departButton = new TextButton(game.msg("depart"), skin);
         departButton.addListener(new ChangeListener() {
@@ -47,7 +47,7 @@ public class PlanetScreen extends ScreenAdapter {
                 continue;
             }
             window.row();
-            TextButton missionButton = new TextButton(m.title, skin);
+            final TextButton missionButton = new TextButton(m.title, skin);
             missionButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
@@ -56,6 +56,8 @@ public class PlanetScreen extends ScreenAdapter {
                         public void result(ObjectSet<String> state) {
                             if (state.contains("accepted")) {
                                 m.active = true;
+                                game.gameData.activeMission.add(m);
+                                window.getCell(missionButton).clearActor();
                             }
                         }
                     }));
@@ -73,16 +75,19 @@ public class PlanetScreen extends ScreenAdapter {
                 m.active = false;
                 m.done = true;
                 m.failed.accept(new MissionConversion());
+                game.gameData.activeMission.removeValue(m, true);
             } else if (m.succeedWhen.conditionsMet(game)) {
                 m.active = false;
                 m.done = true;
                 m.succeeded.accept(new MissionConversion());
+                m.wasSuccessful = true;
+                game.gameData.activeMission.removeValue(m, true);
             }
         }
     }
 
     private class MissionConversion implements Visitor {
-        private Array<ScriptItem> scriptStack = new Array<ScriptItem>();
+        private Array<Chain> chainStack = new Array<Chain>();
         private ObjectSet<String> conditions = new ObjectSet<String>();
         private ConversionResultHandler resultHandler;
 
@@ -95,16 +100,29 @@ public class PlanetScreen extends ScreenAdapter {
 
 
         @Override
-        public void visit(Text text) {
-            Dialog dialog = new Dialog("Text", game.assets.skin) {
+        public void visit(final Text text) {
+            chainStack.add(new Chain() {
+                int index;
                 @Override
-                protected void result(Object object) {
-                    next();
+                public boolean next() {
+                    if (index >= text.line.size) {
+                        return false;
+                    }
+                    String textToShow = text.line.get(index);
+                    index++;
+                    Dialog dialog = new Dialog("Text", game.assets.skin) {
+                        @Override
+                        protected void result(Object object) {
+                            MissionConversion.this.next();
+                        }
+                    };
+                    dialog.text(textToShow);
+                    dialog.button("Ok");
+                    dialog.show(game.stage);
+                    return true;
                 }
-            };
-            dialog.text(text.line.get(0));
-            dialog.button("Ok");
-            dialog.show(game.stage);
+            });
+            next();
         }
 
         @Override
@@ -134,22 +152,43 @@ public class PlanetScreen extends ScreenAdapter {
         }
 
         @Override
-        public void visit(Script script) {
-            for (int i = script.items.size - 1; i >= 0; i--) {
-                scriptStack.add(script.items.get(i));
-            }
+        public void visit(final Script script) {
+            chainStack.add(new Chain() {
+                private int index;
+                @Override
+                public boolean next() {
+                    if (index >= script.items.size) {
+                        return false;
+                    }
+                    ScriptItem scriptItem = script.items.get(index);
+                    index++;
+                    scriptItem.accept(MissionConversion.this);
+                    return true;
+                }
+            });
             next();
         }
 
         private void next() {
-            if (scriptStack.size == 0) {
-                if (resultHandler != null) {
-                    resultHandler.result(conditions);
+            while (true){
+                if (chainStack.size == 0) {
+                    if (resultHandler != null) {
+                        resultHandler.result(conditions);
+                    }
+                    return;
                 }
-                return;
+                boolean next = chainStack.peek().next();
+                if (!next) {
+                    chainStack.pop();
+                } else {
+                    return;
+                }
             }
-            scriptStack.pop().accept(this);
         }
+    }
+
+    private interface Chain {
+        boolean next();
     }
 
     public interface ConversionResultHandler {

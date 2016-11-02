@@ -10,6 +10,7 @@ public class Mission {
     public Condition succeedWhen = new Condition();
     public Condition failWhen = new Condition();
     public boolean done;
+    public boolean wasSuccessful;
     public boolean active;
     public String title;
     public Script offered = new Script();

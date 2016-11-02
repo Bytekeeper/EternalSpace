@@ -11,6 +11,7 @@ import static org.bk.data.component.Mapper.LANDING;
  */
 public class Condition {
     public Entity at;
+    public Mission completed;
 
     public boolean conditionsMet(Game game) {
         boolean hasCondition = false;
@@ -18,6 +19,12 @@ public class Condition {
             hasCondition = true;
             Landing landing = LANDING.get(game.player);
             if (landing != null && landing.target != at) {
+                return false;
+            }
+        }
+        if (completed != null) {
+            hasCondition = true;
+            if (!completed.wasSuccessful) {
                 return false;
             }
         }

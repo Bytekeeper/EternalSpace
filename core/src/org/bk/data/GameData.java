@@ -23,7 +23,9 @@ public class GameData implements Initializable {
     public Array<JumpLink> link = new Array<JumpLink>();
     public ObjectMap<String, GameEvent> event = new ObjectMap<String, GameEvent>();
     public ObjectMap<String, Mission> mission = new ObjectMap<String, Mission>();
+    public Array<Mission> activeMission = new Array<Mission>();
     private ObjectMap<String, Faction> factions = new ObjectMap<String, Faction>();
+
 
     public GameData() {
         kryo.getContext().put("gameData", this);

@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import org.bk.Assets;
 import org.bk.Game;
+import org.bk.data.Mission;
 import org.bk.data.component.*;
 import org.bk.graphics.Radar;
 
@@ -81,6 +82,15 @@ public class RenderingSystem extends EntitySystem {
         game.uiBatch.setColor(Color.WHITE);
         drawRadar();
         drawJumpTarget();
+        drawMissions();
+    }
+
+    private void drawMissions() {
+        float y = game.height - assets.hudFont.getLineHeight();
+        for (Mission m: game.gameData.activeMission) {
+            assets.hudFont.draw(game.uiBatch, m.title, game.width - 200, y);
+            y -= assets.hudFont.getLineHeight();
+        }
     }
 
     private void drawJumpTarget() {
