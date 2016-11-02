@@ -12,8 +12,8 @@ import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.esotericsoftware.kryo.Kryo;
 import org.bk.data.EntityTemplate;
-import org.bk.data.GameData;
 import org.bk.data.component.*;
+import org.bk.data.script.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +24,12 @@ import java.util.Arrays;
  * Created by dante on 29.10.2016.
  */
 public class ScriptContext {
-    private final Object root;
+    private final Initializable root;
     private Kryo kryo = new Kryo();
     private ObjectMap<String, Object> refTable = new ObjectMap<String, Object>();
     private ObjectMap<String, Class<?>> classForIdentifier = new ObjectMap<String, Class<?>>();
 
-    public ScriptContext(Object root) {
+    public ScriptContext(Initializable root) {
         this.root = root;
 
         for (Class<? extends Component> cc : Arrays.asList(
@@ -49,6 +49,7 @@ public class ScriptContext {
         ScannerWithPushBack sc = new ScannerWithPushBack(new InputStreamReader(in));
         try {
             executeScript(sc, root);
+            root.afterFieldsSet();
         } catch (ReflectionException e) {
             throw new IllegalStateException(e);
         } catch (InstantiationException e) {
@@ -76,6 +77,9 @@ public class ScriptContext {
             return;
         } else if (context instanceof EntityTemplate) {
             handleTemplate(sc, (EntityTemplate) context);
+            return;
+        } else if (context instanceof Script) {
+            parseScript(sc, (Script) context);
             return;
         }
         while (sc.hasNext()) {
@@ -146,8 +150,11 @@ public class ScriptContext {
             } else if (!field.getType().isPrimitive()) {
                 String next = sc.next();
                 if ("{".equals(next)) {
-                    Object newInstance = field.getType().newInstance();
-                    executeBlock(sc, newInstance);
+                    Object instanceToUse = field.get(context);
+                    if (instanceToUse == null) {
+                        instanceToUse = field.getType().newInstance();
+                    }
+                    executeBlock(sc, instanceToUse);
                 } else {
                     Object ref = ref(field.getType(), next);
                     field.set(context, ref);
@@ -157,8 +164,69 @@ public class ScriptContext {
             } else if (field.getType() == Boolean.TYPE) {
                 field.set(context, Boolean.parseBoolean(sc.next()));
             } else {
-                throw new ParseException("Field '" + item + "' is not handled on " + context.getClass().getName());
+                unexpectedToken(context, item);
             }
+        }
+    }
+
+    private void unexpectedToken(Object context, String item) {
+        throw new ParseException("Token '" + item + "' is not handled on " + context.getClass().getName());
+    }
+
+    private void parseScript(ScannerWithPushBack sc, Script scripted) {
+        while (sc.hasNext()) {
+            String item = sc.next();
+            if ("}".equals(item)) {
+                return;
+            }
+            ScriptItem itemToAdd;
+            if ("text".equals(item)) {
+                consume(sc, "{");
+                Text text = new Text();
+                parseText(sc, text);
+                itemToAdd = text;
+            } else if ("if".equals(item)) {
+                If scriptIf = new If();
+                scriptIf.condition = sc.next();
+                consume(sc, "{");
+                parseScript(sc, scriptIf.script);
+                itemToAdd = scriptIf;
+            } else if ("choice".equals(item)) {
+                Choice choice = new Choice();
+                consume(sc, "{");
+                parseChoice(sc, choice);
+                itemToAdd = choice;
+            } else {
+                unexpectedToken(scripted, item);
+                itemToAdd = null;
+            }
+            scripted.items.add(itemToAdd);
+        }
+    }
+
+    private void parseChoice(ScannerWithPushBack sc, Choice choice) {
+        while (sc.hasNext()) {
+            String item = sc.next();
+            if ("}".equals(item)) {
+                return;
+            }
+            Choice.Option option = new Choice.Option();
+            option.condition = item;
+            Text text = new Text();
+            consume(sc, "{");
+            parseText(sc, text);
+            option.text = text;
+            choice.options.add(option);
+        }
+    }
+
+    private void parseText(ScannerWithPushBack sc, Text text) {
+        while (sc.hasNext()) {
+            String item = sc.next();
+            if ("}".equals(item)) {
+                return;
+            }
+            text.line.add(item);
         }
     }
 
@@ -173,10 +241,7 @@ public class ScriptContext {
                 throw new IllegalStateException("No class for identifier '" + item + "'!");
             }
             Component component = componentClass.newInstance();
-            String next = sc.next();
-            if (!"{".equals(next)) {
-                throw new IllegalStateException("Expected component initializer, but found '" + next + "'!");
-            }
+            consume(sc, "{");
             executeBlock(sc, component);
             template.component.add(component);
         }
@@ -203,13 +268,17 @@ public class ScriptContext {
                 if (component == null) {
                     component = componentClass.newInstance();
                 }
-                String next = sc.next();
-                if (!"{".equals(next)) {
-                    throw new IllegalStateException("Expected component initializer, but found '" + next + "'!");
-                }
+                consume(sc, "{");
                 executeBlock(sc, component);
                 entity.add(component);
             }
+        }
+    }
+
+    private void consume(ScannerWithPushBack sc, String expected) {
+        String next = sc.next();
+        if (!expected.equals(next)) {
+            throw new IllegalStateException("Expected '" + expected + "', but found '" + next + "'!");
         }
     }
 
@@ -276,7 +345,12 @@ public class ScriptContext {
                 return;
             }
             if (nxt == '"') {
-                while ((nxt = nextChar()) != -1 && nxt != '"') nextToken.append((char) nxt);
+                while ((nxt = nextChar()) != -1 && nxt != '"') {
+                    if (nxt == '\r' || nxt == '\n') {
+                        throw new ParseException("Unclosed token: '" + nextToken + "...'");
+                    }
+                    nextToken.append((char) nxt);
+                }
             } else {
                 nextToken.append((char) nxt);
                 while ((nxt = nextChar()) != -1 && nxt != '\n' && nxt != '\r' && nxt != ' ' && nxt != '\t')

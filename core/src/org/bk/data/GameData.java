@@ -8,19 +8,22 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.esotericsoftware.kryo.serializers.FieldSerializerConfig;
+import org.bk.script.Initializable;
 import org.objenesis.instantiator.ObjectInstantiator;
 import org.objenesis.strategy.InstantiatorStrategy;
 
 /**
  * Created by dante on 22.10.2016.
  */
-public class GameData {
+public class GameData implements Initializable {
     private Kryo kryo = new Kryo();
     private PooledEngine engine;
     public ObjectMap<String, SolarSystem> system = new ObjectMap<String, SolarSystem>();
     public ObjectMap<String, EntityTemplate> template = new ObjectMap<String, EntityTemplate>();
+    public Array<JumpLink> link = new Array<JumpLink>();
+    public ObjectMap<String, GameEvent> event = new ObjectMap<String, GameEvent>();
+    public ObjectMap<String, Mission> mission = new ObjectMap<String, Mission>();
     private ObjectMap<String, Faction> factions = new ObjectMap<String, Faction>();
-    private Array<JumpLink> jumpLinks = new Array<JumpLink>();
 
     public GameData() {
         kryo.getContext().put("gameData", this);
@@ -48,6 +51,10 @@ public class GameData {
 
     public Entity spawnEntity(String name) {
         EntityTemplate template = getEntityTemplate(name);
+        return spawnEntity(template);
+    }
+
+    public Entity spawnEntity(EntityTemplate template) {
         Entity entity = engine.createEntity();
         template.applyTo(kryo, entity, null);
         engine.addEntity(entity);
@@ -62,39 +69,25 @@ public class GameData {
         return sourceEntity;
     }
 
-    public void spawnSystem(String name) {
-        SolarSystem solarSystem = system.get(name);
-        if (solarSystem == null) {
-            throw new IllegalStateException("No such system: " + name);
-        }
-        for (Entity entity: solarSystem.entity) {
-            engine.addEntity(entity);
-        }
+    public SolarSystem getSystem(String name) {
+        return system.get(name);
     }
 
-    public SolarSystem getSystem(String system) {
-        return this.system.get(system);
+    public void spawnSystem(SolarSystem solarSystem) {
+        for (Entity entity : solarSystem.entity) {
+            engine.addEntity(entity);
+        }
     }
 
     public Array<SolarSystem> getSystem() {
         return system.values().toArray();
     }
 
-    private static Entity getOrCreateEntity(Kryo kryo, String id) {
-        Entity result = (Entity) kryo.getContext().get("_" + id);
-        if (result == null) {
-            PooledEngine engine = getEngine(kryo);
-            result = engine.createEntity();
-            kryo.getContext().put("_" + id, result);
+    @Override
+    public void afterFieldsSet() {
+        for (JumpLink l : link) {
+            l.a.links.add(l);
+            l.b.links.add(l);
         }
-        return result;
-    }
-
-    private static PooledEngine getEngine(Kryo kryo) {
-        return gameData(kryo).engine;
-    }
-
-    private static GameData gameData(Kryo kryo) {
-        return (GameData) kryo.getContext().get("gameData");
     }
 }

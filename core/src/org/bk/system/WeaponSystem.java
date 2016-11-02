@@ -34,14 +34,14 @@ public class WeaponSystem extends IteratingSystem {
             }
             weapon.firing = false;
             weapon.cooldown = weapon.cooldownPerShot;
-            if (weapon.projectileName != null) {
+            if (weapon.projectile != null) {
                 spawnProjectile(weapon, entity);
             }
         }
     }
 
     private void spawnProjectile(Mounts.Weapon weapon, Entity owner) {
-        if (weapon.projectileName == null) {
+        if (weapon.projectile == null) {
             Gdx.app.error(WeaponSystem.class.getSimpleName(), "No ProjectileSpec");
             return;
         }
@@ -52,7 +52,7 @@ public class WeaponSystem extends IteratingSystem {
         Transform sourceTransform = TRANSFORM.get(owner);
         Movement sourceMovement = MOVEMENT.get(owner);
 
-        Entity projectileEntity = game.spawn(weapon.projectileName, Transform.class, Movement.class, Projectile.class, Physics.class);
+        Entity projectileEntity = game.spawn(weapon.projectile);
         Owned owned = getEngine().createComponent(Owned.class);
         owned.owner = owner;
         projectileEntity.add(owned);

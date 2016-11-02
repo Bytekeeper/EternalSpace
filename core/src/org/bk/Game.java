@@ -14,6 +14,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import org.bk.data.EntityTemplate;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
 import org.bk.data.GameData;
@@ -89,7 +90,7 @@ public class Game extends com.badlogic.gdx.Game {
 
         assets.gameData.setEngine(engine);
 
-        player = spawn("Titan");
+        player = spawn("falcon");
         Persistence persistence = engine.createComponent(Persistence.class);
         persistence.system = gameData.getSystem("Arcos");
         player.add(persistence);
@@ -200,6 +201,10 @@ public class Game extends com.badlogic.gdx.Game {
         return assets.gameData.spawnEntity(entityDefinitionKey);
     }
 
+    public Entity spawn(EntityTemplate template) {
+        return assets.gameData.spawnEntity(template);
+    }
+
     @Override
     public void setScreen(Screen screen) {
         stage.clear();
@@ -218,7 +223,7 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void populateCurrentSystem() {
-        assets.gameData.spawnSystem(currentSystem.name);
+        assets.gameData.spawnSystem(currentSystem);
     }
 
     public void flash(float time) {

@@ -3,6 +3,7 @@ package org.bk.data.component;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import org.bk.data.EntityTemplate;
 
 /**
  * Created by dante on 15.10.2016.
@@ -21,7 +22,7 @@ public class Mounts implements Component {
         public float cooldown;
         public float cooldownPerShot;
         public boolean firing;
-        public String projectileName;
+        public EntityTemplate projectile;
     }
 
     public static class Thruster extends Mount {

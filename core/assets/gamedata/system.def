@@ -72,12 +72,12 @@ template falcon {
     Mounts {
         weapons {
             cooldownPerShot 0.1
-            projectileName "projectile"
+            projectile "projectile"
             offset 20 -5
         }
         weapons {
             cooldownPerShot 0.1
-            projectileName "projectile"
+            projectile "projectile"
             offset 20 5
         }
         thrusters {
@@ -112,12 +112,12 @@ template Titan {
     Mounts {
         weapons {
             cooldownPerShot 0.1
-            projectileName "projectile"
+            projectile "projectile"
             offset 20 -5
         }
         weapons {
             cooldownPerShot 0.1
-            projectileName "projectile"
+            projectile "projectile"
             offset 20 5
         }
         thrusters {
@@ -156,7 +156,7 @@ system "Arcos" {
     entity - "Arcos prime" {
         template "planet"
         Transform {
-            location 20 100
+            location -120 100
         }
     }
     entity - "Arcos prime moon 1" {
@@ -206,6 +206,50 @@ system "Theodem" {
         template "planet"
         Transform {
             location 20 100
+        }
+    }
+}
+
+link {
+    a "Theodem"
+    b "Arcos"
+}
+
+event "Test" {
+}
+
+mission "mission test" {
+    title "Test mission"
+    offerWhen {
+        at "Arcos prime"
+    }
+    succeedWhen {
+        at "Theodem prime"
+    }
+    failWhen {
+    }
+    offered {
+        text {
+            "Hello"
+        }
+        choice {
+            accepted { "I accept" }
+            declined { "Na, not now" }
+        }
+        if accepted {
+            text {
+                "Good choice."
+            }
+        }
+        if declined {
+            text {
+                "You brought this on yourself."
+            }
+        }
+    }
+    succeeded {
+        text {
+            "Congratulations, the first mission test worked!"
         }
     }
 }
