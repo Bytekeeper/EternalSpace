@@ -89,6 +89,49 @@ template falcon {
     }
 }
 
+template Titan {
+    Physics {
+    }
+    Body {
+        dimension 98 171
+        graphics "ship/5"
+    }
+    Ship {
+    }
+    Movement {
+        maxVelocity 300
+        angularThrust 100000
+        linearThrust 20000
+    }
+    Health {
+        hull 100
+        shields 100
+    }
+    Steering {
+    }
+    Mounts {
+        weapons {
+            cooldownPerShot 0.1
+            projectileName "projectile"
+            offset 20 -5
+        }
+        weapons {
+            cooldownPerShot 0.1
+            projectileName "projectile"
+            offset 20 5
+        }
+        thrusters {
+            offset -90 10
+        }
+        thrusters {
+            offset -90 -10
+        }
+    }
+    Transform {
+
+    }
+}
+
 template asteroid {
     Asteroid {
     }

@@ -70,7 +70,8 @@ public class TrafficSystem extends EntitySystem {
 
     private void spawnShip(boolean initialDeployment) {
         Entity target = entitiesToLandOn.random();
-        Entity entity = game.spawn("falcon", Transform.class, Movement.class);
+        Entity entity = MathUtils.randomBoolean() ? game.spawn("falcon", Transform.class, Movement.class) :
+                game.spawn("Titan");
         Persistence persistence = getEngine().createComponent(Persistence.class);
         persistence.temporary = true;
         entity.add(persistence);

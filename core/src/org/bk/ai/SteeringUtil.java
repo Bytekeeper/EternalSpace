@@ -71,7 +71,7 @@ public class SteeringUtil {
 
             @Override
             public float getMaxAngularSpeed() {
-                return movement.angularThrust / physics.physicsBody.getMass() / physics.physicsBody.getAngularDamping() / 3.5f;
+                return movement.angularThrust / physics.physicsBody.getInertia() / physics.physicsBody.getAngularDamping();
             }
 
             @Override

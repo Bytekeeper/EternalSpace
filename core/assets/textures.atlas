@@ -6,14 +6,14 @@ filter: MipMapLinearLinear,Linear
 repeat: none
 asteroid/asteroid_placeholder
   rotate: false
-  xy: 518, 394
+  xy: 194, 136
   size: 90, 90
   orig: 90, 90
   offset: 0, 0
   index: -1
 effect/small+1
   rotate: false
-  xy: 518, 272
+  xy: 618, 364
   size: 25, 120
   orig: 25, 120
   offset: 0, 0
@@ -41,14 +41,21 @@ planet/forest2
   index: -1
 projectile/ion bolt~0
   rotate: false
-  xy: 194, 44
+  xy: 645, 384
   size: 16, 100
   orig: 16, 100
   offset: 0, 0
   index: -1
+ship/5
+  rotate: false
+  xy: 518, 313
+  size: 98, 171
+  orig: 98, 171
+  offset: 0, 0
+  index: -1
 ship/sparrow
   rotate: false
-  xy: 194, 146
+  xy: 518, 231
   size: 70, 80
   orig: 70, 80
   offset: 0, 0

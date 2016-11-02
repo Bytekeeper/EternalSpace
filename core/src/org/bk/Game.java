@@ -10,6 +10,7 @@ import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -17,6 +18,7 @@ import org.bk.data.component.*;
 import org.bk.data.component.Character;
 import org.bk.data.GameData;
 import org.bk.data.SolarSystem;
+import org.bk.data.component.Transform;
 import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
@@ -87,7 +89,7 @@ public class Game extends com.badlogic.gdx.Game {
 
         assets.gameData.setEngine(engine);
 
-        player = spawn("falcon");
+        player = spawn("Titan");
         Persistence persistence = engine.createComponent(Persistence.class);
         persistence.system = gameData.getSystem("Arcos");
         player.add(persistence);
@@ -145,7 +147,9 @@ public class Game extends com.badlogic.gdx.Game {
         if (accelTimer < 0) {
             accelTimer += 1;
             Steering steering = STEERING.get(player);
-//            System.err.println(accel + " " + steering.steerable.getMaxLinearAcceleration() + " " + steering.steerable.getMaxAngularSpeed() + " " + PHYSICS.get(player).physicsBody.getAngularVelocity());
+//            com.badlogic.gdx.physics.box2d.Body physicsBody = PHYSICS.get(player).physicsBody;
+//            System.err.println(accel + " " + steering.steerable.getMaxLinearAcceleration() + " " + steering.steerable.getMaxAngularSpeed() + " " + physicsBody.getAngularVelocity() +
+//            " " + physicsBody.getMass());
         }
         Steering steering = STEERING.get(player);
         if (steering != null) {
