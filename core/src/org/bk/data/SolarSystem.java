@@ -1,5 +1,6 @@
 package org.bk.data;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -12,6 +13,6 @@ public class SolarSystem {
     public String name;
     public final Vector2 position = new Vector2();
     public float asteroidDensity;
-    public Array<EntityInstance> entity = new Array<EntityInstance>();
+    public Array<Entity> entity = new Array<Entity>();
     public Array<JumpLink> links = new Array<JumpLink>();
 }

@@ -10,7 +10,7 @@ import com.esotericsoftware.kryo.Kryo;
  * Template for one template of entity.
  */
 public class EntityTemplate {
-    public Array<Component> components = new Array<Component>();
+    public Array<Component> component = new Array<Component>();
 
     public void applyTo(Kryo kryo, Entity entity, Array<Component> componentSpecializations) {
         ObjectSet<Class<? extends Component>> alreadySet = new ObjectSet<Class<? extends Component>>();
@@ -20,7 +20,7 @@ public class EntityTemplate {
                 alreadySet.add(component.getClass());
             }
         }
-        for (Component component : components) {
+        for (Component component : this.component) {
             if (alreadySet.contains(component.getClass())) {
                 continue;
             }

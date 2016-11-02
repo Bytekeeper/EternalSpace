@@ -1,3 +1,0 @@
-{
-  imports: ["ships", "planets", "asteroids", "projectiles", "systems"]
-}

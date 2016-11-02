@@ -1,5 +1,6 @@
 package org.bk;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
 import org.bk.data.GameData;
+import org.bk.data.component.*;
 import org.bk.script.ScriptContext;
 
 import java.util.Arrays;
@@ -44,7 +46,7 @@ public class Assets {
 
 
         atlas = assetManager.get(atlasAssetDescriptor);
-        for (TextureAtlas.AtlasRegion region: atlas.getRegions()) {
+        for (TextureAtlas.AtlasRegion region : atlas.getRegions()) {
             textures.put(region.name, region);
         }
         debugFont = new BitmapFont();

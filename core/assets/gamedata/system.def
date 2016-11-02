@@ -1,14 +1,169 @@
-system "Arcos" {
-    position 100 80
-
-    entity {
-        template "planet"
-        template {
-        }
+template projectile {
+    Body {
+        dimension 8 50
+        graphics "projectile/ion bolt~0"
+    }
+    LifeTime {
+        remaining 2
+    }
+    Projectile {
+        initialSpeed 1000
+        yield 10
+    }
+    Transform {
+    }
+    Movement {
+    }
+    Physics {
     }
 }
 
 template "planet" {
-    components [
-    ]
+    Celestial {
+        radarColor 0.3 0.8 0.5 1
+    }
+    Body {
+        graphics "planet/forest2"
+        dimension 190 190
+    }
+    Transform {
+    }
+    Physics {
+    }
+    LandingPlace {
+    }
 }
+
+template "moon" {
+    Celestial {
+        radarColor 0.7 0.7 0.7 1
+    }
+    Body {
+        graphics "planet/earth_moon"
+        dimension 64 64
+    }
+    Physics {
+    }
+    Transform {
+    }
+}
+
+
+template falcon {
+    Physics {
+    }
+    Body {
+        dimension 35 40
+        graphics "ship/sparrow"
+    }
+    Ship {
+    }
+    Movement {
+        maxVelocity 500
+        angularThrust 3000
+        linearThrust 20000
+    }
+    Health {
+        hull 100
+        shields 100
+    }
+    Steering {
+    }
+    Mounts {
+        weapons {
+            cooldownPerShot 0.1
+            projectileName "projectile"
+            offset 20 -5
+        }
+        weapons {
+            cooldownPerShot 0.1
+            projectileName "projectile"
+            offset 20 5
+        }
+        thrusters {
+            offset -20 0
+        }
+    }
+    Transform {
+
+    }
+}
+
+template asteroid {
+    Asteroid {
+    }
+    Body {
+        dimension 45 45
+        graphics "asteroid/asteroid_placeholder"
+    }
+    Movement {
+        maxVelocity 500
+    }
+    Physics {
+    }
+    Transform {
+    }
+}
+
+system "Arcos" {
+    name "Arcos"
+    position 100 50
+    asteroidDensity 0.2
+
+    entity - "Arcos prime" {
+        template "planet"
+        Transform {
+            location 20 100
+        }
+    }
+    entity - "Arcos prime moon 1" {
+        template "moon"
+        Orbiting {
+            entity "Arcos prime"
+            distance 800
+            speed 80
+            tidalLock true
+        }
+    }
+    entity - "Arcos prime moon 2" {
+        template "moon"
+        Orbiting {
+            entity "Arcos prime moon 1"
+            distance 400
+            speed 240
+            tidalLock true
+        }
+    }
+    entity - "Arcos prime moon 3" {
+        template "moon"
+        Orbiting {
+            entity "Arcos prime moon 2"
+            distance 200
+            speed 720
+            tidalLock true
+        }
+    }
+    entity - "Arcos prime moon 4" {
+        template "moon"
+        Orbiting {
+            entity "Arcos prime moon 3"
+            distance 100
+            speed 2160
+            tidalLock true
+        }
+    }
+}
+
+system "Theodem" {
+    name "Theodem"
+    position -100 50
+    asteroidDensity 0.7
+
+    entity - "Theodem prime" {
+        template "planet"
+        Transform {
+            location 20 100
+        }
+    }
+}
+

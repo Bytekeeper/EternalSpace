@@ -89,7 +89,7 @@ public class Game extends com.badlogic.gdx.Game {
 
         player = spawn("falcon");
         Persistence persistence = engine.createComponent(Persistence.class);
-        persistence.system = gameData.getSystem("Thorin");
+        persistence.system = gameData.getSystem("Arcos");
         player.add(persistence);
         player.add(engine.createComponent(Character.class));
 

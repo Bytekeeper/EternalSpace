@@ -36,14 +36,17 @@ public class AsteroidSystem extends IteratingSystem {
     }
 
     @Override
-    public void addedToEngine(Engine engine) {
+    public void addedToEngine(final Engine engine) {
         super.addedToEngine(engine);
         engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<String>() {
             @Override
             public void receive(Signal<String> signal, String object) {
+                for (Entity e: getEntities()) {
+                    engine.removeEntity(e);
+                }
                 Gdx.app.log(AsteroidSystem.class.getSimpleName(), "Setting up initial asteroid deployment");
                 Vector3 cameraPosition = game.viewport.getCamera().position;
-                int toSpawn = (int) (MAX_DENSITY_ASTEROIDS * game.currentSystem.asteroidDensity - getEntities().size());
+                int toSpawn = (int) (MAX_DENSITY_ASTEROIDS * game.currentSystem.asteroidDensity);
                 while (toSpawn-- > 0) {
                     spawnAsteroid(cameraPosition,  0, MAX_ASTEROID_DISTANCE);
                 }

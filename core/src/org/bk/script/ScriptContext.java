@@ -1,5 +1,8 @@
 package org.bk.script;
 
+import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -7,21 +10,39 @@ import com.badlogic.gdx.utils.StringBuilder;
 import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
+import com.esotericsoftware.kryo.Kryo;
+import org.bk.data.EntityTemplate;
 import org.bk.data.GameData;
+import org.bk.data.component.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 /**
  * Created by dante on 29.10.2016.
  */
 public class ScriptContext {
-    private final GameData root;
+    private final Object root;
+    private Kryo kryo = new Kryo();
     private ObjectMap<String, Object> refTable = new ObjectMap<String, Object>();
+    private ObjectMap<String, Class<?>> classForIdentifier = new ObjectMap<String, Class<?>>();
 
-    public ScriptContext(GameData root) {
+    public ScriptContext(Object root) {
         this.root = root;
+
+        for (Class<? extends Component> cc : Arrays.asList(
+                Transform.class, Body.class, Celestial.class, Physics.class,
+                LandingPlace.class, Orbiting.class, Ship.class, Movement.class,
+                Health.class, Steering.class, Mounts.class, Asteroid.class,
+                LifeTime.class, Projectile.class)) {
+            registerClass(cc.getSimpleName(), cc);
+        }
+    }
+
+    public void registerClass(String identifier, Class<?> aClass) {
+        classForIdentifier.put(identifier, aClass);
     }
 
     public void load(InputStream in) {
@@ -50,6 +71,13 @@ public class ScriptContext {
     }
 
     private void executeBlock(ScannerWithPushBack sc, Object context) throws ReflectionException, IllegalAccessException, InstantiationException {
+        if (context instanceof Entity) {
+            handleEntity(sc, (Entity) context);
+            return;
+        } else if (context instanceof EntityTemplate) {
+            handleTemplate(sc, (EntityTemplate) context);
+            return;
+        }
         while (sc.hasNext()) {
             String item = sc.next();
             if ("}".equals(item)) {
@@ -75,22 +103,46 @@ public class ScriptContext {
                 float x = Float.parseFloat(sc.next());
                 float y = Float.parseFloat(sc.next());
                 v.set(x, y);
+            } else if (Color.class.isAssignableFrom(field.getType())) {
+                Color c = getOrCreate(context, field, Color.class);
+                float r = Float.parseFloat(sc.next());
+                float g = Float.parseFloat(sc.next());
+                float b = Float.parseFloat(sc.next());
+                float a = Float.parseFloat(sc.next());
+                c.set(r, g, b, a);
             } else if (Array.class.isAssignableFrom(field.getType())) {
                 Array<Object> array = (Array<Object>) field.get(context);
                 if (array == null) {
                     throw new IllegalStateException("Field '" + item + "' on " + context.getClass().getName() + " in should be an initialized array!");
                 }
-                Class elementType = field.getElementType(0);
-                Object newInstance = elementType.newInstance();
                 String next = sc.next();
+
+                Class<?> elementType = field.getElementType(0);
+                Object newInstance;
+
+                if (!"-".equals(next) && !"{".equals(next)) {
+                    elementType = classForIdentifier.get(next);
+                    if (elementType == null) {
+                        throw new IllegalStateException("No class found for '" + next + "'!");
+                    }
+                    next = sc.next();
+                } else if ("-".equals(next)) {
+                    next = sc.next();
+                }
+                if (!"{".equals(next)) {
+                    newInstance = ref(elementType, next);
+                    next = sc.next();
+                } else {
+                    newInstance = elementType.newInstance();
+                }
                 if ("{".equals(next)) {
                     executeBlock(sc, newInstance);
                 } else {
-                    sc.pushBack(next);
+                    throw new ParseException("Expected '{' for array, but found '" + next + "'");
                 }
                 array.add(newInstance);
-            } else if (String.class == field.getType()){
-                field.set(context, item);
+            } else if (String.class == field.getType()) {
+                field.set(context, sc.next());
             } else if (!field.getType().isPrimitive()) {
                 String next = sc.next();
                 if ("{".equals(next)) {
@@ -100,23 +152,87 @@ public class ScriptContext {
                     Object ref = ref(field.getType(), next);
                     field.set(context, ref);
                 }
+            } else if (field.getType() == Float.TYPE) {
+                field.set(context, Float.parseFloat(sc.next()));
+            } else if (field.getType() == Boolean.TYPE) {
+                field.set(context, Boolean.parseBoolean(sc.next()));
             } else {
                 throw new ParseException("Field '" + item + "' is not handled on " + context.getClass().getName());
             }
         }
     }
 
-    private Object ref(Class type, String id) throws IllegalAccessException, InstantiationException {
+    private void handleTemplate(ScannerWithPushBack sc, EntityTemplate template) throws IllegalAccessException, InstantiationException, ReflectionException {
+        while (sc.hasNext()) {
+            String item = sc.next();
+            if ("}".equals(item)) {
+                return;
+            }
+            Class<Component> componentClass = (Class<Component>) classForIdentifier.get(item);
+            if (componentClass == null) {
+                throw new IllegalStateException("No class for identifier '" + item + "'!");
+            }
+            Component component = componentClass.newInstance();
+            String next = sc.next();
+            if (!"{".equals(next)) {
+                throw new IllegalStateException("Expected component initializer, but found '" + next + "'!");
+            }
+            executeBlock(sc, component);
+            template.component.add(component);
+        }
+    }
+
+    private void handleEntity(ScannerWithPushBack sc, Entity entity) throws IllegalAccessException, InstantiationException, ReflectionException {
+        while (sc.hasNext()) {
+            String item = sc.next();
+            if ("}".equals(item)) {
+                return;
+            }
+            if ("template".equals(item)) {
+                String templateName = sc.next();
+                EntityTemplate entityTemplate = ref(EntityTemplate.class, templateName);
+                for (Component c : entityTemplate.component) {
+                    entity.add(kryo.copy(c));
+                }
+            } else {
+                Class<Component> componentClass = (Class<Component>) classForIdentifier.get(item);
+                if (componentClass == null) {
+                    throw new IllegalStateException("No class for identifier '" + item + "'!");
+                }
+                Component component = entity.getComponent(componentClass);
+                if (component == null) {
+                    component = componentClass.newInstance();
+                }
+                String next = sc.next();
+                if (!"{".equals(next)) {
+                    throw new IllegalStateException("Expected component initializer, but found '" + next + "'!");
+                }
+                executeBlock(sc, component);
+                entity.add(component);
+            }
+        }
+    }
+
+    private <T> T getOrCreate(Object context, Field field, Class<T> type) throws ReflectionException, IllegalAccessException, InstantiationException {
+        T result = (T) field.get(context);
+        if (result == null) {
+            result = type.newInstance();
+            field.set(context, result);
+        }
+        return result;
+    }
+
+    private <T> T ref(Class<T> type, String id) throws IllegalAccessException, InstantiationException {
         Object reference = refTable.get(id);
         if (reference == null) {
-            Object newInstance = type.newInstance();
+            T newInstance = type.newInstance();
             refTable.put(id, newInstance);
             return newInstance;
         }
         if (!type.isInstance(reference)) {
             throw new IllegalStateException("Expected '" + id + "' to be a '" + type.getName() + "', but was a '" + reference.getClass().getName() + "'");
         }
-        return reference;
+        return (T) reference;
     }
 
     public static class ParseException extends RuntimeException {
@@ -163,12 +279,13 @@ public class ScriptContext {
                 while ((nxt = nextChar()) != -1 && nxt != '"') nextToken.append((char) nxt);
             } else {
                 nextToken.append((char) nxt);
-                while ((nxt = nextChar()) != -1 && nxt != '\n' && nxt != '\r' && nxt != ' ' && nxt != '\t') nextToken.append((char) nxt);
+                while ((nxt = nextChar()) != -1 && nxt != '\n' && nxt != '\r' && nxt != ' ' && nxt != '\t')
+                    nextToken.append((char) nxt);
             }
             pushBack(nextToken.toString());
         }
 
-        private int nextChar()  {
+        private int nextChar() {
             try {
                 return reader.read();
             } catch (IOException e) {
