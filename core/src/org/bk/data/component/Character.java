@@ -9,7 +9,6 @@ import org.bk.data.*;
  */
 public class Character implements Component, Pool.Poolable {
     public Faction faction;
-    public long credits;
 
     @Override
     public void reset() {

@@ -20,7 +20,7 @@ effect/small+1
   index: -1
 particle
   rotate: false
-  xy: 2, 2
+  xy: 286, 194
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -60,10 +60,38 @@ ship/sparrow
   orig: 70, 80
   offset: 0, 0
   index: -1
+ui/credits
+  rotate: false
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui/health
+  rotate: false
+  xy: 194, 102
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+ui/power
+  rotate: false
+  xy: 663, 452
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 ui/radar_placeholder
   rotate: false
   xy: 260, 228
   size: 256, 256
   orig: 256, 256
+  offset: 0, 0
+  index: -1
+ui/shield
+  rotate: false
+  xy: 36, 2
+  size: 32, 32
+  orig: 32, 32
   offset: 0, 0
   index: -1

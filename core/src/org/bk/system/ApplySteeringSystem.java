@@ -63,6 +63,17 @@ public class ApplySteeringSystem extends IteratingSystem {
                 Math.abs(Util.deltaAngle(transform.orientRad, targetOrientation)) > ACTION_DELTA_ANGLE_THRESHOLD) {
             return;
         }
+        Ship ship = SHIP.get(entity);
+        Modules modules = MODULES.get(entity);
+        if (ship != null && modules != null) {
+            if (modules.jumpDrive == null) {
+                return;
+            }
+            if (ship.power < modules.jumpDrive.powerCost) {
+                return;
+            }
+            ship.power -= modules.jumpDrive.powerCost;
+        }
         if (entity == game.player) {
             game.assets.snd_hyperdrive_engage.play();
         }

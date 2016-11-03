@@ -1,6 +1,7 @@
 package org.bk.script;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -33,13 +34,8 @@ public class ScriptContext {
 
     public ScriptContext(Initializable root) {
         this.root = root;
-
-        for (Class<? extends Component> cc : Arrays.asList(
-                Transform.class, Body.class, Celestial.class, Physics.class,
-                LandingPlace.class, Orbiting.class, Ship.class, Movement.class,
-                Health.class, Steering.class, Mounts.class, Asteroid.class,
-                LifeTime.class, Projectile.class, Character.class, Persistence.class)) {
-            registerClass(cc.getSimpleName(), cc);
+        for (Class<? extends Component> component : Mapper.MAPPED_COMPONENTS) {
+            registerClass(component.getSimpleName(), component);
         }
     }
 

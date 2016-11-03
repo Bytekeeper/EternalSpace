@@ -38,6 +38,7 @@ public class Game extends com.badlogic.gdx.Game {
     public int width;
     public int height;
     public Stage stage;
+    public Stage hud;
     public PlanetScreen planetScreen;
     public SolarSystem currentSystem;
     public GameData gameData;
@@ -50,6 +51,7 @@ public class Game extends com.badlogic.gdx.Game {
         viewport.update(width, height);
         uiBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
         stage.getViewport().update(width, height);
+        hud.getViewport().update(width, height);
         this.width = width;
         this.height = height;
     }
@@ -65,6 +67,7 @@ public class Game extends com.badlogic.gdx.Game {
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         stage = new Stage(new ScreenViewport(), uiBatch);
+        hud = new Stage(new ScreenViewport(), uiBatch);
         initScreens();
         batch.getProjectionMatrix().setToOrtho2D(-Gdx.graphics.getWidth() / 2, -Gdx.graphics.getHeight() / 2,
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -93,7 +96,10 @@ public class Game extends com.badlogic.gdx.Game {
         player = assets.gameData.player;
         engine.addEntity(player);
 
-        Gdx.input.setInputProcessor(stage);
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(stage);
+        inputMultiplexer.addProcessor(hud);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     private void initScreens() {
@@ -132,6 +138,8 @@ public class Game extends com.badlogic.gdx.Game {
         super.render();
         stage.act();
         stage.draw();
+        hud.act();
+        hud.draw();
     }
 
     private float accelTimer = 1;

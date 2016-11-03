@@ -1,30 +1,41 @@
 package org.bk.data.component;
 
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Created by dante on 10.10.2016.
  */
 public class Mapper {
-    public static final ComponentMapper<Transform> TRANSFORM = ComponentMapper.getFor(Transform.class);
-    public static final ComponentMapper<Body> BODY = ComponentMapper.getFor(Body.class);
-    public static final ComponentMapper<Movement> MOVEMENT = ComponentMapper.getFor(Movement.class);
-    public static final ComponentMapper<Ship> SHIP = ComponentMapper.getFor(Ship.class);
-    public static final ComponentMapper<Projectile> PROJECTILE = ComponentMapper.getFor(Projectile.class);
-    public static final ComponentMapper<Mounts> MOUNTS = ComponentMapper.getFor(Mounts.class);
-    public static final ComponentMapper<LifeTime> LIFE_TIME = ComponentMapper.getFor(LifeTime.class);
-    public static final ComponentMapper<Touching> TOUCHING = ComponentMapper.getFor(Touching.class);
-    public static final ComponentMapper<Health> HEALTH = ComponentMapper.getFor(Health.class);
-    public static final ComponentMapper<Steering> STEERING = ComponentMapper.getFor(Steering.class);
-    public static final ComponentMapper<AIControlled> AI_CONTROLLED = ComponentMapper.getFor(AIControlled.class);
-    public static final ComponentMapper<Celestial> CELESTIAL = ComponentMapper.getFor(Celestial.class);
-    public static final ComponentMapper<Landing> LANDING = ComponentMapper.getFor(Landing.class);
-    public static final ComponentMapper<Asteroid> ASTEROID = ComponentMapper.getFor(Asteroid.class);
-    public static final ComponentMapper<Physics> PHYSICS = ComponentMapper.getFor(Physics.class);
-    public static final ComponentMapper<Persistence> PERSISTENCE = ComponentMapper.getFor(Persistence.class);
-    public static final ComponentMapper<Character> CHARACTER = ComponentMapper.getFor(Character.class);
-    public static final ComponentMapper<Owned> OWNED = ComponentMapper.getFor(Owned.class);
-    public static final ComponentMapper<Jumping> JUMPING = ComponentMapper.getFor(Jumping.class);
-    public static final ComponentMapper<Orbiting> ORBITING = ComponentMapper.getFor(Orbiting.class);
-    public static final ComponentMapper<LandingPlace> LANDING_PLACE = ComponentMapper.getFor(LandingPlace.class);
+    public static final Array<Class<? extends Component>> MAPPED_COMPONENTS = new Array<Class<? extends Component>>();
+    public static final ComponentMapper<Transform> TRANSFORM = mapperFor(Transform.class);
+    public static final ComponentMapper<Body> BODY = mapperFor(Body.class);
+    public static final ComponentMapper<Movement> MOVEMENT = mapperFor(Movement.class);
+    public static final ComponentMapper<Ship> SHIP = mapperFor(Ship.class);
+    public static final ComponentMapper<Projectile> PROJECTILE = mapperFor(Projectile.class);
+    public static final ComponentMapper<Mounts> MOUNTS = mapperFor(Mounts.class);
+    public static final ComponentMapper<LifeTime> LIFE_TIME = mapperFor(LifeTime.class);
+    public static final ComponentMapper<Touching> TOUCHING = mapperFor(Touching.class);
+    public static final ComponentMapper<Health> HEALTH = mapperFor(Health.class);
+    public static final ComponentMapper<Steering> STEERING = mapperFor(Steering.class);
+    public static final ComponentMapper<AIControlled> AI_CONTROLLED = mapperFor(AIControlled.class);
+    public static final ComponentMapper<Celestial> CELESTIAL = mapperFor(Celestial.class);
+    public static final ComponentMapper<Landing> LANDING = mapperFor(Landing.class);
+    public static final ComponentMapper<Asteroid> ASTEROID = mapperFor(Asteroid.class);
+    public static final ComponentMapper<Physics> PHYSICS = mapperFor(Physics.class);
+    public static final ComponentMapper<Persistence> PERSISTENCE = mapperFor(Persistence.class);
+    public static final ComponentMapper<Character> CHARACTER = mapperFor(Character.class);
+    public static final ComponentMapper<Owned> OWNED = mapperFor(Owned.class);
+    public static final ComponentMapper<Jumping> JUMPING = mapperFor(Jumping.class);
+    public static final ComponentMapper<Orbiting> ORBITING = mapperFor(Orbiting.class);
+    public static final ComponentMapper<LandingPlace> LANDING_PLACE = mapperFor(LandingPlace.class);
+    public static final ComponentMapper<Modules> MODULES = mapperFor(Modules.class);
+    public static final ComponentMapper<Shield> SHIELD = mapperFor(Shield.class);
+    public static final ComponentMapper<Account> ACCOUNT = mapperFor(Account.class);
+
+    private static <T extends Component> ComponentMapper<T> mapperFor(Class<T> componentClass) {
+        MAPPED_COMPONENTS.add(componentClass);
+        return ComponentMapper.getFor(componentClass);
+    }
 }

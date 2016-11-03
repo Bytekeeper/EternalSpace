@@ -57,6 +57,8 @@ template falcon {
         graphics "ship/sparrow"
     }
     Ship {
+        power 1000
+        maxPower 1000
     }
     Movement {
         maxVelocity 500
@@ -65,7 +67,11 @@ template falcon {
     }
     Health {
         hull 100
+        maxHull 100
+    }
+    Shield {
         shields 100
+        maxShields 100
     }
     Steering {
     }
@@ -85,7 +91,6 @@ template falcon {
         }
     }
     Transform {
-
     }
 }
 
@@ -97,6 +102,8 @@ template Titan {
         graphics "ship/5"
     }
     Ship {
+        power 1000
+        maxPower 1000
     }
     Movement {
         maxVelocity 300
@@ -105,7 +112,11 @@ template Titan {
     }
     Health {
         hull 100
+        maxHull 100
+    }
+    Shield {
         shields 100
+        maxShields 100
     }
     Steering {
     }
@@ -229,15 +240,6 @@ mission "mission test" {
     failWhen {
     }
     offered {
-        change {
-            system "Theodem" {
-                entity - "Theodem prime" {
-                    Body {
-                        dimension 300 300
-                    }
-                }
-            }
-        }
         text {
             "Hello"
         }
@@ -257,6 +259,8 @@ mission "mission test" {
         }
     }
     succeeded {
+        change {
+        }
         text {
             "Congratulations, the first mission test worked!"
         }
@@ -294,9 +298,16 @@ mission "Mission 2" {
 player {
     template "falcon"
     Character {
-        credits + 1000
+    }
+    Account {
+            credits 1000
     }
     Persistence {
         system "Arcos"
+    }
+    Modules {
+        jumpDrive {
+            powerCost 333
+        }
     }
 }
