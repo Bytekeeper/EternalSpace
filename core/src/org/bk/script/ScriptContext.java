@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class ScriptContext {
     private final Initializable root;
     private Kryo kryo = new Kryo();
-    private ObjectMap<String, Object> refTable = new ObjectMap<String, Object>();
+    private ObjectMap<Object, Object> refTable = new ObjectMap<Object, Object>();
     private ObjectMap<String, Class<?>> classForIdentifier = new ObjectMap<String, Class<?>>();
 
     public ScriptContext(Initializable root) {
@@ -87,19 +87,7 @@ public class ScriptContext {
             }
             Field field = ClassReflection.getField(context.getClass(), item);
             if (ObjectMap.class.isAssignableFrom(field.getType())) {
-                String key = sc.next();
-                ObjectMap<String, Object> map = (ObjectMap<String, Object>) field.get(context);
-                Object value = map.get(key);
-                if (value == null) {
-                    value = ref(field.getElementType(1), key);
-                    map.put(key, value);
-                }
-                String next = sc.next();
-                if ("{".equals(next)) {
-                    executeBlock(sc, value);
-                } else {
-                    sc.pushBack(next);
-                }
+                parseObjectMapAssignment(sc, context, field);
             } else if (Vector2.class.isAssignableFrom(field.getType())) {
                 Vector2 v = (Vector2) field.get(context);
                 float x = Float.parseFloat(sc.next());
@@ -168,6 +156,25 @@ public class ScriptContext {
                 unexpectedToken(context, item);
             }
         }
+    }
+
+    private void parseObjectMapAssignment(ScannerWithPushBack sc, Object context, Field field) throws ReflectionException, IllegalAccessException, InstantiationException {
+        String key = sc.next();
+        Object keyObject;
+        ObjectMap<Object, Object> map = (ObjectMap<Object, Object>) field.get(context);
+        Object value;
+        if (String.class == field.getElementType(0)) {
+            keyObject = key;
+        } else {
+            keyObject = ref(field.getElementType(0), key);
+        }
+        value = map.get(keyObject);
+        if (value == null) {
+            value = ref(field.getElementType(1), keyObject);
+            map.put(keyObject, value);
+        }
+        consume(sc, "{");
+        executeBlock(sc, value);
     }
 
     private void applyLong(ScannerWithPushBack sc, Object context, Field field) throws ReflectionException {
@@ -332,7 +339,7 @@ public class ScriptContext {
         return result;
     }
 
-    private <T> T ref(Class<T> type, String id) throws IllegalAccessException, InstantiationException {
+    private <T> T ref(Class<T> type, Object id) throws IllegalAccessException, InstantiationException {
         Object reference = refTable.get(id);
         if (reference == null) {
             T newInstance = type.newInstance();

@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.component.*;
+import org.bk.data.component.Character;
 
 import static org.bk.data.component.Mapper.MOVEMENT;
 import static org.bk.data.component.Mapper.TRANSFORM;
@@ -75,6 +76,9 @@ public class TrafficSystem extends EntitySystem {
         Persistence persistence = getEngine().createComponent(Persistence.class);
         persistence.temporary = true;
         entity.add(persistence);
+        Character character = getEngine().createComponent(Character.class);
+        character.faction = game.gameData.faction.values().toArray().random();
+        entity.add(character);
         AIControlled aiControlled = getEngine().createComponent(AIControlled.class);
         entity.add(aiControlled);
         Transform transform = TRANSFORM.get(entity);

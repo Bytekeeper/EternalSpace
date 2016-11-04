@@ -34,6 +34,7 @@ public class Hud extends WidgetGroup {
         setFillParent(true);
         Table br = new Table();
         br.setFillParent(true);
+        br.pad(10);
         br.bottom().right();
 
         Image creditsIcon = new Image(assets.textures.get("ui/credits"));

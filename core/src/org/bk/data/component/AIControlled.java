@@ -12,11 +12,11 @@ import com.badlogic.gdx.utils.Pool;
  */
 public class AIControlled implements Component, Pool.Poolable {
     public transient BehaviorTree<Entity> behaviorTree;
-    public transient SteeringBehavior<Vector2> behavior;
+    public Entity enemy;
 
     @Override
     public void reset() {
         behaviorTree = null;
-        behavior = null;
+        enemy = null;
     }
 }

@@ -6,7 +6,7 @@ filter: MipMapLinearLinear,Linear
 repeat: none
 asteroid/asteroid_placeholder
   rotate: false
-  xy: 889, 417
+  xy: 879, 407
   size: 90, 90
   orig: 90, 90
   offset: 0, 0
@@ -20,14 +20,14 @@ effect/small+1
   index: -1
 particle
   rotate: false
-  xy: 981, 475
+  xy: 971, 465
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 planet/earth_moon
   rotate: false
-  xy: 273, 251
+  xy: 263, 241
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -42,8 +42,8 @@ planet/earthlike1
 planet/gas1
   rotate: false
   xy: 2, 238
-  size: 269, 269
-  orig: 269, 269
+  size: 259, 259
+  orig: 259, 259
   offset: 0, 0
   index: -1
 projectile/ion bolt~0
@@ -55,14 +55,14 @@ projectile/ion bolt~0
   index: -1
 ship/5
   rotate: false
-  xy: 789, 336
+  xy: 779, 326
   size: 98, 171
   orig: 98, 171
   offset: 0, 0
   index: -1
 ship/sparrow
   rotate: false
-  xy: 789, 254
+  xy: 779, 244
   size: 70, 80
   orig: 70, 80
   offset: 0, 0
@@ -76,7 +76,7 @@ ui/credits
   index: -1
 ui/health
   rotate: false
-  xy: 889, 383
+  xy: 879, 373
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -90,14 +90,14 @@ ui/power
   index: -1
 ui/radar_placeholder
   rotate: false
-  xy: 531, 251
+  xy: 521, 241
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 ui/shield
   rotate: false
-  xy: 889, 349
+  xy: 879, 339
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

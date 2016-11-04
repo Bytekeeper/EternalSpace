@@ -40,7 +40,7 @@ template "gas1" {
     }
     Body {
         graphics "planet/gas1"
-        dimension 269 269
+        dimension 259 259
     }
     Transform {
     }
@@ -308,9 +308,31 @@ mission "Mission 2" {
     }
 }
 
+faction "Player Faction" {
+    name "Player"
+}
+
+faction "United Mars Government" {
+    name "United Mars Government"
+    relation "Player Faction" {
+        reputation -100
+    }
+    relation "Arcos Raiders" {
+        reputation -100
+    }
+}
+
+faction "Arcos Raiders" {
+    name "Arcos Raiders"
+    relation "Player Faction" {
+        reputation -100
+    }
+}
+
 player {
     template "falcon"
     Character {
+        faction "Player Faction"
     }
     Account {
             credits 1000

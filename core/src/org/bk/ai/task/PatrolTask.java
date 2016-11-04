@@ -17,18 +17,18 @@ import static org.bk.data.component.Mapper.STEERING;
  * Created by dante on 18.10.2016.
  */
 public class PatrolTask extends LeafTask<Entity> {
+    private Wander wander;
+
     @Override
     public Status execute() {
         Steering steering = STEERING.get(getObject());
-        AIControlled aiControlled = AI_CONTROLLED.get(getObject());
-        if (!(aiControlled.behavior instanceof Wander)) {
-            Wander<Vector2> wander = new Wander<Vector2>(steering.steerable);
+        if (wander == null) {
+            wander = new Wander<Vector2>(steering.steerable);
             wander.setWanderOffset(150).
                     setWanderRadius(60).
                     setWanderRate(MathUtils.PI / 2);
-            aiControlled.behavior = wander;
         }
-        SteeringUtil.applySteering(aiControlled.behavior, steering.steerable, STEERING.get(getObject()));
+        SteeringUtil.applySteering(wander, steering.steerable, STEERING.get(getObject()));
         return Status.RUNNING;
     }
 

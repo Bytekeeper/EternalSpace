@@ -168,11 +168,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
         @Override
         public void entityRemoved(Entity entity) {
-            Physics physics = PHYSICS.get(entity);
-            if (physics != null && physics.physicsBody != null) {
-                world.destroyBody(physics.physicsBody);
-                physics.physicsBody = null;
-            }
+            entity.remove(Touching.class);
         }
     }
 
