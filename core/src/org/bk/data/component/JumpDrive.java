@@ -4,13 +4,13 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;
 
 /**
- * Created by dante on 15.10.2016.
+ * Created by dante on 04.11.2016.
  */
-public class Ship implements Component, Pool.Poolable {
-    public float heat;
+public class JumpDrive implements Component, Pool.Poolable {
+    public float powerCost;
 
     @Override
     public void reset() {
-        heat = 0;
+        powerCost = 0;
     }
 }

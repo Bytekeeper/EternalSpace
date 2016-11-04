@@ -23,7 +23,7 @@ template "planet" {
         radarColor 0.3 0.8 0.5 1
     }
     Body {
-        graphics "planet/forest2"
+        graphics "planet/earthlike1"
         dimension 190 190
     }
     Transform {
@@ -31,6 +31,20 @@ template "planet" {
     Physics {
     }
     LandingPlace {
+    }
+}
+
+template "gas1" {
+    Celestial {
+        radarColor 0.6 0.2 0.6 1
+    }
+    Body {
+        graphics "planet/gas1"
+        dimension 269 269
+    }
+    Transform {
+    }
+    Physics {
     }
 }
 
@@ -57,8 +71,10 @@ template falcon {
         graphics "ship/sparrow"
     }
     Ship {
-        power 1000
-        maxPower 1000
+    }
+    Battery {
+        capacity 1000
+        maxCapacity 1000
     }
     Movement {
         maxVelocity 500
@@ -75,18 +91,23 @@ template falcon {
     }
     Steering {
     }
-    Mounts {
-        weapons {
+    JumpDrive {
+        powerCost 333
+    }
+    Weapons {
+        weapon {
             cooldownPerShot 0.1
             projectile "projectile"
             offset 20 -5
         }
-        weapons {
+        weapon {
             cooldownPerShot 0.1
             projectile "projectile"
             offset 20 5
         }
-        thrusters {
+    }
+    Thrusters {
+        thruster {
             offset -20 0
         }
     }
@@ -102,8 +123,10 @@ template Titan {
         graphics "ship/5"
     }
     Ship {
-        power 1000
-        maxPower 1000
+    }
+    Battery {
+        capacity 1000
+        maxCapacity 1000
     }
     Movement {
         maxVelocity 300
@@ -114,28 +137,39 @@ template Titan {
         hull 100
         maxHull 100
     }
+    JumpDrive {
+        powerCost 333
+    }
     Shield {
         shields 100
         maxShields 100
     }
     Steering {
     }
-    Mounts {
-        weapons {
+    Weapons {
+        weapon {
             cooldownPerShot 0.1
             projectile "projectile"
             offset 20 -5
         }
-        weapons {
+        weapon {
             cooldownPerShot 0.1
             projectile "projectile"
             offset 20 5
         }
-        thrusters {
+    }
+    Thrusters {
+        thruster {
             offset -90 10
         }
-        thrusters {
+        thruster {
             offset -90 -10
+        }
+        thruster {
+            offset 0 -35
+        }
+        thruster {
+            offset 0 35
         }
     }
     Transform {
@@ -179,31 +213,10 @@ system "Arcos" {
             tidalLock true
         }
     }
-    entity - "Arcos prime moon 2" {
-        template "moon"
-        Orbiting {
-            entity "Arcos prime moon 1"
-            distance 400
-            speed 240
-            tidalLock true
-        }
-    }
-    entity - "Arcos prime moon 3" {
-        template "moon"
-        Orbiting {
-            entity "Arcos prime moon 2"
-            distance 200
-            speed 720
-            tidalLock true
-        }
-    }
-    entity - "Arcos prime moon 4" {
-        template "moon"
-        Orbiting {
-            entity "Arcos prime moon 3"
-            distance 100
-            speed 2160
-            tidalLock true
+    entity {
+        template "gas1"
+        Transform {
+            location 500 -50
         }
     }
 }
@@ -304,10 +317,5 @@ player {
     }
     Persistence {
         system "Arcos"
-    }
-    Modules {
-        jumpDrive {
-            powerCost 333
-        }
     }
 }

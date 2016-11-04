@@ -7,10 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import org.bk.Assets;
 import org.bk.Game;
-import org.bk.data.component.Account;
-import org.bk.data.component.Health;
-import org.bk.data.component.Shield;
-import org.bk.data.component.Ship;
+import org.bk.data.component.*;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -65,12 +62,12 @@ public class Hud extends WidgetGroup {
     @Override
     public void act(float delta) {
         Health health = HEALTH.get(game.player);
-        Ship ship = SHIP.get(game.player);
+        Battery battery = BATTERY.get(game.player);
         Shield shield = SHIELD.get(game.player);
         Account account = ACCOUNT.get(game.player);
 
         healthBar.setFactor(health.hull / health.maxHull);
-        powerBar.setFactor(ship.power / ship.maxPower);
+        powerBar.setFactor(battery.capacity / battery.maxCapacity);
         shieldBar.setFactor(shield.shields / shield.maxShields);
         creditsAmount.setText(String.format("%10d", account.credits));
     }

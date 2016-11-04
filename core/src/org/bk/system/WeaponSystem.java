@@ -20,14 +20,14 @@ public class WeaponSystem extends IteratingSystem {
     private final Game game;
 
     public WeaponSystem(Game game, int priority) {
-        super(Family.all(Mounts.class, Transform.class).get(), priority);
+        super(Family.all(Weapons.class, Transform.class).get(), priority);
         this.game = game;
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        Mounts mounts = MOUNTS.get(entity);
-        for (Mounts.Weapon weapon: mounts.weapons) {
+        Weapons weapons = WEAPONS.get(entity);
+        for (Weapons.Weapon weapon: weapons.weapon) {
             weapon.cooldown = Math.max(0, weapon.cooldown - deltaTime);
             if (weapon.cooldown > 0 || !weapon.firing) {
                 continue;
@@ -40,13 +40,13 @@ public class WeaponSystem extends IteratingSystem {
         }
     }
 
-    private void spawnProjectile(Mounts.Weapon weapon, Entity owner) {
+    private void spawnProjectile(Weapons.Weapon weapon, Entity owner) {
         if (weapon.projectile == null) {
             Gdx.app.error(WeaponSystem.class.getSimpleName(), "No ProjectileSpec");
             return;
         }
         if (owner == null) {
-            Gdx.app.error(WeaponSystem.class.getSimpleName(), "Mounts without owner");
+            Gdx.app.error(WeaponSystem.class.getSimpleName(), "Weapons without owner");
             return;
         }
         Transform sourceTransform = TRANSFORM.get(owner);

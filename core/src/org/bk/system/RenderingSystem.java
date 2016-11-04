@@ -13,18 +13,13 @@ import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.Array;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.Mission;
 import org.bk.data.component.*;
-import org.bk.data.component.Character;
 import org.bk.graphics.Hud;
 import org.bk.graphics.Radar;
-import org.bk.graphics.StatusBar;
 
 import static org.bk.Game.SQRT_2;
 import static org.bk.data.component.Mapper.*;
@@ -120,17 +115,15 @@ public class RenderingSystem extends EntitySystem {
         }
         Landing landing = LANDING.get(entity);
         if (landing == null) {
-            Mounts mounts = MOUNTS.get(entity);
-            if (mounts != null) {
-                Movement movement = MOVEMENT.get(entity);
-                if (movement != null & movement.linearAccel.len2() > 0) {
-                    for (Mounts.Thruster thruster : mounts.thrusters) {
-                        tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);
-                        float hbx = 8;
-                        float hby = 40;
-                        batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
-                                hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
-                    }
+            Movement movement = MOVEMENT.get(entity);
+            if (movement != null && movement.linearAccel.len2() > 0) {
+                Thrusters thrusters = THRUSTERS.get(entity);
+                for (Thrusters.Thruster thruster : thrusters.thruster) {
+                    tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);
+                    float hbx = 8;
+                    float hby = 40;
+                    batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
+                            hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
                 }
             }
         } else if (landing.landed) {

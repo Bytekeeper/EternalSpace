@@ -45,9 +45,9 @@ public class ApplySteeringSystem extends IteratingSystem {
                 break;
         }
 
-        Mounts mounts = MOUNTS.get(entity);
-        if (mounts != null) {
-            for (Mounts.Weapon weapon : mounts.weapons) {
+        Weapons weapons = WEAPONS.get(entity);
+        if (weapons != null) {
+            for (Weapons.Weapon weapon : weapons.weapon) {
                 weapon.firing = steering.primaryFire;
             }
         }
@@ -63,16 +63,16 @@ public class ApplySteeringSystem extends IteratingSystem {
                 Math.abs(Util.deltaAngle(transform.orientRad, targetOrientation)) > ACTION_DELTA_ANGLE_THRESHOLD) {
             return;
         }
-        Ship ship = SHIP.get(entity);
-        Modules modules = MODULES.get(entity);
-        if (ship != null && modules != null) {
-            if (modules.jumpDrive == null) {
+        Battery battery = BATTERY.get(entity);
+        JumpDrive jumpDrive = JUMP_DRIVE.get(entity);
+        if (jumpDrive == null) {
+            return;
+        }
+        if (battery != null) {
+            if (battery.capacity < jumpDrive.powerCost) {
                 return;
             }
-            if (ship.power < modules.jumpDrive.powerCost) {
-                return;
-            }
-            ship.power -= modules.jumpDrive.powerCost;
+            battery.capacity -= jumpDrive.powerCost;
         }
         if (entity == game.player) {
             game.assets.snd_hyperdrive_engage.play();

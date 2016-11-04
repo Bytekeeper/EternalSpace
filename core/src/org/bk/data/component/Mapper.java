@@ -3,6 +3,7 @@ package org.bk.data.component;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.gdx.utils.Array;
+import org.bk.data.JumpLink;
 
 /**
  * Created by dante on 10.10.2016.
@@ -14,7 +15,8 @@ public class Mapper {
     public static final ComponentMapper<Movement> MOVEMENT = mapperFor(Movement.class);
     public static final ComponentMapper<Ship> SHIP = mapperFor(Ship.class);
     public static final ComponentMapper<Projectile> PROJECTILE = mapperFor(Projectile.class);
-    public static final ComponentMapper<Mounts> MOUNTS = mapperFor(Mounts.class);
+    public static final ComponentMapper<Weapons> WEAPONS = mapperFor(Weapons.class);
+    public static final ComponentMapper<Thrusters> THRUSTERS = mapperFor(Thrusters.class);
     public static final ComponentMapper<LifeTime> LIFE_TIME = mapperFor(LifeTime.class);
     public static final ComponentMapper<Touching> TOUCHING = mapperFor(Touching.class);
     public static final ComponentMapper<Health> HEALTH = mapperFor(Health.class);
@@ -30,7 +32,8 @@ public class Mapper {
     public static final ComponentMapper<Jumping> JUMPING = mapperFor(Jumping.class);
     public static final ComponentMapper<Orbiting> ORBITING = mapperFor(Orbiting.class);
     public static final ComponentMapper<LandingPlace> LANDING_PLACE = mapperFor(LandingPlace.class);
-    public static final ComponentMapper<Modules> MODULES = mapperFor(Modules.class);
+    public static final ComponentMapper<Battery> BATTERY = mapperFor(Battery.class);
+    public static final ComponentMapper<JumpDrive> JUMP_DRIVE = mapperFor(JumpDrive.class);
     public static final ComponentMapper<Shield> SHIELD = mapperFor(Shield.class);
     public static final ComponentMapper<Account> ACCOUNT = mapperFor(Account.class);
 
