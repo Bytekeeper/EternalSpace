@@ -9,9 +9,12 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bk.data.EntityTemplate;
@@ -44,6 +47,8 @@ public class Game extends com.badlogic.gdx.Game {
     public GameData gameData;
     private MapScreen mapScreen;
     private float flashTimer, lastFlashTime;
+
+    private Polygon polygon;
 
     @Override
     public void resize(int width, int height) {
@@ -100,6 +105,9 @@ public class Game extends com.badlogic.gdx.Game {
         inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(hud);
         Gdx.input.setInputProcessor(inputMultiplexer);
+
+        Outliner outliner = new Outliner();
+        polygon = outliner.determineOutlineOf(assets.textures.get("ship/5"));
     }
 
     private void initScreens() {
@@ -140,6 +148,11 @@ public class Game extends com.badlogic.gdx.Game {
         stage.draw();
         hud.act();
         hud.draw();
+
+        ShapeRenderer shapeRenderer = new ShapeRenderer();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.polygon(polygon.getVertices());
+        shapeRenderer.end();
     }
 
     private float accelTimer = 1;
