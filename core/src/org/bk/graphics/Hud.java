@@ -94,15 +94,15 @@ public class Hud extends WidgetGroup {
 
     @Override
     public void act(float delta) {
-        Health health = HEALTH.get(game.player);
-        Battery battery = BATTERY.get(game.player);
-        Shield shield = SHIELD.get(game.player);
-        Account account = ACCOUNT.get(game.player);
-        playerShipOutline.setShape(game.assets.outlineOf(BODY.get(game.player).graphics));
-        Steering steering = STEERING.get(game.player);
+        Health health = HEALTH.get(game.playerEntity);
+        Battery battery = BATTERY.get(game.playerEntity);
+        Shield shield = SHIELD.get(game.playerEntity);
+        Account account = ACCOUNT.get(game.playerEntity);
+        playerShipOutline.setShape(game.assets.outlineOf(BODY.get(game.playerEntity).graphics));
+        Steering steering = STEERING.get(game.playerEntity);
         if (steering != null) {
-            Entity selectedEntity = steering.selectedEntity;
-            if (selectedEntity == null || !BODY.has(selectedEntity) || !TRANSFORM.has(selectedEntity)) {
+            Entity selectedEntity = game.player.selectedEntity;
+            if (selectedEntity == null) {
                 targetShipOutline.setShape(null);
             } else {
                 targetShipOutline.setShape(game.assets.outlineOf(BODY.get(selectedEntity).graphics));

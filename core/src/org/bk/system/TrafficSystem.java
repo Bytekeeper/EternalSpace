@@ -43,7 +43,7 @@ public class TrafficSystem extends EntitySystem {
             public void receive(Signal<String> signal, String object) {
                 Gdx.app.log(TrafficSystem.class.getSimpleName(), "Setting up initial traffic deployment");
                 for (SolarSystem.TrafficDefinition td: game.currentSystem.traffic) {
-                    int toSpawn = (int) (120 / td.every);
+                    int toSpawn = (int) MathUtils.random(120 / td.every);
                     while (toSpawn-- > 0) {
                         spawnTraffic(td, true);
                     }

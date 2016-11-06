@@ -39,7 +39,7 @@ public class SystemPopulateSystem extends EntitySystem {
             systemChanged.dispatch(game.currentSystem.name);
             dispatchOnNextUpdate = false;
         }
-        Persistence playerPersistence = PERSISTENCE.get(game.player);
+        Persistence playerPersistence = PERSISTENCE.get(game.playerEntity);
         if (game.currentSystem == null || playerPersistence.system != game.currentSystem) {
             game.currentSystem = playerPersistence.system;
             Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem);

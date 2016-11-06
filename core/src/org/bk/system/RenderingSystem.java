@@ -51,20 +51,6 @@ public class RenderingSystem extends EntitySystem {
         batch = game.batch;
         radar = new Radar(game);
         game.hud.addActor(new Hud(game, assets));
-        game.inputMultiplexer.addProcessor(new InputAdapter() {
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                tv.set(screenX,  screenY);
-                game.viewport.unproject(tv);
-                tv.scl(Box2DPhysicsSystem.W2B);
-                Entity picked = getEngine().getSystem(Box2DPhysicsSystem.class).pick(tv);
-                if (picked != null && STEERING.has(game.player)) {
-                    STEERING.get(game.player).selectedEntity = picked;
-                    return true;
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -114,7 +100,7 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void drawJumpTarget() {
-        Steering steering = STEERING.get(game.player);
+        Steering steering = STEERING.get(game.playerEntity);
         if (steering != null && steering.jumpTo != null) {
             assets.hudFont.draw(game.uiBatch, steering.jumpTo.name, 220, game.height - assets.hudFont.getLineHeight());
         }
@@ -164,7 +150,7 @@ public class RenderingSystem extends EntitySystem {
 
     private void drawRadar() {
         radar.bounds.set(0, game.height - 256, 256, 256);
-        radar.position.set(TRANSFORM.get(game.player).location);
+        radar.position.set(TRANSFORM.get(game.playerEntity).location);
         radar.drawBackground();
         for (Entity entity : planetEntities) {
             radar.drawCelestial(entity);

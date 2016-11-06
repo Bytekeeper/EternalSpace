@@ -54,11 +54,6 @@ public class AISystem extends IteratingSystem {
             return;
         }
         AIControlled aiControlled = AI_CONTROLLED.get(entity);
-        if (aiControlled.enemy != null) {
-            if (!TRANSFORM.has(aiControlled.enemy) || !STEERING.has(aiControlled.enemy)) {
-                aiControlled.enemy = null;
-            }
-        }
         if (aiControlled.behaviorTree == null) {
             Gdx.app.debug(AISystem.class.getSimpleName(), "AI entity without behavior!");
             return;

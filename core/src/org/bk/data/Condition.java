@@ -17,7 +17,7 @@ public class Condition {
         boolean hasCondition = false;
         if (at != null) {
             hasCondition = true;
-            Landing landing = LANDING.get(game.player);
+            Landing landing = LANDING.get(game.playerEntity);
             if (landing != null && landing.target != at) {
                 return false;
             }

@@ -71,7 +71,7 @@ public class ApplySteeringSystem extends IteratingSystem {
             }
             battery.capacity -= jumpDrive.powerCost;
         }
-        if (entity == game.player) {
+        if (entity == game.playerEntity) {
             game.assets.snd_hyperdrive_engage.play();
         }
         getEngine().getSystem(JumpingSystem.class).depart(entity, transform.location, steering.jumpTo);
@@ -85,9 +85,9 @@ public class ApplySteeringSystem extends IteratingSystem {
         Touching touching = TOUCHING.get(entity);
         if (touching != null) {
             for (Entity e : touching.touchList) {
-                if (CELESTIAL.has(e)) {
-                    Vector2 celestialLocation = TRANSFORM.get(e).location;
-                    if (ownerLocation.dst(celestialLocation) < BODY.get(e).dimension.x / 2) {
+                if (LANDING_PLACE.has(e)) {
+                    Vector2 landingLocation = TRANSFORM.get(e).location;
+                    if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {
                         Landing landing = getEngine().createComponent(Landing.class);
                         landing.landingDirection = Landing.LandingDirection.LANDING;
                         landing.target = e;

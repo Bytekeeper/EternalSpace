@@ -11,11 +11,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bk.data.*;
@@ -36,19 +33,22 @@ public class Game extends com.badlogic.gdx.Game {
     public ShapeRenderer shape;
     public Assets assets;
     public Behaviors behaviors;
-    PooledEngine engine;
-    public Entity player;
+    public Entity playerEntity;
     public int width;
     public int height;
     public Stage stage;
     public Stage hud;
+    private EntityFactory entityFactory;
     public PlanetScreen planetScreen;
+
+    public Player player = new Player();
     public SolarSystem currentSystem;
     public GameData gameData;
+
+    PooledEngine engine;
     private MapScreen mapScreen;
     private float flashTimer, lastFlashTime;
 
-    private Array<Entity> tEntities = new Array<Entity>();
     public InputMultiplexer inputMultiplexer;
 
     @Override
@@ -71,7 +71,6 @@ public class Game extends com.badlogic.gdx.Game {
         assets = new Assets();
         gameData = assets.gameData;
         behaviors = new Behaviors();
-        batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
         shape = new ShapeRenderer();
         stage = new Stage(new ScreenViewport(), uiBatch);
@@ -82,13 +81,23 @@ public class Game extends com.badlogic.gdx.Game {
         inputMultiplexer.addProcessor(hud);
         Gdx.input.setInputProcessor(inputMultiplexer);
 
-        initScreens();
+        batch = new SpriteBatch();
         batch.getProjectionMatrix().setToOrtho2D(-Gdx.graphics.getWidth() / 2, -Gdx.graphics.getHeight() / 2,
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        initScreens();
+
+        initWorldEngine();
+        entityFactory = new EntityFactory(this);
+
+        assets.gameData.setEngine(engine);
+        playerEntity = assets.gameData.player;
+        engine.addEntity(playerEntity);
+    }
+
+    private void initWorldEngine() {
         engine = new PooledEngine();
-
         engine.addSystem(new SystemPopulateSystem(this, 0));
-
         engine.addSystem(new AISystem(this, 0));
         engine.addSystem(new AutopilotSystem(this, 1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
@@ -97,6 +106,7 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
         engine.addSystem(new HealthSystem(8));
+        engine.addSystem(new SelectionSystem(this, 9));
 
         engine.addSystem(new AsteroidSystem(this, 9000));
         engine.addSystem(new TrafficSystem(this, 9000));
@@ -105,10 +115,6 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new OrbitingSystem(10000));
         engine.addSystem(new LandingSystem(10000));
         engine.addSystem(new JumpingSystem(this, 10000));
-
-        assets.gameData.setEngine(engine);
-        player = assets.gameData.player;
-        engine.addEntity(player);
     }
 
     private void initScreens() {
@@ -125,14 +131,14 @@ public class Game extends com.badlogic.gdx.Game {
         Gdx.gl.glClearColor(c, c, c, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         handlePlayerInput();
-        Transform transform = TRANSFORM.get(player);
+        Transform transform = TRANSFORM.get(playerEntity);
         viewport.getCamera().position.set(transform.location, 0);
         viewport.getCamera().update();
         batch.setProjectionMatrix(viewport.getCamera().combined);
         GdxAI.getTimepiece().update(deltaTime);
         engine.update(deltaTime);
 
-        Landing landing = LANDING.get(player);
+        Landing landing = LANDING.get(playerEntity);
         if (landing != null && landing.landed) {
             if (screen != planetScreen) {
                 setScreen(planetScreen);
@@ -156,18 +162,18 @@ public class Game extends com.badlogic.gdx.Game {
     private float lastVel;
 
     private void handlePlayerInput() {
-        Movement movement = MOVEMENT.get(player);
+        Movement movement = MOVEMENT.get(playerEntity);
         float accel = (movement.velocity.len() - lastVel) / Gdx.graphics.getDeltaTime();
         lastVel = movement.velocity.len();
         accelTimer -= Gdx.graphics.getDeltaTime();
         if (accelTimer < 0) {
             accelTimer += 1;
-            Steering steering = STEERING.get(player);
+            Steering steering = STEERING.get(playerEntity);
 //            com.badlogic.gdx.physics.box2d.Body physicsBody = PHYSICS.get(player).physicsBody;
 //            System.err.println(accel + " " + steering.steerable.getMaxLinearAcceleration() + " " + steering.steerable.getMaxAngularSpeed() + " " + physicsBody.getAngularVelocity() +
 //            " " + physicsBody.getMass());
         }
-        Steering steering = STEERING.get(player);
+        Steering steering = STEERING.get(playerEntity);
         if (steering != null) {
             steering.thrust = 0;
             steering.turn = 0;
@@ -197,7 +203,7 @@ public class Game extends com.badlogic.gdx.Game {
             if (Gdx.input.isKeyPressed(Keys.L)) {
                 Entity planet = null;
                 float bestDst2 = Float.POSITIVE_INFINITY;
-                Transform playerTransform = TRANSFORM.get(this.player);
+                Transform playerTransform = TRANSFORM.get(this.playerEntity);
                 for (Entity entity : engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get())) {
                     float dst2 = TRANSFORM.get(entity).location.dst2(playerTransform.location);
                     if (dst2 < bestDst2) {
@@ -216,24 +222,15 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public Entity spawn(String entityDefinitionKey, Class<? extends Component>... expectedComponents) {
-        return assets.gameData.spawnEntity(entityDefinitionKey);
+        return entityFactory.spawnEntity(entityDefinitionKey);
     }
 
     public Entity spawn(EntityTemplate template) {
-        return assets.gameData.spawnEntity(template);
+        return entityFactory.spawnEntity(template);
     }
 
     public Array<Entity> spawnGroup(EntityGroup entityGroup) {
-        tEntities.clear();
-        Array<EntityTemplate> toSpawn = entityGroup.randomVariant();
-        for (EntityTemplate et: toSpawn) {
-            Entity entity = spawn(et);
-            Character character = engine.createComponent(Character.class);
-            character.faction = entityGroup.faction;
-            entity.add(character);
-            tEntities.add(entity);
-        }
-        return tEntities;
+        return entityFactory.spawnGroup(entityGroup);
     }
 
     @Override
@@ -254,7 +251,7 @@ public class Game extends com.badlogic.gdx.Game {
     }
 
     public void populateCurrentSystem() {
-        assets.gameData.spawnSystem(currentSystem);
+        entityFactory.spawnSystem(currentSystem);
     }
 
     public void flash(float time) {

@@ -18,13 +18,12 @@ public class Steering implements Component, Pool.Poolable {
     public Steerable<Vector2> steerable;
     public Entity modeTargetEntity;
     public boolean primaryFire;
-    public Entity selectedEntity;
 
     @Override
     public void reset() {
         thrust = turn = 0;
         steerable = null;
-        selectedEntity = modeTargetEntity = null;
+        modeTargetEntity = null;
         jumpTo = null;
         mode = SteeringMode.FREE_FLIGHT;
     }

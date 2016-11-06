@@ -45,7 +45,7 @@ public class MapScreen extends ScreenAdapter {
             public void changed(ChangeEvent event, Actor actor) {
                 SolarSystem targetSystem = (SolarSystem) actor.getUserObject();
                 if (game.currentSystem != targetSystem) {
-                    STEERING.get(game.player).jumpTo = targetSystem;
+                    STEERING.get(game.playerEntity).jumpTo = targetSystem;
                 }
             }
         };

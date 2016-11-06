@@ -51,7 +51,7 @@ public class JumpingSystem extends IteratingSystem {
                 if (persistence == null || persistence.temporary) {
                     getEngine().removeEntity(entity);
                 } else {
-                    if (entity == game.player) {
+                    if (entity == game.playerEntity) {
                         game.flash(0.2f);
                         game.assets.snd_hyperdrive_shutdown.play();
                     }
