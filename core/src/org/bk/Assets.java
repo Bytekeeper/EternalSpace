@@ -33,6 +33,7 @@ public class Assets {
     public final BitmapFont hudFont;
     public final Sound snd_hyperdrive_shutdown;
     public final ScriptContext scriptContext;
+    public final Sound snd_shot1;
     public BitmapFont debugFont;
     private final AssetManager assetManager;
     public ObjectMap<String, TextureRegion> textures = new ObjectMap<String, TextureRegion>();
@@ -44,6 +45,7 @@ public class Assets {
         AssetDescriptor<Sound> thrustAsset = loadSound("sound/ship/thrust.ogg");
         AssetDescriptor<Sound> hyperDriveEngage = loadSound("sound/ship/hyperdrive_engage.ogg");
         AssetDescriptor<Sound> hyperDriveShutdown = loadSound("sound/ship/hyperdrive_shutdown.ogg");
+        AssetDescriptor<Sound> shot1 = loadSound("sound/ship/shot1.ogg");
         AssetDescriptor<TextureAtlas> atlasAssetDescriptor = new AssetDescriptor<TextureAtlas>("textures.atlas", TextureAtlas.class);
         assetManager.load(atlasAssetDescriptor);
         assetManager.finishLoading();
@@ -58,6 +60,7 @@ public class Assets {
         snd_thrust = assetManager.get(thrustAsset);
         snd_hyperdrive_engage = assetManager.get(hyperDriveEngage);
         snd_hyperdrive_shutdown = assetManager.get(hyperDriveShutdown);
+        snd_shot1 = assetManager.get(shot1);
         this.gameData = new GameData();
         hudFont = skin.getFont("default-font");
 

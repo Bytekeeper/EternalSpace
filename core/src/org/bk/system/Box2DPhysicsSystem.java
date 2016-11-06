@@ -66,6 +66,13 @@ public class Box2DPhysicsSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         for (Entity entity : entities) {
+            Touching touching = TOUCHING.get(entity);
+            if (touching != null) {
+                touching.touchList.removeAll(touching.untouchList, true);
+                if (touching.touchList.size == 0) {
+                    entity.remove(Touching.class);
+                }
+            }
             Transform transform = TRANSFORM.get(entity);
             Physics physics = PHYSICS.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
@@ -226,15 +233,11 @@ public class Box2DPhysicsSystem extends EntitySystem {
         @Override
         public void endContact(Contact contact) {
             Entity a = (Entity) contact.getFixtureA().getBody().getUserData();
-            Array<Entity> touchListA = touchingOf(a).touchList;
             Entity b = (Entity) contact.getFixtureB().getBody().getUserData();
-            Array<Entity> touchListB = touchingOf(b).touchList;
-            if (touchListA.removeValue(b, true) && touchListA.size == 0) {
-                a.remove(Touching.class);
-            }
-            if (touchListB.removeValue(a, true) && touchListB.size == 0) {
-                b.remove(Touching.class);
-            }
+            Touching touchingA = touchingOf(a);
+            Touching touchingB = touchingOf(b);
+            touchingA.untouchList.add(b);
+            touchingB.untouchList.add(a);
         }
 
         private Touching touchingOf(Entity e) {

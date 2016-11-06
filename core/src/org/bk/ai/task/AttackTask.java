@@ -50,7 +50,8 @@ public class AttackTask extends LeafTask<Entity> {
         SteeringUtil.applySteering(steeringBehavior, steering.steerable, steering);
         float targetAngle = tv.set(TRANSFORM.get(aiControlled.enemy).location).sub(TRANSFORM.get(getObject()).location).angleRad();
         STEERING.get(getObject()).primaryFire = false;
-        if (Math.abs(Util.deltaAngle(targetAngle, TRANSFORM.get(getObject()).orientRad)) < 0.1f) {
+        if (Math.abs(Util.deltaAngle(targetAngle, TRANSFORM.get(getObject()).orientRad)) < 0.1f &&
+                tv.len() < 1000) {
             STEERING.get(getObject()).primaryFire = true;
         }
         return Status.RUNNING;

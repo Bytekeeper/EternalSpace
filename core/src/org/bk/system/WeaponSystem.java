@@ -52,6 +52,8 @@ public class WeaponSystem extends IteratingSystem {
         Transform sourceTransform = TRANSFORM.get(owner);
         Movement sourceMovement = MOVEMENT.get(owner);
 
+        game.assets.snd_shot1.play();
+
         Entity projectileEntity = game.spawn(weapon.projectile);
         Owned owned = getEngine().createComponent(Owned.class);
         owned.owner = owner;
