@@ -106,6 +106,9 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void drawEntityWithBody(Entity entity) {
+        if (entity.isScheduledForRemoval()) {
+            return;
+        }
         Transform transform = TRANSFORM.get(entity);
         Body body = BODY.get(entity);
 
@@ -115,8 +118,8 @@ public class RenderingSystem extends EntitySystem {
         }
         Landing landing = LANDING.get(entity);
         if (landing == null) {
-            Movement movement = MOVEMENT.get(entity);
-            if (movement != null && movement.linearAccel.len2() > 0) {
+            Steering steering = STEERING.get(entity);
+            if (steering != null && steering.thrust != 0) {
                 Thrusters thrusters = THRUSTERS.get(entity);
                 for (Thrusters.Thruster thruster : thrusters.thruster) {
                     tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);

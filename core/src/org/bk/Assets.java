@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
 import org.bk.data.GameData;
@@ -35,6 +36,8 @@ public class Assets {
     public BitmapFont debugFont;
     private final AssetManager assetManager;
     public ObjectMap<String, TextureRegion> textures = new ObjectMap<String, TextureRegion>();
+    private ObjectMap<String, Array<float[]>> outline = new ObjectMap<String, Array<float[]>>();
+    public Outliner outliner = new Outliner();
 
     public Assets() {
         assetManager = new AssetManager();
@@ -70,5 +73,14 @@ public class Assets {
 
     private TextureRegion tr(String name) {
         return atlas.findRegion(name);
+    }
+
+    public Array<float[]> outlineOf(String name) {
+        Array<float[]> result = outline.get(name);
+        if (result == null) {
+            result = outliner.determineOutlineOf(textures.get(name));
+            outline.put(name, result);
+        }
+        return result;
     }
 }

@@ -51,9 +51,6 @@ public class ApplySteeringSystem extends IteratingSystem {
                 weapon.firing = steering.primaryFire;
             }
         }
-
-        steering.thrust = 0;
-        steering.turn = 0;
     }
 
     private void tryJumping(Entity entity, Movement movement, Steering steering, Transform transform) {

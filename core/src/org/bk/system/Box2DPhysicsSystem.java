@@ -3,10 +3,16 @@ package org.bk.system;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
+import org.bk.Assets;
+import org.bk.Game;
+import org.bk.Outliner;
 import org.bk.ai.SteeringUtil;
 import org.bk.data.component.Body;
 import org.bk.data.component.*;
@@ -28,13 +34,18 @@ public class Box2DPhysicsSystem extends EntitySystem {
     public static final float B2W = 1f / W2B;
     private final ContactListener myContactListener = new MyContactListener();
     private final ContactFilter myContactFilter = new MyContactFilter();
+//    private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
+    private final Assets assets;
+    private final Game game;
     private World world;
     private ImmutableArray<Entity> entities;
     private final Vector2 tv = new Vector2();
     private float nextStep;
 
-    public Box2DPhysicsSystem(int priority) {
+    public Box2DPhysicsSystem(Game game, int priority) {
         super(priority);
+        assets = game.assets;
+        this.game = game;
         world = new World(Vector2.Zero, true);
         world.setContactListener(myContactListener);
         world.setContactFilter(myContactFilter);
@@ -59,11 +70,11 @@ public class Box2DPhysicsSystem extends EntitySystem {
             Physics physics = PHYSICS.get(entity);
             com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
             tv.set(physicsBody.getPosition()).scl(B2W);
-            if (transform.location.dst2(tv) > 0.1f ||
-                    Math.abs(transform.orientRad - physicsBody.getAngle()) > 0.01f) {
-                tv.set(transform.location).scl(W2B);
-                physicsBody.setTransform(tv, transform.orientRad);
-            }
+//            if (transform.location.dst2(tv) > 0.1f ||
+//                    Math.abs(transform.orientRad - physicsBody.getAngle()) > 0.01f) {
+//                tv.set(transform.location).scl(W2B);
+//                physicsBody.setTransform(tv, transform.orientRad);
+//            }
         }
         nextStep -= Math.min(deltaTime, 0.1f);
         while (nextStep < 0) {
@@ -102,12 +113,18 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 movement.velocity.set(physicsBody.getLinearVelocity()).scl(B2W);
                 movement.angularVelocity = physicsBody.getAngularVelocity();
             }
+
         }
+//        Matrix4 m = new Matrix4();
+//        m.set(game.viewport.getCamera().combined);
+//        m.scl(B2W);
+//        debugRenderer.render(world, m);
     }
 
     private class MyEntityListener implements EntityListener {
         BodyDef bodyDef = new BodyDef();
         FixtureDef fixtureDef = new FixtureDef();
+        ObjectMap<String, Array<float[]>> trianglesOf = new ObjectMap<String, Array<float[]>>();
 
         @Override
         public void entityAdded(Entity entity) {
@@ -121,8 +138,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 bodyDef.angularDamping = 0;
             }
             bodyDef.angle = transform.orientRad;
-            tv.set(transform.location).scl(W2B);
-            bodyDef.position.set(tv);
+            bodyDef.position.set(transform.location).scl(W2B);
             Movement movement = MOVEMENT.get(entity);
             if (movement != null) {
                 bodyDef.linearVelocity.set(movement.velocity).scl(W2B);
@@ -132,17 +148,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 bodyDef.angularVelocity = 0;
             }
 
-            com.badlogic.gdx.physics.box2d.Body physicsBody = world.createBody(bodyDef);
-            physicsBody.setUserData(entity);
-            Physics physics = PHYSICS.get(entity);
-            Body body = BODY.get(entity);
-            physics.physicsBody = physicsBody;
-            CircleShape circleShape = new CircleShape();
-            circleShape.setRadius(body.dimension.len() * W2B / 2);
+            bodyDef.bullet = false;
 
-            fixtureDef.shape = circleShape;
-            fixtureDef.density = 5f;
-//            fixtureDef.density = 1f;
+            fixtureDef.density = 40f;
             fixtureDef.friction = 0.5f;
             fixtureDef.restitution = 0.2f;
             if (SHIP.has(entity)) {
@@ -152,6 +160,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 fixtureDef.filter.categoryBits = CATEGORY_WEAPON;
                 fixtureDef.filter.maskBits = CATEGORY_DEBRIS | CATEGORY_SHIPS | CATEGORY_WEAPON;
                 fixtureDef.isSensor = true;
+                bodyDef.bullet = true;
             } else if (CELESTIAL.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_POI;
                 fixtureDef.filter.maskBits = CATEGORY_SHIPS;
@@ -162,12 +171,43 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 fixtureDef.isSensor = false;
             }
 
-            Fixture fixture = physicsBody.createFixture(fixtureDef);
-            circleShape.dispose();
+            com.badlogic.gdx.physics.box2d.Body physicsBody = world.createBody(bodyDef);
+            physicsBody.setUserData(entity);
+            Physics physics = PHYSICS.get(entity);
+            Body body = BODY.get(entity);
+            physics.physicsBody = physicsBody;
+
+            Array<float[]> triangles = trianglesOf.get(body.graphics);
+            if (triangles == null) {
+                TextureRegion region = assets.textures.get(body.graphics);
+                Array<float[]> polygons = assets.outlineOf(body.graphics);
+                for (int i = 0; i < polygons.size; i++) {
+                    polygons.set(i, Outliner.douglasPeucker(polygons.get(i), 7));
+                }
+                triangles = assets.outliner.triangulate(polygons, W2B * body.dimension.x / region.getRegionWidth());
+                trianglesOf.put(body.graphics, triangles);
+            }
+            PolygonShape shape = new PolygonShape();
+            for (float[] triangle: triangles) {
+//                float x1 = triangle[2] - triangle[0];
+//                float y1 = triangle[3] - triangle[1];
+//                float x2 = triangle[4] - triangle[0];
+//                float y2 = triangle[5] - triangle[1];
+//                float area = 0.5f * Math.abs(x1 * y2 - x2 * y1);
+                shape.set(triangle);
+                fixtureDef.shape = shape;
+                physicsBody.createFixture(fixtureDef);
+            }
+            shape.dispose();
         }
 
         @Override
         public void entityRemoved(Entity entity) {
+            Physics physics = PHYSICS.get(entity);
+            if (physics != null && physics.physicsBody != null) {
+                world.destroyBody(physics.physicsBody);
+                physics.physicsBody = null;
+            }
             entity.remove(Touching.class);
         }
     }
@@ -212,7 +252,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
         @Override
         public void postSolve(Contact contact, ContactImpulse impulse) {
-
         }
     }
 

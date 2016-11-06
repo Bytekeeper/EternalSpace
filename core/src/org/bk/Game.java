@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -48,8 +49,6 @@ public class Game extends com.badlogic.gdx.Game {
     private MapScreen mapScreen;
     private float flashTimer, lastFlashTime;
 
-    private Polygon polygon;
-
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
@@ -82,9 +81,8 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new AISystem(this, 0));
         engine.addSystem(new AutopilotSystem(this, 1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
-        engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(4));
-        engine.addSystem(new Box2DPhysicsSystem(5));
+        engine.addSystem(new Box2DPhysicsSystem(this, 3));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
         engine.addSystem(new HealthSystem(8));
@@ -92,6 +90,7 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new AsteroidSystem(this, 9000));
         engine.addSystem(new TrafficSystem(this, 9000));
 
+        engine.addSystem(new RenderingSystem(this, 10000));
         engine.addSystem(new OrbitingSystem(10000));
         engine.addSystem(new LandingSystem(10000));
         engine.addSystem(new JumpingSystem(this, 10000));
@@ -105,9 +104,6 @@ public class Game extends com.badlogic.gdx.Game {
         inputMultiplexer.addProcessor(stage);
         inputMultiplexer.addProcessor(hud);
         Gdx.input.setInputProcessor(inputMultiplexer);
-
-        Outliner outliner = new Outliner();
-        polygon = outliner.determineOutlineOf(assets.textures.get("ship/5"));
     }
 
     private void initScreens() {
@@ -148,11 +144,6 @@ public class Game extends com.badlogic.gdx.Game {
         stage.draw();
         hud.act();
         hud.draw();
-
-        ShapeRenderer shapeRenderer = new ShapeRenderer();
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.polygon(polygon.getVertices());
-        shapeRenderer.end();
     }
 
     private float accelTimer = 1;
@@ -172,6 +163,9 @@ public class Game extends com.badlogic.gdx.Game {
         }
         Steering steering = STEERING.get(player);
         if (steering != null) {
+            steering.thrust = 0;
+            steering.turn = 0;
+
             if (Gdx.input.isKeyPressed(Keys.UP)) {
                 steering.thrust = 1;
                 steering.mode = Steering.SteeringMode.FREE_FLIGHT;
