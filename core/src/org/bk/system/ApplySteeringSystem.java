@@ -81,14 +81,18 @@ public class ApplySteeringSystem extends IteratingSystem {
         if (movement.velocity.len2() > ACTION_VELOCITY_THRESHOLD2) {
             return;
         }
+        Vector2 ownerLocation = TRANSFORM.get(entity).location;
         Touching touching = TOUCHING.get(entity);
         if (touching != null) {
             for (Entity e : touching.touchList) {
                 if (CELESTIAL.has(e)) {
-                    Landing landing = getEngine().createComponent(Landing.class);
-                    landing.landingDirection = Landing.LandingDirection.LANDING;
-                    landing.target = e;
-                    entity.add(landing);
+                    Vector2 celestialLocation = TRANSFORM.get(e).location;
+                    if (ownerLocation.dst(celestialLocation) < BODY.get(e).dimension.x / 2) {
+                        Landing landing = getEngine().createComponent(Landing.class);
+                        landing.landingDirection = Landing.LandingDirection.LANDING;
+                        landing.target = e;
+                        entity.add(landing);
+                    }
                 }
             }
         }

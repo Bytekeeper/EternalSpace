@@ -5,7 +5,6 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
@@ -131,7 +130,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private class MyEntityListener implements EntityListener {
         BodyDef bodyDef = new BodyDef();
         FixtureDef fixtureDef = new FixtureDef();
-        ObjectMap<String, Array<float[]>> trianglesOf = new ObjectMap<String, Array<float[]>>();
+        ObjectMap<String, Array<PolygonShape>> shapesOf = new ObjectMap<String, Array<PolygonShape>>();
 
         @Override
         public void entityAdded(Entity entity) {
@@ -184,28 +183,26 @@ public class Box2DPhysicsSystem extends EntitySystem {
             Body body = BODY.get(entity);
             physics.physicsBody = physicsBody;
 
-            Array<float[]> triangles = trianglesOf.get(body.graphics);
-            if (triangles == null) {
+            Array<PolygonShape> shapes = shapesOf.get(body.graphics);
+            if (shapes == null) {
                 TextureRegion region = assets.textures.get(body.graphics);
                 Array<float[]> polygons = assets.outlineOf(body.graphics);
                 for (int i = 0; i < polygons.size; i++) {
                     polygons.set(i, Outliner.douglasPeucker(polygons.get(i), 7));
                 }
-                triangles = assets.outliner.triangulate(polygons, W2B * body.dimension.x / region.getRegionWidth());
-                trianglesOf.put(body.graphics, triangles);
+                Array<float[]> triangles = assets.outliner.triangulate(polygons, W2B * body.dimension.x / region.getRegionWidth());
+                shapes = new Array<PolygonShape>(triangles.size);
+                for (float[] triangle: triangles) {
+                    PolygonShape shape = new PolygonShape();
+                    shape.set(triangle);
+                    shapes.add(shape);
+                }
+                shapesOf.put(body.graphics, shapes);
             }
-            PolygonShape shape = new PolygonShape();
-            for (float[] triangle: triangles) {
-//                float x1 = triangle[2] - triangle[0];
-//                float y1 = triangle[3] - triangle[1];
-//                float x2 = triangle[4] - triangle[0];
-//                float y2 = triangle[5] - triangle[1];
-//                float area = 0.5f * Math.abs(x1 * y2 - x2 * y1);
-                shape.set(triangle);
+            for (PolygonShape shape: shapes) {
                 fixtureDef.shape = shape;
                 physicsBody.createFixture(fixtureDef);
             }
-            shape.dispose();
         }
 
         @Override

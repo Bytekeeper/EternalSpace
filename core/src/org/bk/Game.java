@@ -138,6 +138,7 @@ public class Game extends com.badlogic.gdx.Game {
 
         uiBatch.begin();
         assets.debugFont.draw(uiBatch, Gdx.graphics.getFramesPerSecond() + " FPS", Gdx.graphics.getWidth() - 80, Gdx.graphics.getHeight() - 20);
+        assets.debugFont.draw(uiBatch, engine.getEntities().size() + " Entities", Gdx.graphics.getWidth() - 80, Gdx.graphics.getHeight() - 40);
         uiBatch.end();
         super.render();
         stage.act();
