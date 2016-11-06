@@ -14,8 +14,8 @@ import org.bk.Game;
 import org.bk.Outliner;
 import org.bk.ai.SteeringUtil;
 import org.bk.data.component.Body;
-import org.bk.data.component.*;
 import org.bk.data.component.Character;
+import org.bk.data.component.*;
 import org.bk.data.component.Transform;
 
 import static org.bk.data.component.Mapper.*;
@@ -29,17 +29,30 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private static final short CATEGORY_SHIPS = 0x0004;
     private static final short CATEGORY_WEAPON = 0x0008;
 
-    private static final float W2B = 1f / 10;
+    static final float W2B = 1f / 10;
     public static final float B2W = 1f / W2B;
     private final ContactListener myContactListener = new MyContactListener();
     private final ContactFilter myContactFilter = new MyContactFilter();
-//    private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
+    //    private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     private final Assets assets;
     private final Game game;
     private World world;
     private ImmutableArray<Entity> entities;
     private final Vector2 tv = new Vector2();
     private float nextStep;
+    private ImmutableArray<Entity> touchingEntities;
+    private Entity lastPick;
+    private QueryCallback pickCallback = new QueryCallback() {
+        @Override
+        public boolean reportFixture(Fixture fixture) {
+            Entity picked = (Entity) fixture.getBody().getUserData();
+            if (SHIP.has(picked)) {
+                lastPick = picked;
+                return false;
+            }
+            return true;
+        }
+    };
 
     public Box2DPhysicsSystem(Game game, int priority) {
         super(priority);
@@ -54,6 +67,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     public void addedToEngine(Engine engine) {
         Family family = Family.all(Transform.class, Physics.class).get();
         entities = engine.getEntitiesFor(family);
+        touchingEntities = engine.getEntitiesFor(Family.all(Touching.class).get());
         engine.addEntityListener(family, new MyEntityListener());
     }
 
@@ -64,23 +78,12 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        for (Entity entity : entities) {
+        for (Entity entity : touchingEntities) {
             Touching touching = TOUCHING.get(entity);
-            if (touching != null) {
-                touching.touchList.removeAll(touching.untouchList, true);
-                if (touching.touchList.size == 0) {
-                    entity.remove(Touching.class);
-                }
+            touching.touchList.removeAll(touching.untouchList, true);
+            if (touching.touchList.size == 0) {
+                entity.remove(Touching.class);
             }
-            Transform transform = TRANSFORM.get(entity);
-            Physics physics = PHYSICS.get(entity);
-            com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
-            tv.set(physicsBody.getPosition()).scl(B2W);
-//            if (transform.location.dst2(tv) > 0.1f ||
-//                    Math.abs(transform.orientRad - physicsBody.getAngle()) > 0.01f) {
-//                tv.set(transform.location).scl(W2B);
-//                physicsBody.setTransform(tv, transform.orientRad);
-//            }
         }
         nextStep -= Math.min(deltaTime, 0.1f);
         while (nextStep < 0) {
@@ -103,7 +106,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 }
             }
             nextStep += 1 / 60f;
-            world.step(1 / 60f, 6, 2);
+            world.step(1 / 60f, 8, 3);
         }
         for (Entity entity : entities) {
             Physics physics = PHYSICS.get(entity);
@@ -125,6 +128,14 @@ public class Box2DPhysicsSystem extends EntitySystem {
 //        m.set(game.viewport.getCamera().combined);
 //        m.scl(B2W);
 //        debugRenderer.render(world, m);
+    }
+
+    public Entity pick(Vector2 at) {
+        lastPick = null;
+        world.QueryAABB(pickCallback, at.x, at.y, at.x, at.y);
+        Entity tmp = lastPick;
+        lastPick = null;
+        return tmp;
     }
 
     private class MyEntityListener implements EntityListener {
@@ -170,6 +181,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             } else if (CELESTIAL.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_POI;
                 fixtureDef.filter.maskBits = CATEGORY_SHIPS;
+                bodyDef.type = BodyDef.BodyType.StaticBody;
                 fixtureDef.isSensor = true;
             } else if (ASTEROID.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_DEBRIS;
@@ -186,20 +198,20 @@ public class Box2DPhysicsSystem extends EntitySystem {
             Array<PolygonShape> shapes = shapesOf.get(body.graphics);
             if (shapes == null) {
                 TextureRegion region = assets.textures.get(body.graphics);
-                Array<float[]> polygons = assets.outlineOf(body.graphics);
+                Array<float[]> polygons = new Array<float[]>(assets.outlineOf(body.graphics));
                 for (int i = 0; i < polygons.size; i++) {
                     polygons.set(i, Outliner.douglasPeucker(polygons.get(i), 7));
                 }
                 Array<float[]> triangles = assets.outliner.triangulate(polygons, W2B * body.dimension.x / region.getRegionWidth());
                 shapes = new Array<PolygonShape>(triangles.size);
-                for (float[] triangle: triangles) {
+                for (float[] triangle : triangles) {
                     PolygonShape shape = new PolygonShape();
                     shape.set(triangle);
                     shapes.add(shape);
                 }
                 shapesOf.put(body.graphics, shapes);
             }
-            for (PolygonShape shape: shapes) {
+            for (PolygonShape shape : shapes) {
                 fixtureDef.shape = shape;
                 physicsBody.createFixture(fixtureDef);
             }

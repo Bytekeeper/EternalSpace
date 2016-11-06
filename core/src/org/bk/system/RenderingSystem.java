@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -43,13 +44,27 @@ public class RenderingSystem extends EntitySystem {
     private final Vector2 tv = new Vector2();
     private final Radar radar;
 
-    public RenderingSystem(Game game, int priority) {
+    public RenderingSystem(final Game game, int priority) {
         super(priority);
         this.game = game;
         assets = game.assets;
         batch = game.batch;
         radar = new Radar(game);
         game.hud.addActor(new Hud(game, assets));
+        game.inputMultiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                tv.set(screenX,  screenY);
+                game.viewport.unproject(tv);
+                tv.scl(Box2DPhysicsSystem.W2B);
+                Entity picked = getEngine().getSystem(Box2DPhysicsSystem.class).pick(tv);
+                if (picked != null && STEERING.has(game.player)) {
+                    STEERING.get(game.player).selectedEntity = picked;
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -144,6 +159,7 @@ public class RenderingSystem extends EntitySystem {
         }
         TextureRegion textureRegion = assets.textures.get(body.graphics);
         draw(transform, tv, textureRegion);
+//        game.assets.debugFont.draw(batch, "" + transform.location, transform.location.x, transform.location.y);
     }
 
     private void drawRadar() {

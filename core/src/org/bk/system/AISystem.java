@@ -63,6 +63,7 @@ public class AISystem extends IteratingSystem {
             Gdx.app.debug(AISystem.class.getSimpleName(), "AI entity without behavior!");
             return;
         }
+        steering.primaryFire = false;
         aiControlled.behaviorTree.step();
         if (DEBUG) {
             Transform transform = TRANSFORM.get(entity);

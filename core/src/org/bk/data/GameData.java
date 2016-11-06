@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.StringBuilder;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.esotericsoftware.kryo.serializers.FieldSerializerConfig;
@@ -25,6 +26,7 @@ public class GameData implements Initializable {
     public ObjectMap<String, Mission> mission = new ObjectMap<String, Mission>();
     public Array<Mission> activeMission = new Array<Mission>();
     public ObjectMap<String, Faction> faction = new ObjectMap<String, Faction>();
+    public ObjectMap<String, EntityGroup> group = new ObjectMap<String, EntityGroup>();
     public Entity player;
 
 
@@ -87,6 +89,9 @@ public class GameData implements Initializable {
         for (JumpLink l : link) {
             l.a.links.add(l);
             l.b.links.add(l);
+        }
+        for (EntityGroup g: group.values()) {
+            g.afterFieldsSet();
         }
     }
 }

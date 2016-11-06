@@ -78,7 +78,7 @@ template falcon {
     }
     Movement {
         maxVelocity 500
-        angularThrust 3000
+        angularThrust 2000
         linearThrust 20000
     }
     Health {
@@ -197,6 +197,10 @@ system "Arcos" {
     name "Arcos"
     position 100 50
     asteroidDensity 0.2
+    traffic {
+        group "Small Merchant"
+        every 10
+    }
 
     entity - "Arcos prime" {
         template "planet"
@@ -339,5 +343,13 @@ player {
     }
     Persistence {
         system "Arcos"
+    }
+}
+
+group "Small Merchant" {
+    faction "United Mars Government"
+    variant {
+        quota 10
+        entity - "Titan" { }
     }
 }

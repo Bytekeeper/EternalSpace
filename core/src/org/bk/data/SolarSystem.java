@@ -15,4 +15,10 @@ public class SolarSystem {
     public float asteroidDensity;
     public Array<Entity> entity = new Array<Entity>();
     public Array<JumpLink> links = new Array<JumpLink>();
+    public Array<TrafficDefinition> traffic = new Array<TrafficDefinition>();
+
+    public static class TrafficDefinition {
+        public EntityGroup group;
+        public float every;
+    }
 }

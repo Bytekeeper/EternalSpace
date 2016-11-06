@@ -37,7 +37,7 @@ public class AttackTask extends LeafTask<Entity> {
             Faction ownerFaction = CHARACTER.get(getObject()).faction;
             for (Entity e: entitiesToObserve) {
                 Character otherCharacter = CHARACTER.get(e);
-                if (ownerFaction.isEnemy(otherCharacter.faction) && STEERING.has(e)) {
+                if (ownerFaction.isEnemy(otherCharacter.faction) && STEERING.has(e) && STEERING.get(e).steerable != null) {
                     aiControlled.enemy = e;
                     break;
                 }
@@ -48,12 +48,11 @@ public class AttackTask extends LeafTask<Entity> {
 //            steeringBehavior = new Attack(steering.steerable, STEERING.get(aiControlled.enemy).steerable);
 //            steeringBehavior.setMaxMatchDistance(200);
             Pursue pursue = new Pursue(steering.steerable, STEERING.get(aiControlled.enemy).steerable);
-            pursue.setMaxPredictionTime(10);
+            pursue.setMaxPredictionTime(3);
             steeringBehavior = pursue;
         }
         SteeringUtil.applySteering(steeringBehavior, steering.steerable, steering);
         float targetAngle = tv.set(TRANSFORM.get(aiControlled.enemy).location).sub(TRANSFORM.get(getObject()).location).angleRad();
-        STEERING.get(getObject()).primaryFire = false;
         if (Math.abs(Util.deltaAngle(targetAngle, TRANSFORM.get(getObject()).orientRad)) < 0.2f &&
                 tv.len() < 1000) {
             STEERING.get(getObject()).primaryFire = true;

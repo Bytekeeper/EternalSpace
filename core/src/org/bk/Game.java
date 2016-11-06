@@ -18,11 +18,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import org.bk.data.EntityTemplate;
+import org.bk.data.*;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
-import org.bk.data.GameData;
-import org.bk.data.SolarSystem;
 import org.bk.data.component.Transform;
 import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
@@ -35,6 +33,7 @@ public class Game extends com.badlogic.gdx.Game {
     public Viewport viewport;
     public SpriteBatch batch;
     public SpriteBatch uiBatch;
+    public ShapeRenderer shape;
     public Assets assets;
     public Behaviors behaviors;
     PooledEngine engine;
@@ -49,11 +48,15 @@ public class Game extends com.badlogic.gdx.Game {
     private MapScreen mapScreen;
     private float flashTimer, lastFlashTime;
 
+    private Array<Entity> tEntities = new Array<Entity>();
+    public InputMultiplexer inputMultiplexer;
+
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
         viewport.update(width, height);
         uiBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
+        shape.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
         stage.getViewport().update(width, height);
         hud.getViewport().update(width, height);
         this.width = width;
@@ -70,12 +73,20 @@ public class Game extends com.badlogic.gdx.Game {
         behaviors = new Behaviors();
         batch = new SpriteBatch();
         uiBatch = new SpriteBatch();
+        shape = new ShapeRenderer();
         stage = new Stage(new ScreenViewport(), uiBatch);
         hud = new Stage(new ScreenViewport(), uiBatch);
+
+        inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(stage);
+        inputMultiplexer.addProcessor(hud);
+        Gdx.input.setInputProcessor(inputMultiplexer);
+
         initScreens();
         batch.getProjectionMatrix().setToOrtho2D(-Gdx.graphics.getWidth() / 2, -Gdx.graphics.getHeight() / 2,
                 Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         engine = new PooledEngine();
+
         engine.addSystem(new SystemPopulateSystem(this, 0));
 
         engine.addSystem(new AISystem(this, 0));
@@ -96,14 +107,8 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new JumpingSystem(this, 10000));
 
         assets.gameData.setEngine(engine);
-
         player = assets.gameData.player;
         engine.addEntity(player);
-
-        InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(stage);
-        inputMultiplexer.addProcessor(hud);
-        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     private void initScreens() {
@@ -216,6 +221,19 @@ public class Game extends com.badlogic.gdx.Game {
 
     public Entity spawn(EntityTemplate template) {
         return assets.gameData.spawnEntity(template);
+    }
+
+    public Array<Entity> spawnGroup(EntityGroup entityGroup) {
+        tEntities.clear();
+        Array<EntityTemplate> toSpawn = entityGroup.randomVariant();
+        for (EntityTemplate et: toSpawn) {
+            Entity entity = spawn(et);
+            Character character = engine.createComponent(Character.class);
+            character.faction = entityGroup.faction;
+            entity.add(character);
+            tEntities.add(entity);
+        }
+        return tEntities;
     }
 
     @Override

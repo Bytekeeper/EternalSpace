@@ -9,9 +9,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
+import org.bk.data.SolarSystem;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
 
+import static org.bk.data.component.Mapper.CHARACTER;
 import static org.bk.data.component.Mapper.MOVEMENT;
 import static org.bk.data.component.Mapper.TRANSFORM;
 
@@ -40,13 +42,21 @@ public class TrafficSystem extends EntitySystem {
             @Override
             public void receive(Signal<String> signal, String object) {
                 Gdx.app.log(TrafficSystem.class.getSimpleName(), "Setting up initial traffic deployment");
-                int toSpawn = 15 - shipEntities.size();
-                while (toSpawn-- > 0) {
-                    spawnShip(true);
+                for (SolarSystem.TrafficDefinition td: game.currentSystem.traffic) {
+                    int toSpawn = (int) (120 / td.every);
+                    while (toSpawn-- > 0) {
+                        spawnTraffic(td, true);
+                    }
                 }
             }
         });
         setSpawnTimer();
+    }
+
+    private void spawnTraffic(SolarSystem.TrafficDefinition td, boolean initialDeployment) {
+        for (Entity e: game.spawnGroup(td.group)) {
+            setupEntity(initialDeployment, e);
+        }
     }
 
     private void setSpawnTimer() {
@@ -60,25 +70,23 @@ public class TrafficSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        nextSpawn -= deltaTime;
-        if (nextSpawn < 0) {
-            setSpawnTimer();
-            for (int i = rnd.nextInt(3) + 1; i > 0; i--) {
-                spawnShip(false);
+        for (SolarSystem.TrafficDefinition td: game.currentSystem.traffic) {
+            if (MathUtils.random() < 1 / td.every * deltaTime) {
+                spawnTraffic(td, false);
             }
         }
     }
 
-    private void spawnShip(boolean initialDeployment) {
+    private void setupEntity(boolean initialDeployment, Entity entity) {
         Entity target = entitiesToLandOn.random();
-        Entity entity = MathUtils.randomBoolean() ? game.spawn("falcon", Transform.class, Movement.class) :
-                game.spawn("Titan");
         Persistence persistence = getEngine().createComponent(Persistence.class);
         persistence.temporary = true;
         entity.add(persistence);
-        Character character = getEngine().createComponent(Character.class);
-        character.faction = game.gameData.faction.values().toArray().random();
-        entity.add(character);
+        if (!CHARACTER.has(entity)) {
+            Character character = getEngine().createComponent(Character.class);
+            character.faction = game.gameData.faction.values().toArray().random();
+            entity.add(character);
+        }
         AIControlled aiControlled = getEngine().createComponent(AIControlled.class);
         entity.add(aiControlled);
         Transform transform = TRANSFORM.get(entity);
