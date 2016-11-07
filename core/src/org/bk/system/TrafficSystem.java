@@ -44,6 +44,7 @@ public class TrafficSystem extends EntitySystem {
                 Gdx.app.log(TrafficSystem.class.getSimpleName(), "Setting up initial traffic deployment");
                 for (SolarSystem.TrafficDefinition td: game.currentSystem.traffic) {
                     int toSpawn = (int) MathUtils.random(120 / td.every);
+                    Gdx.app.debug(TrafficSystem.class.getSimpleName(), "Spawning " + toSpawn);
                     while (toSpawn-- > 0) {
                         spawnTraffic(td, true);
                     }
@@ -82,8 +83,9 @@ public class TrafficSystem extends EntitySystem {
         Persistence persistence = getEngine().createComponent(Persistence.class);
         persistence.temporary = true;
         entity.add(persistence);
-        if (!CHARACTER.has(entity)) {
-            Character character = getEngine().createComponent(Character.class);
+        Character character = CHARACTER.get(entity);
+        if (character == null) {
+            character = getEngine().createComponent(Character.class);
             character.faction = game.gameData.faction.values().toArray().random();
             entity.add(character);
         }
@@ -91,7 +93,8 @@ public class TrafficSystem extends EntitySystem {
         entity.add(aiControlled);
         Transform transform = TRANSFORM.get(entity);
         transform.orientRad = MathUtils.random(-MathUtils.PI, MathUtils.PI);
-        if (target != null && (initialDeployment || rnd.nextFloat() < 0.7f)) {
+        Character targetCharacter = target != null ? CHARACTER.get(target) : null;
+        if (target != null && (initialDeployment || rnd.nextFloat() < 0.7f) && (targetCharacter == null || !targetCharacter.faction.isEnemy(character.faction))) {
             if (!initialDeployment || rnd.nextFloat() < 0.2f) {
                 transform.location.set(TRANSFORM.get(target).location);
                 Landing landing = getEngine().createComponent(Landing.class);

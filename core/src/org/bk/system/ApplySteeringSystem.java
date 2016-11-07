@@ -16,7 +16,7 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 16.10.2016.
  */
 public class ApplySteeringSystem extends IteratingSystem {
-    public static final int ACTION_VELOCITY_THRESHOLD2 = 50;
+    public static final int ACTION_VELOCITY_THRESHOLD2 = 100;
     public static final double ACTION_DELTA_ANGLE_THRESHOLD = 0.01;
     private final Vector2 tv = new Vector2();
     private final Game game;

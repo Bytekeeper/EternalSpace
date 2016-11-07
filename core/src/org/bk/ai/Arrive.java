@@ -77,13 +77,13 @@ public class Arrive extends SteeringBehavior<Vector2> {
         float v = owner.getLinearVelocity().len();
 
 
-        float turnTime = MathUtils.PI / actualLimiter.getMaxAngularSpeed();
+        float turnTime = (MathUtils.PI - Math.abs(Util.deltaAngle(owner.getLinearVelocity().angleRad(), owner.getOrientation()))) / actualLimiter.getMaxAngularSpeed();
         float radius = 0.5f * v * v / actualLimiter.getMaxLinearAcceleration() + turnTime * v;
         tv.set(owner.getLinearVelocity()).nor().scl(radius);
         tv.add(owner.getPosition());
         toTarget.set(targetPosition).sub(tv);
 
-        toTarget.setLength(actualLimiter.getMaxLinearAcceleration());
+        toTarget.setLength(actualLimiter.getMaxLinearAcceleration()).scl(Math.min(1, tv.len() / 10));
 
         // No angular acceleration
         steering.angular = 0f;

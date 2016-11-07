@@ -111,7 +111,7 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new AsteroidSystem(this, 9000));
         engine.addSystem(new TrafficSystem(this, 9000));
 
-        engine.addSystem(new RenderingSystem(this, 10000));
+        engine.addSystem(new RenderingSystem(this, 0));
         engine.addSystem(new OrbitingSystem(10000));
         engine.addSystem(new LandingSystem(10000));
         engine.addSystem(new JumpingSystem(this, 10000));
@@ -163,16 +163,16 @@ public class Game extends com.badlogic.gdx.Game {
 
     private void handlePlayerInput() {
         Movement movement = MOVEMENT.get(playerEntity);
-        float accel = (movement.velocity.len() - lastVel) / Gdx.graphics.getDeltaTime();
-        lastVel = movement.velocity.len();
-        accelTimer -= Gdx.graphics.getDeltaTime();
-        if (accelTimer < 0) {
-            accelTimer += 1;
-            Steering steering = STEERING.get(playerEntity);
-//            com.badlogic.gdx.physics.box2d.Body physicsBody = PHYSICS.get(player).physicsBody;
+//        accelTimer -= Gdx.graphics.getDeltaTime();
+//        if (accelTimer < 0) {
+//            Steering steering = STEERING.get(playerEntity);
+//            float accel = (movement.velocity.len() - lastVel) / Gdx.graphics.getDeltaTime();
+//            accelTimer += 1;
+//            com.badlogic.gdx.physics.box2d.Body physicsBody = PHYSICS.get(playerEntity).physicsBody;
 //            System.err.println(accel + " " + steering.steerable.getMaxLinearAcceleration() + " " + steering.steerable.getMaxAngularSpeed() + " " + physicsBody.getAngularVelocity() +
 //            " " + physicsBody.getMass());
-        }
+//        }
+//        lastVel = movement.velocity.len();
         Steering steering = STEERING.get(playerEntity);
         if (steering != null) {
             steering.thrust = 0;

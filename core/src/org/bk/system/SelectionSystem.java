@@ -52,7 +52,7 @@ public class SelectionSystem extends EntitySystem {
                 }
                 for (Entity e: aiNPCs) {
                     AIControlled aiControlled = AI_CONTROLLED.get(e);
-                    if (aiControlled.enemy == entity) {
+                    if (aiControlled != null && aiControlled.enemy == entity) {
                         aiControlled.enemy = null;
                     }
                 }

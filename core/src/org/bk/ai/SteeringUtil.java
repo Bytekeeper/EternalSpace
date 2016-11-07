@@ -22,6 +22,8 @@ public class SteeringUtil {
 
     public static SteeringAcceleration<Vector2> applySteering(SteeringBehavior<Vector2> behavior, Steerable<Vector2> steerable, Steering steering) {
         behavior.calculateSteering(tsa);
+        steering.thrust = 0;
+        steering.turn = 0;
         if (tsa.linear.len2() > 2) {
             float delta = Util.deltaAngle(steerable.getOrientation(), tsa.linear.angleRad());
             steering.turn = Math.signum(delta) * Math.min(1, Math.abs(delta) * 15);

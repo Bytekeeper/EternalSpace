@@ -278,6 +278,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 Entity entityB = (Entity) fixtureB.getBody().getUserData();
                 Owned ownedA = OWNED.get(entityA);
                 Owned ownedB = OWNED.get(entityB);
+                if (ownedA == null && ownedB == null) {
+                    return true;
+                }
                 if (ownedA != null) {
                     entityA = ownedA.owner;
                 }

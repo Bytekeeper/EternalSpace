@@ -199,11 +199,18 @@ system "Arcos" {
     asteroidDensity 0.2
     traffic {
         group "Small Merchant"
-        every 10
+        every 15
+    }
+    traffic {
+        group "Small Raiders"
+        every 120
     }
 
     entity - "Arcos prime" {
         template "planet"
+        Character {
+            faction "United Mars Government"
+        }
         Transform {
             location -120 100
         }
@@ -319,10 +326,10 @@ faction "Player Faction" {
 faction "United Mars Government" {
     name "United Mars Government"
     relation "Player Faction" {
-        reputation -100
+        reputation 100
     }
     relation "Arcos Raiders" {
-        reputation -100
+        reputation -200
     }
 }
 
@@ -351,5 +358,23 @@ group "Small Merchant" {
     variant {
         quota 10
         entity - "Titan" { }
+        entity - "falcon" { }
+        entity - "falcon" { }
+    }
+    variant {
+        quota 20
+        entity - "falcon" { }
+        entity - "falcon" { }
+        entity - "falcon" { }
+        entity - "falcon" { }
+    }
+}
+
+group "Small Raiders" {
+    faction "Arcos Raiders"
+    variant {
+        quota 10
+        entity - "falcon" { }
+        entity - "falcon" { }
     }
 }

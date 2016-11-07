@@ -25,8 +25,8 @@ public class PatrolTask extends LeafTask<Entity> {
         if (wander == null) {
             wander = new Wander<Vector2>(steering.steerable);
             wander.setWanderOffset(150).
-                    setWanderRadius(60).
-                    setWanderRate(MathUtils.PI / 2);
+                    setWanderRadius(80).
+                    setWanderRate(MathUtils.PI / 8);
         }
         SteeringUtil.applySteering(wander, steering.steerable, STEERING.get(getObject()));
         return Status.RUNNING;

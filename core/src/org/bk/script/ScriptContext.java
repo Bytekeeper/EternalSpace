@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.esotericsoftware.kryo.Kryo;
 import org.bk.data.EntityTemplate;
+import org.bk.data.GameData;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
 import org.bk.data.script.*;
@@ -170,7 +171,11 @@ public class ScriptContext {
         }
         value = map.get(keyObject);
         if (value == null) {
-            value = ref(field.getElementType(1), keyObject);
+            if (context instanceof GameData) {
+                value = ref(field.getElementType(1), keyObject);
+            } else {
+                value = field.getElementType(1).newInstance();
+            }
             map.put(keyObject, value);
         }
         consume(sc, "{");
