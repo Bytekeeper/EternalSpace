@@ -79,7 +79,7 @@ template falcon {
     Movement {
         maxVelocity 500
         angularThrust 2000
-        linearThrust 20000
+        linearThrust 25000
     }
     Health {
         hull 100

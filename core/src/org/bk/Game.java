@@ -99,6 +99,7 @@ public class Game extends com.badlogic.gdx.Game {
         engine = new PooledEngine();
         engine.addSystem(new SystemPopulateSystem(this, 0));
         engine.addSystem(new AISystem(this, 0));
+        engine.addSystem(new RenderingSystem(this, 0));
         engine.addSystem(new AutopilotSystem(this, 1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
         engine.addSystem(new LifeTimeSystem(4));
@@ -111,7 +112,6 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new AsteroidSystem(this, 9000));
         engine.addSystem(new TrafficSystem(this, 9000));
 
-        engine.addSystem(new RenderingSystem(this, 0));
         engine.addSystem(new OrbitingSystem(10000));
         engine.addSystem(new LandingSystem(10000));
         engine.addSystem(new JumpingSystem(this, 10000));

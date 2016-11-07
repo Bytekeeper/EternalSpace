@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.component.Celestial;
+import org.bk.data.component.Character;
 import org.bk.data.component.Jumping;
 import org.bk.data.component.Transform;
 
@@ -23,6 +24,7 @@ public class Radar {
     public final Rectangle bounds = new Rectangle();
     public final Vector2 position = new Vector2();
     private final Assets assets;
+    private final Game game;
     private SpriteBatch batch;
     private final Vector2 tv = new Vector2();
     private final Vector2 tv2 = new Vector2();
@@ -30,6 +32,7 @@ public class Radar {
     public Radar(Game game) {
         this.batch = game.uiBatch;
         assets = game.assets;
+        this.game = game;
     }
 
     public void drawBackground() {
@@ -44,7 +47,14 @@ public class Radar {
             tv.setAngleRad(TRANSFORM.get(entity).orientRad + MathUtils.PI / 2).nor().scl(MathUtils.cos(t * 50) * t * t / 5);
             tv2.add(tv);
         }
+        Character character = CHARACTER.get(entity);
+        if (CHARACTER.get(game.playerEntity).faction.isEnemy(character.faction)) {
+            batch.setColor(Color.RED);
+        } else {
+            batch.setColor(Color.GREEN);
+        }
         batch.draw(assets.textures.get("particle"), tv2.x - 2, tv2.y - 2, 4, 4);
+        batch.setColor(Color.WHITE);
     }
 
     public void drawCelestial(Entity entity) {
