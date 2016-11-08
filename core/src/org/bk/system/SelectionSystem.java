@@ -6,7 +6,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.component.AIControlled;
-import org.bk.data.component.Ship;
+import org.bk.data.component.Controllable;
 
 import static org.bk.data.component.Mapper.AI_CONTROLLED;
 import static org.bk.data.component.Mapper.STEERING;
@@ -40,7 +40,7 @@ public class SelectionSystem extends EntitySystem {
     @Override
     public void addedToEngine(Engine engine) {
         final ImmutableArray<Entity> aiNPCs = engine.getEntitiesFor(Family.all(AIControlled.class).get());
-        engine.addEntityListener(Family.all(Ship.class).get(), new EntityListener() {
+        engine.addEntityListener(Family.all(Controllable.class).get(), new EntityListener() {
             @Override
             public void entityAdded(Entity entity) {
             }

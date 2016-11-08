@@ -99,11 +99,11 @@ public class Game extends com.badlogic.gdx.Game {
         engine = new PooledEngine();
         engine.addSystem(new SystemPopulateSystem(this, 0));
         engine.addSystem(new AISystem(this, 0));
-        engine.addSystem(new RenderingSystem(this, 0));
         engine.addSystem(new AutopilotSystem(this, 1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
-        engine.addSystem(new LifeTimeSystem(4));
-        engine.addSystem(new Box2DPhysicsSystem(this, 3));
+        engine.addSystem(new RenderingSystem(this, 3));
+        engine.addSystem(new LifeTimeSystem(3));
+        engine.addSystem(new Box2DPhysicsSystem(this, 4));
         engine.addSystem(new ProjectileHitSystem(6));
         engine.addSystem(new WeaponSystem(this, 7));
         engine.addSystem(new HealthSystem(8));

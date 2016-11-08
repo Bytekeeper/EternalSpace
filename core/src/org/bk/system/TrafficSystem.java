@@ -37,7 +37,7 @@ public class TrafficSystem extends EntitySystem {
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
         entitiesToLandOn = engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get());
-        shipEntities = engine.getEntitiesFor(Family.all(Ship.class).get());
+        shipEntities = engine.getEntitiesFor(Family.all(Controllable.class).get());
         engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<String>() {
             @Override
             public void receive(Signal<String> signal, String object) {

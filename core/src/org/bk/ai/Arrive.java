@@ -83,7 +83,7 @@ public class Arrive extends SteeringBehavior<Vector2> {
         tv.add(owner.getPosition());
         toTarget.set(targetPosition).sub(tv);
 
-        toTarget.setLength(actualLimiter.getMaxLinearAcceleration()).scl(Math.min(1, tv.len() / 10));
+        toTarget.setLength(actualLimiter.getMaxLinearAcceleration());
 
         // No angular acceleration
         steering.angular = 0f;

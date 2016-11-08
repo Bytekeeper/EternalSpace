@@ -6,11 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 /**
  * Created by dante on 15.10.2016.
  */
-public class Ship implements Component, Pool.Poolable {
-    public float heat;
-
+public class Controllable implements Component, Pool.Poolable {
     @Override
     public void reset() {
-        heat = 0;
     }
 }

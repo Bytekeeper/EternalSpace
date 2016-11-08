@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -57,7 +56,7 @@ public class RenderingSystem extends EntitySystem {
     public void addedToEngine(Engine engine) {
         planetEntities = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class, Body.class).get());
         asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).get());
-        shipEntities = engine.getEntitiesFor(Family.all(Ship.class, Transform.class, Body.class).get());
+        shipEntities = engine.getEntitiesFor(Family.all(Controllable.class, Transform.class, Body.class).get());
         projectileEntities = engine.getEntitiesFor(Family.all(Projectile.class, Transform.class, Body.class).get());
     }
 

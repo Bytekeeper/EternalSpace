@@ -46,7 +46,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
         @Override
         public boolean reportFixture(Fixture fixture) {
             Entity picked = (Entity) fixture.getBody().getUserData();
-            if (SHIP.has(picked)) {
+            if (CONTROLLABLE.has(picked)) {
                 lastPick = picked;
                 return false;
             }
@@ -149,7 +149,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             transform.steerableLocation = SteeringUtil.toLocation(transform.location);
 
             bodyDef.type = BodyDef.BodyType.DynamicBody;
-            if (SHIP.has(entity)) {
+            if (CONTROLLABLE.has(entity)) {
                 bodyDef.angularDamping = 5f;
             } else {
                 bodyDef.angularDamping = 0;
@@ -170,7 +170,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             fixtureDef.density = 40f;
             fixtureDef.friction = 0.5f;
             fixtureDef.restitution = 0.2f;
-            if (SHIP.has(entity)) {
+            if (CONTROLLABLE.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_SHIPS;
                 fixtureDef.filter.maskBits = CATEGORY_WEAPON | CATEGORY_POI;
             } else if (PROJECTILE.has(entity)) {
