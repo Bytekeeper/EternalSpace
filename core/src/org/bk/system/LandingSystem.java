@@ -4,10 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
-import org.bk.data.component.Landing;
-import org.bk.data.component.Persistence;
-import org.bk.data.component.Physics;
-import org.bk.data.component.Steering;
+import org.bk.data.component.*;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -35,6 +32,10 @@ public class LandingSystem extends IteratingSystem {
                 getEngine().removeEntity(entity);
             } else {
                 landing.landed = true;
+                Battery battery = BATTERY.get(entity);
+                if (battery != null) {
+                    battery.capacity = battery.maxCapacity;
+                }
             }
         }
     }

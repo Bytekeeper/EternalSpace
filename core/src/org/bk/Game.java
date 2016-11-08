@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.signals.Signal;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ai.GdxAI;
@@ -50,6 +51,8 @@ public class Game extends com.badlogic.gdx.Game {
     private float flashTimer, lastFlashTime;
 
     public InputMultiplexer inputMultiplexer;
+
+    public Signal<Entity> entityDestroyed = new Signal<Entity>();
 
     @Override
     public void resize(int width, int height) {
@@ -104,9 +107,9 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(3));
         engine.addSystem(new Box2DPhysicsSystem(this, 4));
-        engine.addSystem(new ProjectileHitSystem(6));
+        engine.addSystem(new ProjectileHitSystem(this, 6));
         engine.addSystem(new WeaponSystem(this, 7));
-        engine.addSystem(new HealthSystem(8));
+        engine.addSystem(new HealthSystem(this, 8));
         engine.addSystem(new SelectionSystem(this, 9));
 
         engine.addSystem(new AsteroidSystem(this, 9000));

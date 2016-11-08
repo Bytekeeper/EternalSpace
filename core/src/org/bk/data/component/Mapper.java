@@ -27,6 +27,7 @@ public class Mapper {
     public static final ComponentMapper<Physics> PHYSICS = mapperFor(Physics.class);
     public static final ComponentMapper<Persistence> PERSISTENCE = mapperFor(Persistence.class);
     public static final ComponentMapper<Character> CHARACTER = mapperFor(Character.class);
+    public static final ComponentMapper<Damage> DAMAGE = mapperFor(Damage.class);
     public static final ComponentMapper<Owned> OWNED = mapperFor(Owned.class);
     public static final ComponentMapper<Jumping> JUMPING = mapperFor(Jumping.class);
     public static final ComponentMapper<Orbiting> ORBITING = mapperFor(Orbiting.class);
@@ -36,6 +37,8 @@ public class Mapper {
     public static final ComponentMapper<Shield> SHIELD = mapperFor(Shield.class);
     public static final ComponentMapper<Account> ACCOUNT = mapperFor(Account.class);
     public static final ComponentMapper<Heat> HEAT = mapperFor(Heat.class);
+    public static final ComponentMapper<Cargo> CARGO = mapperFor(Cargo.class);
+
 
     private static <T extends Component> ComponentMapper<T> mapperFor(Class<T> componentClass) {
         MAPPED_COMPONENTS.add(componentClass);
