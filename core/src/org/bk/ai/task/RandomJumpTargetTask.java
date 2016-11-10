@@ -5,7 +5,9 @@ import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import org.bk.Game;
 import org.bk.data.SolarSystem;
+import org.bk.data.component.state.Jump;
 
+import static org.bk.data.component.Mapper.JUMP;
 import static org.bk.data.component.Mapper.STEERING;
 
 /**
@@ -21,7 +23,7 @@ public class RandomJumpTargetTask extends LeafTask<Entity> {
     @Override
     public Status execute() {
         SolarSystem solarSystem = game.gameData.getSystem().random();
-        STEERING.get(getObject()).jumpTo = solarSystem;
+        game.control.setTo(getObject(), JUMP, Jump.class).target = solarSystem;
         return Status.SUCCEEDED;
     }
 

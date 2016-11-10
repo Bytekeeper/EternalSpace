@@ -2,7 +2,7 @@ package org.bk.data;
 
 import com.badlogic.ashley.core.Entity;
 import org.bk.Game;
-import org.bk.data.component.Landing;
+import org.bk.data.component.state.Landing;
 
 import static org.bk.data.component.Mapper.LANDING;
 

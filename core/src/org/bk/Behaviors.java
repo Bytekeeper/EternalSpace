@@ -12,7 +12,6 @@ import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.badlogic.gdx.ai.btree.leaf.Wait;
 import com.badlogic.gdx.ai.utils.random.GaussianFloatDistribution;
 import org.bk.ai.task.*;
-import org.bk.data.Faction;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
 
@@ -21,13 +20,12 @@ import org.bk.data.component.Character;
  */
 public class Behaviors {
 
-    public BehaviorTree<Entity> land(Entity owner, Engine engine) {
+    public BehaviorTree<Entity> land(Entity owner, Engine engine, Game game) {
         BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
         DynamicGuardSelector<Entity> root = new DynamicGuardSelector<Entity>();
         Task<Entity> fight = createFightTask(engine);
         Sequence<Entity> findSpotAndLand = new Sequence<Entity>();
-        findSpotAndLand.addChild(new RandomLandingSpotTask(engine));
-        findSpotAndLand.addChild(new LandingTask());
+        findSpotAndLand.addChild(new RandomLandingSpotTask(game, engine));
         tree.addChild(root);
         root.addChild(fight);
         root.addChild(findSpotAndLand);
@@ -35,7 +33,7 @@ public class Behaviors {
         return tree;
     }
 
-    public BehaviorTree<Entity> patrol(Entity owner, Engine engine) {
+    public BehaviorTree<Entity> patrol(Entity owner, Engine engine, Game game) {
         BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
         DynamicGuardSelector<Entity> root = new DynamicGuardSelector<Entity>();
         Sequence<Entity> patrolThenLand = new Sequence<Entity>();
@@ -43,9 +41,8 @@ public class Behaviors {
         patrolTree.addChild(new Wait<Entity>(new GaussianFloatDistribution(10, 10)));
         patrolTree.addChild(new PatrolTask());
         patrolThenLand.addChild(patrolTree);
-        patrolThenLand.addChild(new RandomLandingSpotTask(engine));
         Sequence<Entity> land = new Sequence<Entity>();
-        land.addChild(new LandingTask());
+        land.addChild(new RandomLandingSpotTask(game, engine));
         patrolThenLand.addChild(land);
         Task<Entity> fight = createFightTask(engine);
         root.addChild(fight);
@@ -66,7 +63,6 @@ public class Behaviors {
         BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
         Sequence<Entity> root = new Sequence<Entity>();
         root.addChild(new RandomJumpTargetTask(game));
-        root.addChild(new JumpTask());
 
         tree.setObject(entity);
         tree.addChild(root);

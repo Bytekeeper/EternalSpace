@@ -18,6 +18,8 @@ import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.Mission;
 import org.bk.data.component.*;
+import org.bk.data.component.state.Landing;
+import org.bk.data.component.state.LiftingOff;
 import org.bk.graphics.Hud;
 import org.bk.graphics.Radar;
 
@@ -99,9 +101,8 @@ public class RenderingSystem extends EntitySystem {
     }
 
     private void drawJumpTarget() {
-        Steering steering = STEERING.get(game.playerEntity);
-        if (steering != null && steering.jumpTo != null) {
-            assets.hudFont.draw(game.uiBatch, steering.jumpTo.name, 220, game.height - assets.hudFont.getLineHeight());
+        if (game.player.selectedJumpTarget != null) {
+            assets.hudFont.draw(game.uiBatch, game.player.selectedJumpTarget.name, 220, game.height - assets.hudFont.getLineHeight());
         }
     }
 
@@ -116,30 +117,30 @@ public class RenderingSystem extends EntitySystem {
         if (!game.viewport.getCamera().frustum.boundsInFrustum(location.x, location.y, 0, body.dimension.x / SQRT_2, body.dimension.y / SQRT_2, 1000)) {
             return;
         }
-        Landing landing = LANDING.get(entity);
-        if (landing == null) {
-            Steering steering = STEERING.get(entity);
-            if (steering != null && steering.thrust != 0) {
-                Thrusters thrusters = THRUSTERS.get(entity);
-                for (Thrusters.Thruster thruster : thrusters.thruster) {
-                    tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);
-                    float hbx = 8;
-                    float hby = 40;
-                    batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
-                            hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
-                }
+        Steering steering = STEERING.get(entity);
+        if (steering != null && steering.thrust != 0) {
+            Thrusters thrusters = THRUSTERS.get(entity);
+            for (Thrusters.Thruster thruster : thrusters.thruster) {
+                tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);
+                float hbx = 8;
+                float hby = 40;
+                batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
+                        hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
             }
-        } else if (landing.landed) {
+        }
+        if (LANDED.has(entity)) {
             return;
         }
         ta.setToTranslation(location);
         ta.rotateRad(transform.orientRad);
         tv.set(body.dimension);
+        Landing landing = LANDING.get(entity);
+        LiftingOff liftingOff = LIFTING_OFF.get(entity);
         if (landing != null) {
-            float scale = landing.timeRemaining / Landing.LAND_OR_LIFTOFF_DURATION;
-            if (landing.landingDirection == Landing.LandingDirection.DEPART) {
-                scale = 1 - scale;
-            }
+            float scale = landing.timeRemaining / Landing.LANDING_DURATION;
+            tv.scl(scale);
+        } else if (liftingOff != null) {
+            float scale = 1 - liftingOff.timeRemaining / liftingOff.LIFTOFF_DURATION;
             tv.scl(scale);
         }
         TextureRegion textureRegion = assets.textures.get(body.graphics);

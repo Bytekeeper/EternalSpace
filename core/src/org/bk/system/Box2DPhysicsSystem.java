@@ -215,6 +215,11 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 fixtureDef.shape = shape;
                 physicsBody.createFixture(fixtureDef);
             }
+
+            Steering steering = STEERING.get(entity);
+            if (steering != null && movement != null) {
+                steering.steerable = SteeringUtil.toSteeringBehavior(movement, transform, physics);
+            }
         }
 
         @Override

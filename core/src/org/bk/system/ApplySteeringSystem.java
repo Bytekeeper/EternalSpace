@@ -7,8 +7,8 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
-import org.bk.Util;
 import org.bk.data.component.*;
+import org.bk.data.component.state.Landing;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -16,8 +16,6 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 16.10.2016.
  */
 public class ApplySteeringSystem extends IteratingSystem {
-    public static final int ACTION_VELOCITY_THRESHOLD2 = 100;
-    public static final double ACTION_DELTA_ANGLE_THRESHOLD = 0.01;
     private final Vector2 tv = new Vector2();
     private final Game game;
 
@@ -36,64 +34,11 @@ public class ApplySteeringSystem extends IteratingSystem {
         movement.linearAccel.add(tv);
         movement.angularAccel += MathUtils.clamp(steering.turn, -1, 1) * movement.angularThrust;
 
-        switch (steering.mode) {
-            case LANDING:
-                tryLanding(entity, movement);
-                break;
-            case JUMPING:
-                tryJumping(entity, movement, steering, transform);
-                break;
-        }
-
         Weapons weapons = WEAPONS.get(entity);
-        if (weapons != null) {
+        WeaponControl weaponControl = WEAPON_CONTROL.get(entity);
+        if (weapons != null && weaponControl != null) {
             for (Weapons.Weapon weapon : weapons.weapon) {
-                weapon.firing = steering.primaryFire;
-            }
-        }
-    }
-
-    private void tryJumping(Entity entity, Movement movement, Steering steering, Transform transform) {
-        tv.set(steering.jumpTo.position).sub(game.currentSystem.position).angleRad();
-        float targetOrientation = tv.angleRad();
-        if (movement.velocity.len2() > ACTION_VELOCITY_THRESHOLD2 ||
-                Math.abs(Util.deltaAngle(transform.orientRad, targetOrientation)) > ACTION_DELTA_ANGLE_THRESHOLD) {
-            return;
-        }
-        Battery battery = BATTERY.get(entity);
-        JumpDrive jumpDrive = JUMP_DRIVE.get(entity);
-        if (jumpDrive == null) {
-            return;
-        }
-        if (battery != null) {
-            if (battery.capacity < jumpDrive.powerCost) {
-                return;
-            }
-            battery.capacity -= jumpDrive.powerCost;
-        }
-        if (entity == game.playerEntity) {
-            game.assets.snd_hyperdrive_engage.play();
-        }
-        getEngine().getSystem(JumpingSystem.class).depart(entity, transform.location, steering.jumpTo);
-    }
-
-    private void tryLanding(Entity entity, Movement movement) {
-        if (movement.velocity.len2() > ACTION_VELOCITY_THRESHOLD2) {
-            return;
-        }
-        Vector2 ownerLocation = TRANSFORM.get(entity).location;
-        Touching touching = TOUCHING.get(entity);
-        if (touching != null) {
-            for (Entity e : touching.touchList) {
-                if (LANDING_PLACE.has(e)) {
-                    Vector2 landingLocation = TRANSFORM.get(e).location;
-                    if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {
-                        Landing landing = getEngine().createComponent(Landing.class);
-                        landing.landingDirection = Landing.LandingDirection.LANDING;
-                        landing.target = e;
-                        entity.add(landing);
-                    }
-                }
+                weapon.firing = weaponControl.primaryFire;
             }
         }
     }

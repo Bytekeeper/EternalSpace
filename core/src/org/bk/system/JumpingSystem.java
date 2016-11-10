@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.component.*;
 import org.bk.data.SolarSystem;
+import org.bk.data.component.state.JumpingOut;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -21,24 +22,24 @@ public class JumpingSystem extends IteratingSystem {
     private final Game game;
 
     public JumpingSystem(Game game, int priority) {
-        super(Family.all(Jumping.class, Transform.class, Persistence.class).get(), priority);
+        super(Family.all(JumpingOut.class, Transform.class, Persistence.class).get(), priority);
         this.game = game;
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        Jumping jumping = JUMPING.get(entity);
+        JumpingOut jumping = JUMPING.get(entity);
         entity.remove(Steering.class);
         entity.remove(Physics.class);
         Transform transform = TRANSFORM.get(entity);
-        if (jumping.direction == Jumping.JumpDirection.DEPART) {
-            transform.orientRad = tv.set(jumping.sourceOrTargetSystem.position).sub(game.currentSystem.position).angleRad();
+        if (jumping.direction == JumpingOut.JumpDirection.DEPART) {
+            transform.orientRad = tv.set(jumping.to.position).sub(game.currentSystem.position).angleRad();
             tv.set(Vector2.X).setAngleRad(transform.orientRad);
-            float timePassed = Jumping.JUMP_DURATION / 2 - jumping.timeRemaining;
+            float timePassed = JumpingOut.JUMP_OUT_DURATION / 2 - jumping.timeRemaining;
             float dst = timePassed * timePassed * timePassed * JUMP_SCALE;
             transform.location.set(tv).scl(dst).add(jumping.referencePoint);
         } else {
-            float targetOrientation = tv.set(game.currentSystem.position).sub(jumping.sourceOrTargetSystem.position).angleRad();
+            float targetOrientation = tv.set(game.currentSystem.position).sub(jumping.to.position).angleRad();
             transform.orientRad = targetOrientation;
             tv.set(Vector2.X).setAngleRad(targetOrientation);
             float dst = jumping.timeRemaining * jumping.timeRemaining * jumping.timeRemaining * JUMP_SCALE;
@@ -46,7 +47,7 @@ public class JumpingSystem extends IteratingSystem {
         }
         jumping.timeRemaining -= deltaTime;
         if (jumping.timeRemaining < 0) {
-            if (jumping.direction == Jumping.JumpDirection.DEPART) {
+            if (jumping.direction == JumpingOut.JumpDirection.DEPART) {
                 Persistence persistence = PERSISTENCE.get(entity);
                 if (persistence == null || persistence.temporary) {
                     getEngine().removeEntity(entity);
@@ -55,17 +56,17 @@ public class JumpingSystem extends IteratingSystem {
                         game.flash(0.2f);
                         game.assets.snd_hyperdrive_shutdown.play();
                     }
-                    jumping.direction = Jumping.JumpDirection.ARRIVE;
+                    jumping.direction = JumpingOut.JumpDirection.ARRIVE;
                     SolarSystem comingFrom = persistence.system;
-                    persistence.system = jumping.sourceOrTargetSystem;
-                    jumping.sourceOrTargetSystem = comingFrom;
-                    jumping.timeRemaining = Jumping.JUMP_DURATION / 2;
+                    persistence.system = jumping.to;
+                    jumping.to = comingFrom;
+                    jumping.timeRemaining = JumpingOut.JUMP_OUT_DURATION / 2;
                     jumping.referencePoint.setToRandomDirection().scl(MathUtils.random(0, 800));
                 }
             } else {
                 entity.add(getEngine().createComponent(Physics.class));
                 entity.add(getEngine().createComponent(Steering.class));
-                entity.remove(Jumping.class);
+                entity.remove(JumpingOut.class);
             }
         }
     }
@@ -75,19 +76,4 @@ public class JumpingSystem extends IteratingSystem {
         return (PooledEngine) super.getEngine();
     }
 
-    public void depart(Entity entity, Vector2 from, SolarSystem target) {
-        Jumping jumping = getEngine().createComponent(Jumping.class);
-        jumping.sourceOrTargetSystem = target;
-        jumping.direction = Jumping.JumpDirection.DEPART;
-        jumping.referencePoint.set(from);
-        entity.add(jumping);
-    }
-
-    public void arrive(Entity entity, Vector2 to, SolarSystem fromSystem) {
-        Jumping jumping = getEngine().createComponent(Jumping.class);
-        jumping.referencePoint.set(to);
-        jumping.direction = Jumping.JumpDirection.ARRIVE;
-        jumping.sourceOrTargetSystem = fromSystem;
-        entity.add(jumping);
-    }
 }

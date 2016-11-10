@@ -55,7 +55,7 @@ public class AttackTask extends LeafTask<Entity> {
         float targetAngle = tv.set(TRANSFORM.get(aiControlled.enemy).location).sub(TRANSFORM.get(getObject()).location).angleRad();
         if (Math.abs(Util.deltaAngle(targetAngle, TRANSFORM.get(getObject()).orientRad)) < 0.2f &&
                 tv.len() < 1000) {
-            STEERING.get(getObject()).primaryFire = true;
+            WEAPON_CONTROL.get(getObject()).primaryFire = true;
         }
         return Status.RUNNING;
     }

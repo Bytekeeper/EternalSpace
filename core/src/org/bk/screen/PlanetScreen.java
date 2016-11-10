@@ -8,12 +8,16 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import org.bk.Game;
 import org.bk.data.Mission;
-import org.bk.data.component.Landing;
+import org.bk.data.component.state.Landed;
+import org.bk.data.component.state.Landing;
+import org.bk.data.component.state.LiftingOff;
 import org.bk.data.script.*;
 
 import java.io.StringReader;
 
+import static org.bk.data.component.Mapper.LANDED;
 import static org.bk.data.component.Mapper.LANDING;
+import static org.bk.data.component.Mapper.LIFTING_OFF;
 
 /**
  * Created by dante on 19.10.2016.
@@ -36,11 +40,8 @@ public class PlanetScreen extends ScreenAdapter {
         departButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-
-                Landing landing = LANDING.get(game.playerEntity);
-                landing.landingDirection = Landing.LandingDirection.DEPART;
-                landing.timeRemaining = Landing.LAND_OR_LIFTOFF_DURATION;
-                landing.landed = false;
+                Landed landed = LANDED.get(game.playerEntity);
+                game.control.setTo(game.playerEntity, LIFTING_OFF, LiftingOff.class).from = landed.on;
             }
         });
         window.add(departButton);

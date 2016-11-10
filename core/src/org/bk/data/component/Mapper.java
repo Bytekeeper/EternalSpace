@@ -3,6 +3,7 @@ package org.bk.data.component;
 import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.gdx.utils.Array;
+import org.bk.data.component.state.*;
 
 /**
  * Created by dante on 10.10.2016.
@@ -29,7 +30,7 @@ public class Mapper {
     public static final ComponentMapper<Character> CHARACTER = mapperFor(Character.class);
     public static final ComponentMapper<Damage> DAMAGE = mapperFor(Damage.class);
     public static final ComponentMapper<Owned> OWNED = mapperFor(Owned.class);
-    public static final ComponentMapper<Jumping> JUMPING = mapperFor(Jumping.class);
+    public static final ComponentMapper<JumpingOut> JUMPING = mapperFor(JumpingOut.class);
     public static final ComponentMapper<Orbiting> ORBITING = mapperFor(Orbiting.class);
     public static final ComponentMapper<LandingPlace> LANDING_PLACE = mapperFor(LandingPlace.class);
     public static final ComponentMapper<Battery> BATTERY = mapperFor(Battery.class);
@@ -38,6 +39,13 @@ public class Mapper {
     public static final ComponentMapper<Account> ACCOUNT = mapperFor(Account.class);
     public static final ComponentMapper<Heat> HEAT = mapperFor(Heat.class);
     public static final ComponentMapper<Cargo> CARGO = mapperFor(Cargo.class);
+    public static final ComponentMapper<Jump> JUMP = mapperFor(Jump.class);
+    public static final ComponentMapper<WeaponControl> WEAPON_CONTROL = mapperFor(WeaponControl.class);
+    public static final ComponentMapper<Land> LAND = mapperFor(Land.class);
+    public static final ComponentMapper<ManualControl> MANUAL_CONTROL = mapperFor(ManualControl.class);
+    public static final ComponentMapper<Landed> LANDED = mapperFor(Landed.class);
+    public static final ComponentMapper<LiftingOff> LIFTING_OFF = mapperFor(LiftingOff.class);
+    public static final ComponentMapper<Jumped> JUMPED = mapperFor(Jumped.class);
 
 
     private static <T extends Component> ComponentMapper<T> mapperFor(Class<T> componentClass) {

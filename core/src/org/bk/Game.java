@@ -5,21 +5,30 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.signals.Signal;
-import com.badlogic.gdx.*;
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ai.GdxAI;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import org.bk.data.*;
-import org.bk.data.component.*;
-import org.bk.data.component.Character;
+import org.bk.data.EntityGroup;
+import org.bk.data.EntityTemplate;
+import org.bk.data.GameData;
+import org.bk.data.SolarSystem;
+import org.bk.data.component.LandingPlace;
+import org.bk.data.component.Movement;
 import org.bk.data.component.Transform;
+import org.bk.data.component.WeaponControl;
+import org.bk.data.component.state.*;
 import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
@@ -28,6 +37,8 @@ import static org.bk.data.component.Mapper.*;
 
 public class Game extends com.badlogic.gdx.Game {
     public static final float SQRT_2 = (float) Math.sqrt(2);
+    public static final float ACTION_VELOCITY_THRESHOLD2 = 100;
+    public static final float ACTION_DELTA_ANGLE_THRESHOLD = 0.01f;
     public Viewport viewport;
     public SpriteBatch batch;
     public SpriteBatch uiBatch;
@@ -53,6 +64,8 @@ public class Game extends com.badlogic.gdx.Game {
     public InputMultiplexer inputMultiplexer;
 
     public Signal<Entity> entityDestroyed = new Signal<Entity>();
+
+    public SimpleEntityStateMachine control;
 
     @Override
     public void resize(int width, int height) {
@@ -91,6 +104,7 @@ public class Game extends com.badlogic.gdx.Game {
         initScreens();
 
         initWorldEngine();
+        control = new SimpleEntityStateMachine(engine, Jump.class, Land.class, ManualControl.class, JumpingOut.class, LiftingOff.class, Landed.class, Jumped.class);
         entityFactory = new EntityFactory(this);
 
         assets.gameData.setEngine(engine);
@@ -102,7 +116,10 @@ public class Game extends com.badlogic.gdx.Game {
         engine = new PooledEngine();
         engine.addSystem(new SystemPopulateSystem(this, 0));
         engine.addSystem(new AISystem(this, 0));
-        engine.addSystem(new AutopilotSystem(this, 1));
+        engine.addSystem(new LandSystem(1));
+        engine.addSystem(new JumpSystem(this, 1));
+        engine.addSystem(new LiftOffSystem(this, 1));
+        engine.addSystem(new ManualControlSystem(1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(3));
@@ -110,14 +127,16 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new ProjectileHitSystem(this, 6));
         engine.addSystem(new WeaponSystem(this, 7));
         engine.addSystem(new HealthSystem(this, 8));
+        engine.addSystem(new PersistenceSystem(9));
         engine.addSystem(new SelectionSystem(this, 9));
 
         engine.addSystem(new AsteroidSystem(this, 9000));
         engine.addSystem(new TrafficSystem(this, 9000));
 
         engine.addSystem(new OrbitingSystem(10000));
-        engine.addSystem(new LandingSystem(10000));
+        engine.addSystem(new LandingSystem(this, 10000));
         engine.addSystem(new JumpingSystem(this, 10000));
+        engine.addSystem(new BatterySystem(15000));
     }
 
     private void initScreens() {
@@ -141,12 +160,11 @@ public class Game extends com.badlogic.gdx.Game {
         GdxAI.getTimepiece().update(deltaTime);
         engine.update(deltaTime);
 
-        Landing landing = LANDING.get(playerEntity);
-        if (landing != null && landing.landed) {
+        if (LANDED.has(playerEntity)) {
             if (screen != planetScreen) {
                 setScreen(planetScreen);
             }
-        } else if (screen == planetScreen) {
+        } else if (screen != null) {
             setScreen(null);
         }
 
@@ -176,52 +194,54 @@ public class Game extends com.badlogic.gdx.Game {
 //            " " + physicsBody.getMass());
 //        }
 //        lastVel = movement.velocity.len();
-        Steering steering = STEERING.get(playerEntity);
-        if (steering != null) {
-            steering.thrust = 0;
-            steering.turn = 0;
-
-            if (Gdx.input.isKeyPressed(Keys.UP)) {
-                steering.thrust = 1;
-                steering.mode = Steering.SteeringMode.FREE_FLIGHT;
-            }
-            if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-                steering.turn = 1;
-                steering.mode = Steering.SteeringMode.FREE_FLIGHT;
-            }
-            if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-                steering.turn = -1;
-                steering.mode = Steering.SteeringMode.FREE_FLIGHT;
-            }
-            if (Gdx.input.isKeyPressed(Keys.J) && steering.jumpTo != null && steering.jumpTo != currentSystem) {
-                steering.mode = Steering.SteeringMode.JUMPING;
-            }
-            if (Gdx.input.isKeyJustPressed(Keys.M)) {
-                if (mapScreen != screen) {
-                    setScreen(mapScreen);
-                } else {
-                    setScreen(null);
-                }
-            }
-            if (Gdx.input.isKeyPressed(Keys.L)) {
-                Entity planet = null;
-                float bestDst2 = Float.POSITIVE_INFINITY;
-                Transform playerTransform = TRANSFORM.get(this.playerEntity);
-                for (Entity entity : engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get())) {
-                    float dst2 = TRANSFORM.get(entity).location.dst2(playerTransform.location);
-                    if (dst2 < bestDst2) {
-                        bestDst2 = dst2;
-                        planet = entity;
-                    }
-                }
-
-                if (planet != null) {
-                    steering.modeTargetEntity = planet;
-                    steering.mode = Steering.SteeringMode.LANDING;
-                }
-            }
-            steering.primaryFire = Gdx.input.isKeyPressed(Keys.SPACE);
+        ManualControl manualControl = MANUAL_CONTROL.get(playerEntity);
+        if (manualControl != null) {
+            manualControl.thrust = 0;
+            manualControl.turn = 0;
         }
+        if (Gdx.input.isKeyPressed(Keys.UP)) {
+            playerControl().thrust = 1;
+        }
+        if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+            playerControl().turn = 1;
+        }
+        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+            playerControl().turn = -1;
+        }
+        if (Gdx.input.isKeyPressed(Keys.J) && player.selectedJumpTarget != null) {
+            control.setTo(playerEntity, JUMP, Jump.class).target = player.selectedJumpTarget;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.M)) {
+            if (mapScreen != screen) {
+                setScreen(mapScreen);
+            } else {
+                setScreen(null);
+            }
+        }
+        if (Gdx.input.isKeyPressed(Keys.L)) {
+            Entity planet = null;
+            float bestDst2 = Float.POSITIVE_INFINITY;
+            Transform playerTransform = TRANSFORM.get(this.playerEntity);
+            for (Entity entity : engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get())) {
+                float dst2 = TRANSFORM.get(entity).location.dst2(playerTransform.location);
+                if (dst2 < bestDst2) {
+                    bestDst2 = dst2;
+                    planet = entity;
+                }
+            }
+
+            if (planet != null) {
+                control.setTo(playerEntity, LAND, Land.class).on = planet;
+            }
+            WeaponControl weaponControl = WEAPON_CONTROL.get(playerEntity);
+            if (weaponControl != null) {
+                weaponControl.primaryFire = Gdx.input.isKeyPressed(Keys.SPACE);
+            }
+        }
+    }
+
+    private ManualControl playerControl() {
+        return control.setTo(playerEntity, MANUAL_CONTROL, ManualControl.class);
     }
 
     public Entity spawn(String entityDefinitionKey, Class<? extends Component>... expectedComponents) {

@@ -12,10 +12,9 @@ import org.bk.Game;
 import org.bk.data.SolarSystem;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
+import org.bk.data.component.state.LiftingOff;
 
-import static org.bk.data.component.Mapper.CHARACTER;
-import static org.bk.data.component.Mapper.MOVEMENT;
-import static org.bk.data.component.Mapper.TRANSFORM;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 18.10.2016.
@@ -97,10 +96,7 @@ public class TrafficSystem extends EntitySystem {
         if (target != null && (initialDeployment || rnd.nextFloat() < 0.7f) && (targetCharacter == null || !targetCharacter.faction.isEnemy(character.faction))) {
             if (!initialDeployment || rnd.nextFloat() < 0.2f) {
                 transform.location.set(TRANSFORM.get(target).location);
-                Landing landing = getEngine().createComponent(Landing.class);
-                landing.landingDirection = Landing.LandingDirection.DEPART;
-                landing.target = target;
-                entity.add(landing);
+                game.control.setTo(entity, LIFTING_OFF, LiftingOff.class).from = target;
                 entity.remove(Physics.class);
                 entity.remove(Steering.class);
             } else {
@@ -109,15 +105,15 @@ public class TrafficSystem extends EntitySystem {
                 movement.velocity.setToRandomDirection().scl(MathUtils.random(0, movement.maxVelocity));
             }
             if (rnd.nextFloat() < 0.5f) {
-                aiControlled.behaviorTree = game.behaviors.patrol(entity, getEngine());
+                aiControlled.behaviorTree = game.behaviors.patrol(entity, getEngine(), game);
             } else {
                 aiControlled.behaviorTree = game.behaviors.jump(entity, game);
             }
         } else {
             transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
-            getEngine().getSystem(JumpingSystem.class).arrive(entity, tv.setToRandomDirection().scl(MathUtils.random(0, 800)),
+            game.jumpIn(entity, tv.setToRandomDirection().scl(MathUtils.random(0, 800)),
                     game.gameData.getSystem().random());
-            aiControlled.behaviorTree = game.behaviors.land(entity, getEngine());
+            aiControlled.behaviorTree = game.behaviors.land(entity, getEngine(), game);
             entity.remove(Physics.class);
             entity.remove(Steering.class);
         }

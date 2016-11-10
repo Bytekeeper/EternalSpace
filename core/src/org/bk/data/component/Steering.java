@@ -13,24 +13,11 @@ import org.bk.data.SolarSystem;
 public class Steering implements Component, Pool.Poolable {
     public float thrust;
     public float turn;
-    public SteeringMode mode = SteeringMode.FREE_FLIGHT;
-    public SolarSystem jumpTo;
     public Steerable<Vector2> steerable;
-    public Entity modeTargetEntity;
-    public boolean primaryFire;
 
     @Override
     public void reset() {
         thrust = turn = 0;
         steerable = null;
-        modeTargetEntity = null;
-        jumpTo = null;
-        mode = SteeringMode.FREE_FLIGHT;
     }
-
-    public enum SteeringMode {
-        FREE_FLIGHT,
-        LANDING,
-        JUMPING;
-    };
 }

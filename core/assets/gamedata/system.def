@@ -93,6 +93,10 @@ template falcon {
     }
     Steering {
     }
+    WeaponControl {
+    }
+    ManualControl {
+    }
     JumpDrive {
         powerCost 333
     }
@@ -149,6 +153,10 @@ template Titan {
         maxShields 100
     }
     Steering {
+    }
+    WeaponControl {
+    }
+    ManualControl {
     }
     Weapons {
         weapon {
