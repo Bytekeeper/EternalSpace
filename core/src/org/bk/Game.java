@@ -104,7 +104,8 @@ public class Game extends com.badlogic.gdx.Game {
         initScreens();
 
         initWorldEngine();
-        control = new SimpleEntityStateMachine(engine, Jump.class, Land.class, ManualControl.class, JumpingOut.class, JumpingIn.class, LiftingOff.class, Landed.class, JumpedOut.class);
+        control = new SimpleEntityStateMachine(engine, Jump.class, Land.class, Landing.class,
+                ManualControl.class, JumpingOut.class, JumpingIn.class, LiftingOff.class, Landed.class, JumpedOut.class);
         entityFactory = new EntityFactory(this);
 
         assets.gameData.setEngine(engine);
@@ -166,7 +167,7 @@ public class Game extends com.badlogic.gdx.Game {
             if (screen != planetScreen) {
                 setScreen(planetScreen);
             }
-        } else if (screen != null) {
+        } else if (screen == planetScreen) {
             setScreen(null);
         }
 

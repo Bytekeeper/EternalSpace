@@ -64,6 +64,7 @@ public class JumpingOutSystem extends IteratingSystem {
                 game.flash(0.2f);
                 game.assets.snd_hyperdrive_shutdown.play();
                 game.control.setTo(entity, JUMPING_IN, JumpingIn.class).from = game.currentSystem;
+                PERSISTENCE.get(entity).system = targetSystem;
             } else {
                 game.control.setTo(entity, JUMPED_OUT, JumpedOut.class).to = targetSystem;
             }

@@ -29,7 +29,8 @@ public class LandingSystem extends IteratingSystem {
         Landing landing = LANDING.get(entity);
         landing.timeRemaining = Math.max(0, landing.timeRemaining - deltaTime);
         if (landing.timeRemaining <= 0) {
-            game.control.setTo(entity, LANDED, Landed.class);
+            Entity landedOn = landing.on;
+            game.control.setTo(entity, LANDED, Landed.class).on = landedOn;
         }
     }
 

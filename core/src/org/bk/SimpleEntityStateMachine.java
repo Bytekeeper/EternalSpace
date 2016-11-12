@@ -19,6 +19,9 @@ public class SimpleEntityStateMachine {
     }
 
     public <T extends Component> T setTo(Entity entity, ComponentMapper<T> mapper, Class<T> component) {
+        if (!oneOf.contains(component, true)) {
+            throw new IllegalStateException("Invalid component state: " + component.getSimpleName());
+        }
         T result = mapper.get(entity);
         if (result == null) {
             for (Class<? extends Component> toRemove : oneOf) {
@@ -27,8 +30,8 @@ public class SimpleEntityStateMachine {
                 }
             }
             result = engine.createComponent(component);
+            entity.add(result);
         }
-        entity.add(result);
         return result;
     }
 

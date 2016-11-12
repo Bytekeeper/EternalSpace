@@ -215,7 +215,7 @@ system "Arcos" {
     }
     traffic {
         group "Small Raiders"
-        every 10
+        every 120
     }
 
     entity - "Arcos prime" {
