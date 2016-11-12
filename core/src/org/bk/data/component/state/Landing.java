@@ -10,11 +10,11 @@ import com.badlogic.gdx.utils.Pool;
 public class Landing implements Component, Pool.Poolable {
     public static final float LANDING_DURATION = 2;
     public float timeRemaining = LANDING_DURATION;
-    public Entity target;
+    public Entity on;
 
     @Override
     public void reset() {
         timeRemaining = LANDING_DURATION;
-        target = null;
+        on = null;
     }
 }

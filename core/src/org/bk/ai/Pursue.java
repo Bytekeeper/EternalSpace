@@ -23,17 +23,17 @@ import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.math.Vector;
 
 /**
- * {@code Pursue} behavior produces a force that steers the agent towards the evader (the target). Actually it predicts where an
+ * {@code Pursue} behavior produces a force that steers the agent towards the evader (the on). Actually it predicts where an
  * agent will be in time @{code t} and seeks towards that point to intercept it. We did this naturally playing tag as children,
  * which is why the most difficult tag players to catch were those who kept switching direction, foiling our predictions.
  * <p>
- * This implementation performs the prediction by assuming the target will continue moving with the same velocity it currently
+ * This implementation performs the prediction by assuming the on will continue moving with the same velocity it currently
  * has. This is a reasonable assumption over short distances, and even over longer distances it doesn't appear too stupid. The
- * algorithm works out the distance between character and target and works out how long it would take to get there, at maximum
- * speed. It uses this time interval as its prediction lookahead. It calculates the position of the target if it continues to move
- * with its current velocity. This new position is then used as the target of a standard seek behavior.
+ * algorithm works out the distance between character and on and works out how long it would take to get there, at maximum
+ * speed. It uses this time interval as its prediction lookahead. It calculates the position of the on if it continues to move
+ * with its current velocity. This new position is then used as the on of a standard seek behavior.
  * <p>
- * If the character is moving slowly, or the target is a long way away, the prediction time could be very large. The target is
+ * If the character is moving slowly, or the on is a long way away, the prediction time could be very large. The on is
  * less likely to follow the same path forever, so we'd like to set a limit on how far ahead we aim. The algorithm has a
  * {@code maxPredictionTime} for this reason. If the prediction time is beyond this, then the maximum time is used.
  *
@@ -43,7 +43,7 @@ import com.badlogic.gdx.math.Vector;
 public class Pursue<T extends Vector<T>> extends SteeringBehavior<T> {
 
     /**
-     * The target
+     * The on
      */
     protected Steerable<T> target;
 
@@ -53,21 +53,21 @@ public class Pursue<T extends Vector<T>> extends SteeringBehavior<T> {
     protected float maxPredictionTime;
 
     /**
-     * Creates a {@code Pursue} behavior for the specified owner and target. Maximum prediction time defaults to 1 second.
+     * Creates a {@code Pursue} behavior for the specified owner and on. Maximum prediction time defaults to 1 second.
      *
      * @param owner  the owner of this behavior.
-     * @param target the target of this behavior.
+     * @param target the on of this behavior.
      */
     public Pursue(Steerable<T> owner, Steerable<T> target) {
         this(owner, target, 1);
     }
 
     /**
-     * Creates a {@code Pursue} behavior for the specified owner and target.
+     * Creates a {@code Pursue} behavior for the specified owner and on.
      *
      * @param owner             the owner of this behavior
-     * @param target            the target of this behavior
-     * @param maxPredictionTime the max time used to predict the target's position assuming it continues to move with its current
+     * @param target            the on of this behavior
+     * @param maxPredictionTime the max time used to predict the on's position assuming it continues to move with its current
      *                          velocity.
      */
     public Pursue(Steerable<T> owner, Steerable<T> target, float maxPredictionTime) {
@@ -78,7 +78,7 @@ public class Pursue<T extends Vector<T>> extends SteeringBehavior<T> {
 
     /**
      * Returns the actual linear acceleration to be applied. This method is overridden by the {@link Evade} behavior to invert the
-     * maximum linear acceleration in order to evade the target.
+     * maximum linear acceleration in order to evade the on.
      */
     protected float getActualMaxLinearAcceleration() {
         return getActualLimiter().getMaxLinearAcceleration();
@@ -88,7 +88,7 @@ public class Pursue<T extends Vector<T>> extends SteeringBehavior<T> {
     protected SteeringAcceleration<T> calculateRealSteering(SteeringAcceleration<T> steering) {
         T targetPosition = target.getPosition();
 
-        // Get the square distance to the evader (the target)
+        // Get the square distance to the evader (the on)
         float squareDistance = steering.linear.set(targetPosition).sub(owner.getPosition()).len2();
 
         // Work out our current square speed
@@ -103,7 +103,7 @@ public class Pursue<T extends Vector<T>> extends SteeringBehavior<T> {
                 predictionTime = (float) Math.sqrt(squarePredictionTime);
         }
 
-        // Calculate and seek/flee the predicted position of the target
+        // Calculate and seek/flee the predicted position of the on
         steering.linear.set(targetPosition).
                 mulAdd(target.getLinearVelocity(), predictionTime).
                 sub(owner.getPosition()).
@@ -118,14 +118,14 @@ public class Pursue<T extends Vector<T>> extends SteeringBehavior<T> {
     }
 
     /**
-     * Returns the target.
+     * Returns the on.
      */
     public Steerable<T> getTarget() {
         return target;
     }
 
     /**
-     * Sets the target.
+     * Sets the on.
      *
      * @return this behavior for chaining.
      */

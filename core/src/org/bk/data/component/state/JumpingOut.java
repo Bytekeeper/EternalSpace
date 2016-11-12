@@ -12,10 +12,12 @@ public class JumpingOut implements Component, Pool.Poolable {
     public static final float JUMP_OUT_DURATION = 3;
     public float timeRemaining = JUMP_OUT_DURATION;
     public SolarSystem to;
+    public final Vector2 startFrom = new Vector2();
 
     @Override
     public void reset() {
         timeRemaining = JUMP_OUT_DURATION;
         to = null;
+        startFrom.setZero();
     }
 }

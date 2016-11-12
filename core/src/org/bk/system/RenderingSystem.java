@@ -1,11 +1,10 @@
 package org.bk.system;
 
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
-import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.btree.BehaviorTree;
+import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,6 +13,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.StringBuilder;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.Mission;
@@ -32,6 +32,7 @@ import static org.bk.data.component.Mapper.*;
 public class RenderingSystem extends EntitySystem {
     public static final int STAR_BORDER = 200;
     public static final int STAR_BORDER2 = STAR_BORDER * 2;
+    private static final boolean AI_DEBUG = false;
     private final Assets assets;
     private final SpriteBatch batch;
     private ImmutableArray<Entity> shipEntities;
@@ -146,6 +147,25 @@ public class RenderingSystem extends EntitySystem {
         TextureRegion textureRegion = assets.textures.get(body.graphics);
         draw(transform, tv, textureRegion);
 //        game.assets.debugFont.draw(batch, "" + transform.location, transform.location.x, transform.location.y);
+        if (AI_DEBUG && AI_CONTROLLED.has(entity)) {
+            Component state = game.control.getState(entity);
+            if (state != null) {
+                assets.debugFont.draw(batch, String.format("state: %s", state.getClass().getSimpleName()), transform.location.x, transform.location.y - 20);
+            }
+            AIControlled aiControlled = AI_CONTROLLED.get(entity);
+            if (aiControlled.behaviorTree != null) {
+                renderBehaviorTree(aiControlled.behaviorTree, transform.location.x, transform.location.y - 20);
+            }
+        }
+    }
+
+    private float renderBehaviorTree(Task<Entity> task, float x, float y) {
+        y -= 20;
+        assets.debugFont.draw(batch, String.format("%s: %s", task.getClass().getSimpleName(), task.getStatus()), x, y);
+        for (int i = 0; i < task.getChildCount(); i++) {
+            y = renderBehaviorTree(task.getChild(i), x + 20, y);
+        }
+        return y;
     }
 
     private void drawRadar() {

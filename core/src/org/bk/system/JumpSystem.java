@@ -64,6 +64,6 @@ public class JumpSystem extends IteratingSystem {
             game.assets.snd_hyperdrive_engage.play();
         }
         SolarSystem target = jump.target;
-        game.control.setTo(entity, JUMPING, JumpingOut.class).to = target;
+        game.control.setTo(entity, JUMPING_OUT, JumpingOut.class).to = target;
     }
 }

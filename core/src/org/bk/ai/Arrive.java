@@ -29,18 +29,18 @@ import org.bk.Util;
 public class Arrive extends SteeringBehavior<Vector2> {
 
     /**
-     * The target to arrive to.
+     * The on to arrive to.
      */
     protected Location<Vector2> target;
 
     /**
-     * The tolerance for arriving at the target. It lets the owner get near enough to the target without letting small errors keep
+     * The tolerance for arriving at the on. It lets the owner get near enough to the on without letting small errors keep
      * it in motion.
      */
     protected float arrivalTolerance;
 
     /**
-     * The time over which to achieve target speed
+     * The time over which to achieve on speed
      */
     protected float timeToTarget = 0.1f;
 
@@ -56,10 +56,10 @@ public class Arrive extends SteeringBehavior<Vector2> {
     }
 
     /**
-     * Creates an {@code Arrive} behavior for the specified owner and target.
+     * Creates an {@code Arrive} behavior for the specified owner and on.
      *
      * @param owner  the owner of this behavior
-     * @param target the target of this behavior
+     * @param target the on of this behavior
      */
     public Arrive(Steerable<Vector2> owner, Location<Vector2> target) {
         super(owner);
@@ -93,14 +93,14 @@ public class Arrive extends SteeringBehavior<Vector2> {
     }
 
     /**
-     * Returns the target to arrive to.
+     * Returns the on to arrive to.
      */
     public Location<Vector2> getTarget() {
         return target;
     }
 
     /**
-     * Sets the target to arrive to.
+     * Sets the on to arrive to.
      *
      * @return this behavior for chaining.
      */
@@ -110,7 +110,7 @@ public class Arrive extends SteeringBehavior<Vector2> {
     }
 
     /**
-     * Returns the tolerance for arriving at the target. It lets the owner get near enough to the target without letting small
+     * Returns the tolerance for arriving at the on. It lets the owner get near enough to the on without letting small
      * errors keep it in motion.
      */
     public float getArrivalTolerance() {
@@ -118,7 +118,7 @@ public class Arrive extends SteeringBehavior<Vector2> {
     }
 
     /**
-     * Sets the tolerance for arriving at the target. It lets the owner get near enough to the target without letting small errors
+     * Sets the tolerance for arriving at the on. It lets the owner get near enough to the on without letting small errors
      * keep it in motion.
      *
      * @return this behavior for chaining.
@@ -129,14 +129,14 @@ public class Arrive extends SteeringBehavior<Vector2> {
     }
 
     /**
-     * Returns the time over which to achieve target speed.
+     * Returns the time over which to achieve on speed.
      */
     public float getTimeToTarget() {
         return timeToTarget;
     }
 
     /**
-     * Sets the time over which to achieve target speed.
+     * Sets the time over which to achieve on speed.
      *
      * @return this behavior for chaining.
      */

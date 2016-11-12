@@ -7,8 +7,7 @@ import org.bk.Game;
 import org.bk.data.SolarSystem;
 import org.bk.data.component.state.Jump;
 
-import static org.bk.data.component.Mapper.JUMP;
-import static org.bk.data.component.Mapper.STEERING;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 24.10.2016.
@@ -22,6 +21,9 @@ public class RandomJumpTargetTask extends LeafTask<Entity> {
 
     @Override
     public Status execute() {
+        if (JUMP.has(getObject()) || JUMPING_OUT.has(getObject()) || JUMPING_IN.has(getObject())) {
+            return Status.SUCCEEDED;
+        }
         SolarSystem solarSystem = game.gameData.getSystem().random();
         game.control.setTo(getObject(), JUMP, Jump.class).target = solarSystem;
         return Status.SUCCEEDED;

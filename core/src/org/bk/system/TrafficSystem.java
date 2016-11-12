@@ -12,6 +12,7 @@ import org.bk.Game;
 import org.bk.data.SolarSystem;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
+import org.bk.data.component.state.JumpingIn;
 import org.bk.data.component.state.LiftingOff;
 
 import static org.bk.data.component.Mapper.*;
@@ -97,8 +98,6 @@ public class TrafficSystem extends EntitySystem {
             if (!initialDeployment || rnd.nextFloat() < 0.2f) {
                 transform.location.set(TRANSFORM.get(target).location);
                 game.control.setTo(entity, LIFTING_OFF, LiftingOff.class).from = target;
-                entity.remove(Physics.class);
-                entity.remove(Steering.class);
             } else {
                 Movement movement = MOVEMENT.get(entity);
                 transform.location.set(TRANSFORM.get(target).location).add(MathUtils.random(-1000, 1000), MathUtils.random(-1000, 1000));
@@ -111,11 +110,8 @@ public class TrafficSystem extends EntitySystem {
             }
         } else {
             transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
-            game.jumpIn(entity, tv.setToRandomDirection().scl(MathUtils.random(0, 800)),
-                    game.gameData.getSystem().random());
+            game.control.setTo(entity, JUMPING_IN, JumpingIn.class).from = game.gameData.getSystem().random();
             aiControlled.behaviorTree = game.behaviors.land(entity, getEngine(), game);
-            entity.remove(Physics.class);
-            entity.remove(Steering.class);
         }
     }
 }

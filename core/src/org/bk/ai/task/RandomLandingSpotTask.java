@@ -9,9 +9,7 @@ import org.bk.Game;
 import org.bk.data.component.*;
 import org.bk.data.component.state.Land;
 
-import static org.bk.data.component.Mapper.CELESTIAL;
-import static org.bk.data.component.Mapper.LAND;
-import static org.bk.data.component.Mapper.LANDING_PLACE;
+import static org.bk.data.component.Mapper.*;
 
 /**
  * Created by dante on 18.10.2016.
@@ -27,11 +25,14 @@ public class RandomLandingSpotTask extends LeafTask<Entity> {
 
     @Override
     public Status execute() {
+        if (LAND.has(getObject()) || LANDING.has(getObject()) || LANDED.has(getObject())) {
+            return Status.SUCCEEDED;
+        }
         Entity entity = engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get()).random();
         if (entity == null) {
             return Status.FAILED;
         }
-        game.control.setTo(entity, LAND, Land.class).on = entity;
+        game.control.setTo(getObject(), LAND, Land.class).on = entity;
         return Status.SUCCEEDED;
     }
 

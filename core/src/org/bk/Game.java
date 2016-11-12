@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -39,6 +38,7 @@ public class Game extends com.badlogic.gdx.Game {
     public static final float SQRT_2 = (float) Math.sqrt(2);
     public static final float ACTION_VELOCITY_THRESHOLD2 = 100;
     public static final float ACTION_DELTA_ANGLE_THRESHOLD = 0.01f;
+    public static final float JUMP_SCALE = 800;
     public Viewport viewport;
     public SpriteBatch batch;
     public SpriteBatch uiBatch;
@@ -104,7 +104,7 @@ public class Game extends com.badlogic.gdx.Game {
         initScreens();
 
         initWorldEngine();
-        control = new SimpleEntityStateMachine(engine, Jump.class, Land.class, ManualControl.class, JumpingOut.class, LiftingOff.class, Landed.class, Jumped.class);
+        control = new SimpleEntityStateMachine(engine, Jump.class, Land.class, ManualControl.class, JumpingOut.class, JumpingIn.class, LiftingOff.class, Landed.class, JumpedOut.class);
         entityFactory = new EntityFactory(this);
 
         assets.gameData.setEngine(engine);
@@ -115,11 +115,12 @@ public class Game extends com.badlogic.gdx.Game {
     private void initWorldEngine() {
         engine = new PooledEngine();
         engine.addSystem(new SystemPopulateSystem(this, 0));
-        engine.addSystem(new AISystem(this, 0));
-        engine.addSystem(new LandSystem(1));
+        engine.addSystem(new AISystem(0));
+        engine.addSystem(new LandSystem(this, 1));
         engine.addSystem(new JumpSystem(this, 1));
         engine.addSystem(new LiftOffSystem(this, 1));
         engine.addSystem(new ManualControlSystem(1));
+        engine.addSystem(new WeaponControlSystem(1));
         engine.addSystem(new ApplySteeringSystem(this, 2));
         engine.addSystem(new RenderingSystem(this, 3));
         engine.addSystem(new LifeTimeSystem(3));
@@ -135,7 +136,8 @@ public class Game extends com.badlogic.gdx.Game {
 
         engine.addSystem(new OrbitingSystem(10000));
         engine.addSystem(new LandingSystem(this, 10000));
-        engine.addSystem(new JumpingSystem(this, 10000));
+        engine.addSystem(new JumpingOutSystem(this, 10000));
+        engine.addSystem(new JumpingInSystem(this, 10000));
         engine.addSystem(new BatterySystem(15000));
     }
 
@@ -218,6 +220,10 @@ public class Game extends com.badlogic.gdx.Game {
                 setScreen(null);
             }
         }
+        WeaponControl weaponControl = WEAPON_CONTROL.get(playerEntity);
+        if (weaponControl != null) {
+            weaponControl.primaryFire = Gdx.input.isKeyPressed(Keys.SPACE);
+        }
         if (Gdx.input.isKeyPressed(Keys.L)) {
             Entity planet = null;
             float bestDst2 = Float.POSITIVE_INFINITY;
@@ -232,10 +238,6 @@ public class Game extends com.badlogic.gdx.Game {
 
             if (planet != null) {
                 control.setTo(playerEntity, LAND, Land.class).on = planet;
-            }
-            WeaponControl weaponControl = WEAPON_CONTROL.get(playerEntity);
-            if (weaponControl != null) {
-                weaponControl.primaryFire = Gdx.input.isKeyPressed(Keys.SPACE);
             }
         }
     }

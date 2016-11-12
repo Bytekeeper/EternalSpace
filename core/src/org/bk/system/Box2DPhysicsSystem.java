@@ -3,6 +3,8 @@ package org.bk.system;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.steer.Steerable;
+import com.badlogic.gdx.ai.steer.SteerableAdapter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -32,7 +34,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
     static final float W2B = 1f / 10;
     public static final float B2W = 1f / W2B;
     private final ContactListener myContactListener = new MyContactListener();
-    private final ContactFilter myContactFilter = new MyContactFilter();
     //    private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     private final Assets assets;
     private final Game game;
@@ -41,6 +42,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private final Vector2 tv = new Vector2();
     private float nextStep;
     private ImmutableArray<Entity> touchingEntities;
+    private ObjectMap<Entity, com.badlogic.gdx.physics.box2d.Body> entityBody = new ObjectMap<Entity, com.badlogic.gdx.physics.box2d.Body>();
     private Entity lastPick;
     private QueryCallback pickCallback = new QueryCallback() {
         @Override
@@ -60,15 +62,15 @@ public class Box2DPhysicsSystem extends EntitySystem {
         this.game = game;
         world = new World(Vector2.Zero, true);
         world.setContactListener(myContactListener);
-        world.setContactFilter(myContactFilter);
     }
 
     @Override
     public void addedToEngine(Engine engine) {
-        Family family = Family.all(Transform.class, Physics.class).get();
+        Family family = Family.all(Body.class, Transform.class, Physics.class).get();
         entities = engine.getEntitiesFor(family);
         touchingEntities = engine.getEntitiesFor(Family.all(Touching.class).get());
         engine.addEntityListener(family, new MyEntityListener());
+        engine.addEntityListener(Family.all(Steering.class, Physics.class, Transform.class, Movement.class).get(), new SetupSteerableListener());
     }
 
     @Override
@@ -90,8 +92,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             for (Entity entity : entities) {
                 Movement movement = MOVEMENT.get(entity);
                 if (movement != null) {
-                    Physics physics = PHYSICS.get(entity);
-                    com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
+                    com.badlogic.gdx.physics.box2d.Body physicsBody = entityBody.get(entity);
                     tv.set(movement.linearAccel).scl(W2B);
                     physicsBody.applyForceToCenter(tv, true);
                     physicsBody.applyTorque(movement.angularAccel, true);
@@ -109,12 +110,11 @@ public class Box2DPhysicsSystem extends EntitySystem {
             world.step(1 / 60f, 8, 3);
         }
         for (Entity entity : entities) {
-            Physics physics = PHYSICS.get(entity);
             Transform transform = TRANSFORM.get(entity);
-            com.badlogic.gdx.physics.box2d.Body physicsBody = physics.physicsBody;
+            com.badlogic.gdx.physics.box2d.Body physicsBody = entityBody.get(entity);
             transform.orientRad = (physicsBody.getAngle() % MathUtils.PI2 + MathUtils.PI2) % MathUtils.PI2;
             transform.location.set(physicsBody.getPosition()).scl(B2W);
-            physics.physicsBody.setTransform(physicsBody.getPosition(), transform.orientRad);
+            physicsBody.setTransform(physicsBody.getPosition(), transform.orientRad);
             Movement movement = MOVEMENT.get(entity);
             if (movement != null) {
                 movement.linearAccel.setZero();
@@ -136,6 +136,60 @@ public class Box2DPhysicsSystem extends EntitySystem {
         Entity tmp = lastPick;
         lastPick = null;
         return tmp;
+    }
+
+    private Steerable<Vector2> toSteeringBehavior(final Movement movement, final Transform transform, final com.badlogic.gdx.physics.box2d.Body body) {
+        return new SteerableAdapter<Vector2>() {
+            @Override
+            public Vector2 getLinearVelocity() {
+                return movement.velocity;
+            }
+
+            @Override
+            public Vector2 getPosition() {
+                return transform.location;
+            }
+
+            @Override
+            public float getOrientation() {
+                return transform.orientRad;
+            }
+
+            @Override
+            public float getMaxLinearAcceleration() {
+                return movement.linearThrust / body.getMass();
+            }
+
+            @Override
+            public float getMaxLinearSpeed() {
+                return movement.maxVelocity;
+            }
+
+            @Override
+            public float getAngularVelocity() {
+                return body.getAngularVelocity();
+            }
+
+            @Override
+            public float getMaxAngularSpeed() {
+                return movement.angularThrust / body.getInertia() / body.getAngularDamping();
+            }
+
+            @Override
+            public float getMaxAngularAcceleration() {
+                return getMaxAngularSpeed();
+            }
+
+            @Override
+            public float vectorToAngle(Vector2 vector) {
+                return vector.angleRad();
+            }
+
+            @Override
+            public Vector2 angleToVector(Vector2 outVector, float angle) {
+                return outVector.set(1, 0).setAngleRad(angle);
+            }
+        };
     }
 
     private class MyEntityListener implements EntityListener {
@@ -191,9 +245,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
             com.badlogic.gdx.physics.box2d.Body physicsBody = world.createBody(bodyDef);
             physicsBody.setUserData(entity);
-            Physics physics = PHYSICS.get(entity);
             Body body = BODY.get(entity);
-            physics.physicsBody = physicsBody;
+            entityBody.put(entity, physicsBody);
 
             Array<PolygonShape> shapes = shapesOf.get(body.graphics);
             if (shapes == null) {
@@ -216,19 +269,12 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 physicsBody.createFixture(fixtureDef);
             }
 
-            Steering steering = STEERING.get(entity);
-            if (steering != null && movement != null) {
-                steering.steerable = SteeringUtil.toSteeringBehavior(movement, transform, physics);
-            }
         }
 
         @Override
         public void entityRemoved(Entity entity) {
-            Physics physics = PHYSICS.get(entity);
-            if (physics != null && physics.physicsBody != null) {
-                world.destroyBody(physics.physicsBody);
-                physics.physicsBody = null;
-            }
+            com.badlogic.gdx.physics.box2d.Body bodyToDestroy = entityBody.remove(entity);
+            world.destroyBody(bodyToDestroy);
             entity.remove(Touching.class);
         }
     }
@@ -272,34 +318,18 @@ public class Box2DPhysicsSystem extends EntitySystem {
         }
     }
 
-    private class MyContactFilter implements ContactFilter {
+    private class SetupSteerableListener implements EntityListener {
         @Override
-        public boolean shouldCollide(Fixture fixtureA, Fixture fixtureB) {
-            Filter filterA = fixtureA.getFilterData();
-            Filter filterB = fixtureB.getFilterData();
-            boolean collide = (filterA.maskBits & filterB.categoryBits) != 0 && (filterA.categoryBits & filterB.maskBits) != 0;
-            if (collide) {
-                Entity entityA = (Entity) fixtureA.getBody().getUserData();
-                Entity entityB = (Entity) fixtureB.getBody().getUserData();
-                Owned ownedA = OWNED.get(entityA);
-                Owned ownedB = OWNED.get(entityB);
-                if (ownedA == null && ownedB == null) {
-                    return true;
-                }
-                if (ownedA != null) {
-                    entityA = ownedA.owner;
-                }
-                if (ownedB != null) {
-                    entityB = ownedB.owner;
-                }
-                Character characterA = CHARACTER.get(entityA);
-                Character characterB = CHARACTER.get(entityB);
-                if (characterA != null && characterB != null) {
-                    return characterA != characterB && characterA.faction.isEnemy(characterB.faction);
-                }
-                return true;
-            }
-            return false;
+        public void entityAdded(Entity entity) {
+            Steering steering = STEERING.get(entity);
+            Movement movement = MOVEMENT.get(entity);
+            Transform transform = TRANSFORM.get(entity);
+            steering.steerable = toSteeringBehavior(movement, transform, entityBody.get(entity));
+        }
+
+        @Override
+        public void entityRemoved(Entity entity) {
+
         }
     }
 }

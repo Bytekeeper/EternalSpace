@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.component.*;
+import org.bk.data.component.Character;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -32,7 +33,6 @@ public class WeaponSystem extends IteratingSystem {
             if (weapon.cooldown > 0 || !weapon.firing) {
                 continue;
             }
-            weapon.firing = false;
             weapon.cooldown = weapon.cooldownPerShot;
             if (weapon.projectile != null) {
                 spawnProjectile(weapon, entity);
@@ -54,9 +54,11 @@ public class WeaponSystem extends IteratingSystem {
 
         game.assets.snd_shot1.play();
 
+        Character ownerCharacter = CHARACTER.get(owner);
         Entity projectileEntity = game.spawn(weapon.projectile);
         Owned owned = getEngine().createComponent(Owned.class);
         owned.owner = owner;
+        owned.affiliation = ownerCharacter.faction;
         projectileEntity.add(owned);
         Transform projectileTransform = TRANSFORM.get(projectileEntity);
         projectileTransform.orientRad = (sourceTransform.orientRad + weapon.orientRad) % MathUtils.PI2;

@@ -4,8 +4,10 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.utils.Array;
 import org.bk.Game;
 import org.bk.data.component.*;
+import org.bk.data.component.Character;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -14,6 +16,7 @@ import static org.bk.data.component.Mapper.*;
  */
 public class ProjectileHitSystem extends IteratingSystem {
     private final Game game;
+    private final Array<Entity> toDamage = new Array<Entity>();
 
     public ProjectileHitSystem(Game game, int priority) {
         super(Family.all(Projectile.class, Touching.class).get(), priority);
@@ -27,11 +30,32 @@ public class ProjectileHitSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        Projectile projectile = PROJECTILE.get(entity);
+        toDamage.clear();
         Owned owned = OWNED.get(entity);
         Touching touching = TOUCHING.get(entity);
-        float damagePerEntity = projectile.yield / touching.touchList.size;
-        for (Entity e: touching.touchList) {
+        for (Entity potentialTarget : touching.touchList) {
+            Owned targetOwned = OWNED.get(potentialTarget);
+            Character targetCharacter = CHARACTER.get(potentialTarget);
+            if (targetOwned != null) {
+                if (targetOwned.affiliation.isEnemy(owned.affiliation)) {
+                    toDamage.add(potentialTarget);
+                }
+            } else if (targetCharacter != null) {
+                if (targetCharacter.faction.isEnemy(owned.affiliation)) {
+                    toDamage.add(potentialTarget);
+                }
+            } else {
+                toDamage.add(potentialTarget);
+            }
+        }
+
+        if (toDamage.size == 0) {
+            return;
+        }
+
+        Projectile projectile = PROJECTILE.get(entity);
+        float damagePerEntity = projectile.yield / toDamage.size;
+        for (Entity e: toDamage) {
             Damage damage = DAMAGE.get(e);
             if (damage == null) {
                 damage = getEngine().createComponent(Damage.class);

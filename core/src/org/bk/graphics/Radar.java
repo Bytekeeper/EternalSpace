@@ -10,6 +10,7 @@ import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.component.Celestial;
 import org.bk.data.component.Character;
+import org.bk.data.component.state.JumpingIn;
 import org.bk.data.component.state.JumpingOut;
 import org.bk.data.component.Transform;
 
@@ -41,9 +42,15 @@ public class Radar {
 
     public void drawShip(Entity entity) {
         determineDrawPosition(entity);
-        JumpingOut jumping = JUMPING.get(entity);
-        if (jumping != null) {
-            float t = jumping.direction == JumpingOut.JumpDirection.DEPART ? (JumpingOut.JUMP_OUT_DURATION / 2 - jumping.timeRemaining) : jumping.timeRemaining;
+        JumpingOut jumpingOut = JUMPING_OUT.get(entity);
+        JumpingIn jumpingIn = JUMPING_IN.get(entity);
+        if (jumpingOut != null || jumpingIn != null) {
+            float t;
+            if (jumpingOut != null) {
+                t = JumpingOut.JUMP_OUT_DURATION - jumpingOut.timeRemaining;
+            } else {
+                t = jumpingIn.timeRemaining;
+            }
             tv.setAngleRad(TRANSFORM.get(entity).orientRad + MathUtils.PI / 2).nor().scl(MathUtils.cos(t * 50) * t * t / 5);
             tv2.add(tv);
         }

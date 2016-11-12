@@ -3,6 +3,7 @@ package org.bk.system;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import org.bk.data.component.AIControlled;
 import org.bk.data.component.Steering;
 import org.bk.data.component.state.ManualControl;
 
@@ -14,7 +15,7 @@ import static org.bk.data.component.Mapper.STEERING;
  */
 public class ManualControlSystem extends IteratingSystem {
     public ManualControlSystem(int priority) {
-        super(Family.all(ManualControl.class, Steering.class).get(), priority);
+        super(Family.all(ManualControl.class, Steering.class).exclude(AIControlled.class).get(), priority);
     }
 
     @Override

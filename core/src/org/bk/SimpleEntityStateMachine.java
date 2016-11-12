@@ -31,4 +31,13 @@ public class SimpleEntityStateMachine {
         entity.add(result);
         return result;
     }
+
+    public Component getState(Entity entity) {
+        for (Component component : entity.getComponents()) {
+            if (oneOf.contains(component.getClass(), true)) {
+                return component;
+            }
+        }
+        return null;
+    }
 }

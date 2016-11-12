@@ -23,7 +23,7 @@ public class Behaviors {
     public BehaviorTree<Entity> land(Entity owner, Engine engine, Game game) {
         BehaviorTree<Entity> tree = new BehaviorTree<Entity>();
         DynamicGuardSelector<Entity> root = new DynamicGuardSelector<Entity>();
-        Task<Entity> fight = createFightTask(engine);
+        Task<Entity> fight = createFightTask(game, engine);
         Sequence<Entity> findSpotAndLand = new Sequence<Entity>();
         findSpotAndLand.addChild(new RandomLandingSpotTask(game, engine));
         tree.addChild(root);
@@ -39,12 +39,12 @@ public class Behaviors {
         Sequence<Entity> patrolThenLand = new Sequence<Entity>();
         Parallel<Entity> patrolTree = new Parallel<Entity>(Parallel.Policy.Selector);
         patrolTree.addChild(new Wait<Entity>(new GaussianFloatDistribution(10, 10)));
-        patrolTree.addChild(new PatrolTask());
+        patrolTree.addChild(new PatrolTask(game));
         patrolThenLand.addChild(patrolTree);
         Sequence<Entity> land = new Sequence<Entity>();
         land.addChild(new RandomLandingSpotTask(game, engine));
         patrolThenLand.addChild(land);
-        Task<Entity> fight = createFightTask(engine);
+        Task<Entity> fight = createFightTask(game, engine);
         root.addChild(fight);
         root.addChild(patrolThenLand);
         tree.addChild(root);
@@ -52,9 +52,9 @@ public class Behaviors {
         return tree;
     }
 
-    private Task<Entity> createFightTask(Engine engine) {
+    private Task<Entity> createFightTask(Game game, Engine engine) {
         ImmutableArray<Entity> potentialEnemies = engine.getEntitiesFor(Family.all(Character.class, Transform.class, Health.class, Steering.class).get());
-        Task<Entity> fight = new AttackTask(potentialEnemies);
+        Task<Entity> fight = new AttackTask(game, potentialEnemies);
         fight.setGuard(new EnemyNearby(potentialEnemies));
         return fight;
     }

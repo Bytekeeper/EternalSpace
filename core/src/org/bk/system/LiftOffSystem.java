@@ -28,9 +28,12 @@ public class LiftOffSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        entity.remove(Physics.class);
+        entity.remove(Steering.class);
+
         LiftingOff liftingOff = LIFTING_OFF.get(entity);
         liftingOff.timeRemaining = Math.max(0, liftingOff.timeRemaining - deltaTime);
-        if (liftingOff.timeRemaining == 0) {
+        if (liftingOff.timeRemaining <= 0) {
             entity.add(getEngine().createComponent(Physics.class));
             entity.add(getEngine().createComponent(Steering.class));
             game.control.setTo(entity, MANUAL_CONTROL, ManualControl.class);

@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import org.bk.data.component.Persistence;
-import org.bk.data.component.state.Jumped;
+import org.bk.data.component.state.JumpedOut;
 import org.bk.data.component.state.Landed;
 
 import static org.bk.data.component.Mapper.PERSISTENCE;
@@ -14,7 +14,7 @@ import static org.bk.data.component.Mapper.PERSISTENCE;
  */
 public class PersistenceSystem extends IteratingSystem {
     public PersistenceSystem(int priority) {
-        super(Family.one(Jumped.class, Landed.class).get(), priority);
+        super(Family.one(JumpedOut.class, Landed.class).get(), priority);
     }
 
     @Override

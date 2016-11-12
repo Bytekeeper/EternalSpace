@@ -1,6 +1,5 @@
 package org.bk.system;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -24,9 +23,11 @@ import static org.bk.data.component.Mapper.*;
  */
 public class LandSystem extends IteratingSystem {
     private final Arrive steerToLandingSpot = new Arrive(null, null);
+    private final Game game;
 
-    public LandSystem(int priority) {
+    public LandSystem(Game game, int priority) {
         super(Family.all(Land.class, Transform.class, Movement.class, Steering.class).get(), priority);
+        this.game = game;
     }
 
     @Override
@@ -44,12 +45,13 @@ public class LandSystem extends IteratingSystem {
         }
         Vector2 ownerLocation = TRANSFORM.get(entity).location;
         Touching touching = TOUCHING.get(entity);
-        if (touching != null) {
+         if (touching != null) {
             for (Entity e : touching.touchList) {
                 if (LANDING_PLACE.has(e)) {
                     Vector2 landingLocation = TRANSFORM.get(e).location;
                     if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {
-                        entity.add(getEngine().createComponent(Landing.class));
+                        game.control.setTo(entity, LANDING, Landing.class).on = e;
+                        break;
                     }
                 }
             }

@@ -30,7 +30,8 @@ public class Mapper {
     public static final ComponentMapper<Character> CHARACTER = mapperFor(Character.class);
     public static final ComponentMapper<Damage> DAMAGE = mapperFor(Damage.class);
     public static final ComponentMapper<Owned> OWNED = mapperFor(Owned.class);
-    public static final ComponentMapper<JumpingOut> JUMPING = mapperFor(JumpingOut.class);
+    public static final ComponentMapper<JumpingOut> JUMPING_OUT = mapperFor(JumpingOut.class);
+    public static final ComponentMapper<JumpingIn> JUMPING_IN = mapperFor(JumpingIn.class);
     public static final ComponentMapper<Orbiting> ORBITING = mapperFor(Orbiting.class);
     public static final ComponentMapper<LandingPlace> LANDING_PLACE = mapperFor(LandingPlace.class);
     public static final ComponentMapper<Battery> BATTERY = mapperFor(Battery.class);
@@ -45,7 +46,7 @@ public class Mapper {
     public static final ComponentMapper<ManualControl> MANUAL_CONTROL = mapperFor(ManualControl.class);
     public static final ComponentMapper<Landed> LANDED = mapperFor(Landed.class);
     public static final ComponentMapper<LiftingOff> LIFTING_OFF = mapperFor(LiftingOff.class);
-    public static final ComponentMapper<Jumped> JUMPED = mapperFor(Jumped.class);
+    public static final ComponentMapper<JumpedOut> JUMPED_OUT = mapperFor(JumpedOut.class);
 
 
     private static <T extends Component> ComponentMapper<T> mapperFor(Class<T> componentClass) {

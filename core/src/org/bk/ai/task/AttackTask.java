@@ -6,14 +6,16 @@ import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import org.bk.Game;
 import org.bk.Util;
-import org.bk.ai.Attack;
 import org.bk.ai.Pursue;
 import org.bk.ai.SteeringUtil;
 import org.bk.data.Faction;
 import org.bk.data.component.AIControlled;
 import org.bk.data.component.Character;
 import org.bk.data.component.Steering;
+import org.bk.data.component.state.ManualControl;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -22,10 +24,14 @@ import static org.bk.data.component.Mapper.*;
  */
 public class AttackTask extends LeafTask<Entity> {
     private final ImmutableArray<Entity> entitiesToObserve;
+    private final Array<Entity> potentialEnemies = new Array<Entity>();
     private final Vector2 tv = new Vector2();
+    private final Game game;
     public SteeringBehavior<Vector2> steeringBehavior;
 
-    public AttackTask(ImmutableArray<Entity> entitiesToObserve) {
+
+    public AttackTask(Game game, ImmutableArray<Entity> entitiesToObserve) {
+        this.game = game;
         this.entitiesToObserve = entitiesToObserve;
     }
 
@@ -34,14 +40,15 @@ public class AttackTask extends LeafTask<Entity> {
         Steering steering = STEERING.get(getObject());
         AIControlled aiControlled = AI_CONTROLLED.get(getObject());
         if (steeringBehavior == null || aiControlled.enemy == null) {
+            potentialEnemies.clear();
             Faction ownerFaction = CHARACTER.get(getObject()).faction;
             for (Entity e: entitiesToObserve) {
                 Character otherCharacter = CHARACTER.get(e);
                 if (ownerFaction.isEnemy(otherCharacter.faction) && STEERING.has(e) && STEERING.get(e).steerable != null) {
-                    aiControlled.enemy = e;
-                    break;
+                    potentialEnemies.add(e);;
                 }
             }
+            aiControlled.enemy = potentialEnemies.random();
             if (aiControlled.enemy == null) {
                 return Status.SUCCEEDED;
             }
@@ -51,6 +58,7 @@ public class AttackTask extends LeafTask<Entity> {
             pursue.setMaxPredictionTime(3);
             steeringBehavior = pursue;
         }
+        game.control.setTo(getObject(), MANUAL_CONTROL, ManualControl.class);
         SteeringUtil.applySteering(steeringBehavior, steering.steerable, steering);
         float targetAngle = tv.set(TRANSFORM.get(aiControlled.enemy).location).sub(TRANSFORM.get(getObject()).location).angleRad();
         if (Math.abs(Util.deltaAngle(targetAngle, TRANSFORM.get(getObject()).orientRad)) < 0.2f &&

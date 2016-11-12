@@ -39,59 +39,6 @@ public class SteeringUtil {
     }
 
 
-    public static Steerable<Vector2> toSteeringBehavior(final Movement movement, final Transform transform, final Physics physics) {
-        return new SteerableAdapter<Vector2>() {
-            @Override
-            public Vector2 getLinearVelocity() {
-                return movement.velocity;
-            }
-
-            @Override
-            public Vector2 getPosition() {
-                return transform.location;
-            }
-
-            @Override
-            public float getOrientation() {
-                return transform.orientRad;
-            }
-
-            @Override
-            public float getMaxLinearAcceleration() {
-                return movement.linearThrust / physics.physicsBody.getMass();
-            }
-
-            @Override
-            public float getMaxLinearSpeed() {
-                return movement.maxVelocity;
-            }
-
-            @Override
-            public float getAngularVelocity() {
-                return physics.physicsBody.getAngularVelocity();
-            }
-
-            @Override
-            public float getMaxAngularSpeed() {
-                return movement.angularThrust / physics.physicsBody.getInertia() / physics.physicsBody.getAngularDamping();
-            }
-
-            @Override
-            public float getMaxAngularAcceleration() {
-                return getMaxAngularSpeed();
-            }
-
-            @Override
-            public float vectorToAngle(Vector2 vector) {
-                return vector.angleRad();
-            }
-
-            @Override
-            public Vector2 angleToVector(Vector2 outVector, float angle) {
-                return outVector.set(1, 0).setAngleRad(angle);
-            }
-        };
-    }
 
     public static Location<Vector2> toLocation(final Vector2 v) {
         return new Location<Vector2>() {
