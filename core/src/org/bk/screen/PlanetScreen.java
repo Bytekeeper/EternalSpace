@@ -1,5 +1,6 @@
 package org.bk.screen;
 
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -40,8 +41,7 @@ public class PlanetScreen extends ScreenAdapter {
         departButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Landed landed = LANDED.get(game.playerEntity);
-                game.control.setTo(game.playerEntity, LIFTING_OFF, LiftingOff.class).from = landed.on;
+                game.playerEntity.add(game.engine.createComponent(LiftingOff.class));
             }
         });
         window.add(departButton);

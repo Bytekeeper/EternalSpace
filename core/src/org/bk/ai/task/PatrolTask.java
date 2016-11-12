@@ -1,6 +1,7 @@
 package org.bk.ai.task;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.steer.behaviors.Wander;
@@ -18,11 +19,11 @@ import static org.bk.data.component.Mapper.STEERING;
  * Created by dante on 18.10.2016.
  */
 public class PatrolTask extends LeafTask<Entity> {
+    private final PooledEngine engine;
     private Wander wander;
-    private final Game game;
 
-    public PatrolTask(Game game) {
-        this.game = game;
+    public PatrolTask(PooledEngine engine) {
+        this.engine = engine;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class PatrolTask extends LeafTask<Entity> {
                     setWanderRadius(80).
                     setWanderRate(MathUtils.PI / 8);
         }
-        game.control.setTo(getObject(), MANUAL_CONTROL, ManualControl.class);
+        getObject().add(engine.createComponent(ManualControl.class));
         SteeringUtil.applySteering(wander, steering.steerable, STEERING.get(getObject()));
         return Status.RUNNING;
     }

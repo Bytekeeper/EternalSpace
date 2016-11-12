@@ -25,7 +25,9 @@ public class RandomJumpTargetTask extends LeafTask<Entity> {
             return Status.SUCCEEDED;
         }
         SolarSystem solarSystem = game.gameData.getSystem().random();
-        game.control.setTo(getObject(), JUMP, Jump.class).target = solarSystem;
+        Jump jump = game.engine.createComponent(Jump.class);
+        jump.target = solarSystem;
+        getObject().add(jump);
         return Status.SUCCEEDED;
     }
 

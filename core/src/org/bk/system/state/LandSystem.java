@@ -1,5 +1,6 @@
-package org.bk.system;
+package org.bk.system.state;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -13,8 +14,8 @@ import org.bk.data.component.Movement;
 import org.bk.data.component.Steering;
 import org.bk.data.component.Touching;
 import org.bk.data.component.Transform;
-import org.bk.data.component.state.Land;
-import org.bk.data.component.state.Landing;
+import org.bk.data.component.state.*;
+import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -23,11 +24,15 @@ import static org.bk.data.component.Mapper.*;
  */
 public class LandSystem extends IteratingSystem {
     private final Arrive steerToLandingSpot = new Arrive(null, null);
-    private final Game game;
 
-    public LandSystem(Game game, int priority) {
+    public LandSystem(int priority) {
         super(Family.all(Land.class, Transform.class, Movement.class, Steering.class).get(), priority);
-        this.game = game;
+    }
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        engine.addEntityListener(getFamily(), new TransitionListener(Land.class, ManualControl.class, Jump.class, Idle.class));
     }
 
     @Override
@@ -50,7 +55,8 @@ public class LandSystem extends IteratingSystem {
                 if (LANDING_PLACE.has(e)) {
                     Vector2 landingLocation = TRANSFORM.get(e).location;
                     if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {
-                        game.control.setTo(entity, LANDING, Landing.class).on = e;
+                        Landing landing = getEngine().createComponent(Landing.class);
+                        entity.add(landing);
                         break;
                     }
                 }

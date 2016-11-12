@@ -1,4 +1,4 @@
-package org.bk.system;
+package org.bk.system.state;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -8,9 +8,8 @@ import org.bk.Game;
 import org.bk.data.component.Physics;
 import org.bk.data.component.Steering;
 import org.bk.data.component.Transform;
-import org.bk.data.component.state.JumpingIn;
-import org.bk.data.component.state.JumpingOut;
-import org.bk.data.component.state.ManualControl;
+import org.bk.data.component.state.*;
+import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -29,25 +28,19 @@ public class JumpingInSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(getFamily(), new EntityListener() {
+        engine.addEntityListener(getFamily(), new TransitionListener(JumpingIn.class, JumpingOut.class, Idle.class, Start.class) {
             @Override
-            public void entityAdded(Entity entity) {
+            protected void enterState(Entity entity) {
                 JumpingIn jumpingIn = JUMPING_IN.get(entity);
                 jumpingIn.arriveAt.setToRandomDirection().scl(MathUtils.random(0, 800));
-            }
-
-            @Override
-            public void entityRemoved(Entity entity) {
-
+                entity.remove(Physics.class);
+                entity.remove(Steering.class);
             }
         });
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        entity.remove(Physics.class);
-        entity.remove(Steering.class);
-
         JumpingIn jumpingIn = JUMPING_IN.get(entity);
         Transform transform = TRANSFORM.get(entity);
 
@@ -62,7 +55,8 @@ public class JumpingInSystem extends IteratingSystem {
         if (jumpingIn.timeRemaining <= 0) {
             entity.add(getEngine().createComponent(Physics.class));
             entity.add(getEngine().createComponent(Steering.class));
-            game.control.setTo(entity, MANUAL_CONTROL, ManualControl.class);
+            Idle idle = getEngine().createComponent(Idle.class);
+            entity.add(idle);
         }
     }
 

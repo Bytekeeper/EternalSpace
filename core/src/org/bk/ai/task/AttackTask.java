@@ -1,6 +1,7 @@
 package org.bk.ai.task;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
@@ -26,12 +27,12 @@ public class AttackTask extends LeafTask<Entity> {
     private final ImmutableArray<Entity> entitiesToObserve;
     private final Array<Entity> potentialEnemies = new Array<Entity>();
     private final Vector2 tv = new Vector2();
-    private final Game game;
+    private final PooledEngine engine;
     public SteeringBehavior<Vector2> steeringBehavior;
 
 
-    public AttackTask(Game game, ImmutableArray<Entity> entitiesToObserve) {
-        this.game = game;
+    public AttackTask(PooledEngine engine, ImmutableArray<Entity> entitiesToObserve) {
+        this.engine = engine;
         this.entitiesToObserve = entitiesToObserve;
     }
 
@@ -58,7 +59,7 @@ public class AttackTask extends LeafTask<Entity> {
             pursue.setMaxPredictionTime(3);
             steeringBehavior = pursue;
         }
-        game.control.setTo(getObject(), MANUAL_CONTROL, ManualControl.class);
+        getObject().add(engine.createComponent(ManualControl.class));
         SteeringUtil.applySteering(steeringBehavior, steering.steerable, steering);
         float targetAngle = tv.set(TRANSFORM.get(aiControlled.enemy).location).sub(TRANSFORM.get(getObject()).location).angleRad();
         if (Math.abs(Util.deltaAngle(targetAngle, TRANSFORM.get(getObject()).orientRad)) < 0.2f &&

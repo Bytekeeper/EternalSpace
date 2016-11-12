@@ -32,7 +32,9 @@ public class RandomLandingSpotTask extends LeafTask<Entity> {
         if (entity == null) {
             return Status.FAILED;
         }
-        game.control.setTo(getObject(), LAND, Land.class).on = entity;
+        Land land = game.engine.createComponent(Land.class);
+        land.on = entity;
+        getObject().add(land);
         return Status.SUCCEEDED;
     }
 

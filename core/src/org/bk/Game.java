@@ -27,10 +27,13 @@ import org.bk.data.component.LandingPlace;
 import org.bk.data.component.Movement;
 import org.bk.data.component.Transform;
 import org.bk.data.component.WeaponControl;
-import org.bk.data.component.state.*;
+import org.bk.data.component.state.Jump;
+import org.bk.data.component.state.Land;
+import org.bk.data.component.state.ManualControl;
 import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
+import org.bk.system.state.*;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -39,6 +42,8 @@ public class Game extends com.badlogic.gdx.Game {
     public static final float ACTION_VELOCITY_THRESHOLD2 = 100;
     public static final float ACTION_DELTA_ANGLE_THRESHOLD = 0.01f;
     public static final float JUMP_SCALE = 800;
+    public static final float ENGINE_NOISE_VOLUME_LOW = 0.4f;
+    public static final float ENGINE_NOISE_VOLUME_HIGH = 0.7f;
     public Viewport viewport;
     public SpriteBatch batch;
     public SpriteBatch uiBatch;
@@ -57,15 +62,14 @@ public class Game extends com.badlogic.gdx.Game {
     public SolarSystem currentSystem;
     public GameData gameData;
 
-    PooledEngine engine;
+    public PooledEngine engine;
     private MapScreen mapScreen;
     private float flashTimer, lastFlashTime;
 
     public InputMultiplexer inputMultiplexer;
 
     public Signal<Entity> entityDestroyed = new Signal<Entity>();
-
-    public SimpleEntityStateMachine control;
+    public long engine_noise_id;
 
     @Override
     public void resize(int width, int height) {
@@ -104,28 +108,29 @@ public class Game extends com.badlogic.gdx.Game {
         initScreens();
 
         initWorldEngine();
-        control = new SimpleEntityStateMachine(engine, Jump.class, Land.class, Landing.class,
-                ManualControl.class, JumpingOut.class, JumpingIn.class, LiftingOff.class, Landed.class, JumpedOut.class);
         entityFactory = new EntityFactory(this);
 
         assets.gameData.setEngine(engine);
         playerEntity = assets.gameData.player;
         engine.addEntity(playerEntity);
+
+        engine_noise_id = assets.snd_engine_noise.loop(0.1f);
     }
 
     private void initWorldEngine() {
         engine = new PooledEngine();
         engine.addSystem(new SystemPopulateSystem(this, 0));
-        engine.addSystem(new AISystem(0));
-        engine.addSystem(new LandSystem(this, 1));
-        engine.addSystem(new JumpSystem(this, 1));
-        engine.addSystem(new LiftOffSystem(this, 1));
-        engine.addSystem(new ManualControlSystem(1));
-        engine.addSystem(new WeaponControlSystem(1));
-        engine.addSystem(new ApplySteeringSystem(this, 2));
-        engine.addSystem(new RenderingSystem(this, 3));
-        engine.addSystem(new LifeTimeSystem(3));
-        engine.addSystem(new Box2DPhysicsSystem(this, 4));
+        engine.addSystem(new AISystem(1));
+        engine.addSystem(new IdleSystem(0));
+        engine.addSystem(new LandSystem(2));
+        engine.addSystem(new JumpSystem(this, 2));
+        engine.addSystem(new LiftingOffSystem(this, 2));
+        engine.addSystem(new ManualControlSystem(2));
+        engine.addSystem(new WeaponControlSystem(2));
+        engine.addSystem(new ApplySteeringSystem(this, 3));
+        engine.addSystem(new RenderingSystem(this, 4));
+        engine.addSystem(new LifeTimeSystem(4));
+        engine.addSystem(new Box2DPhysicsSystem(this, 5));
         engine.addSystem(new ProjectileHitSystem(this, 6));
         engine.addSystem(new WeaponSystem(this, 7));
         engine.addSystem(new HealthSystem(this, 8));
@@ -133,13 +138,14 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new SelectionSystem(this, 9));
 
         engine.addSystem(new AsteroidSystem(this, 9000));
-        engine.addSystem(new TrafficSystem(this, 9000));
 
         engine.addSystem(new OrbitingSystem(10000));
         engine.addSystem(new LandingSystem(this, 10000));
         engine.addSystem(new JumpingOutSystem(this, 10000));
         engine.addSystem(new JumpingInSystem(this, 10000));
         engine.addSystem(new BatterySystem(15000));
+
+        engine.addSystem(new TrafficSystem(this, 20000));
     }
 
     private void initScreens() {
@@ -212,7 +218,9 @@ public class Game extends com.badlogic.gdx.Game {
             playerControl().turn = -1;
         }
         if (Gdx.input.isKeyPressed(Keys.J) && player.selectedJumpTarget != null) {
-            control.setTo(playerEntity, JUMP, Jump.class).target = player.selectedJumpTarget;
+            Jump jump = engine.createComponent(Jump.class);
+            jump.target = player.selectedJumpTarget;
+            playerEntity.add(jump);
         }
         if (Gdx.input.isKeyJustPressed(Keys.M)) {
             if (mapScreen != screen) {
@@ -238,13 +246,20 @@ public class Game extends com.badlogic.gdx.Game {
             }
 
             if (planet != null) {
-                control.setTo(playerEntity, LAND, Land.class).on = planet;
+                Land land = engine.createComponent(Land.class);
+                land.on = planet;
+                playerEntity.add(land);
             }
         }
     }
 
     private ManualControl playerControl() {
-        return control.setTo(playerEntity, MANUAL_CONTROL, ManualControl.class);
+        ManualControl manualControl = MANUAL_CONTROL.get(playerEntity);
+        if (manualControl == null) {
+            manualControl = engine.createComponent(ManualControl.class);
+            playerEntity.add(manualControl);
+        }
+        return manualControl;
     }
 
     public Entity spawn(String entityDefinitionKey, Class<? extends Component>... expectedComponents) {

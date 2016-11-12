@@ -1,13 +1,15 @@
-package org.bk.system;
+package org.bk.system.state;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import org.bk.Game;
 import org.bk.data.component.*;
-import org.bk.data.component.state.Landed;
-import org.bk.data.component.state.Landing;
+import org.bk.data.component.state.*;
+import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -15,6 +17,7 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 18.10.2016.
  */
 public class LandingSystem extends IteratingSystem {
+
     private final Game game;
 
     public LandingSystem(Game game, int priority) {
@@ -23,14 +26,30 @@ public class LandingSystem extends IteratingSystem {
     }
 
     @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        engine.addEntityListener(getFamily(), new TransitionListener(Landing.class, Land.class));
+    }
+
+    @Override
     protected void processEntity(Entity entity, float deltaTime) {
         entity.remove(Physics.class);
         entity.remove(Steering.class);
         Landing landing = LANDING.get(entity);
         landing.timeRemaining = Math.max(0, landing.timeRemaining - deltaTime);
+
+        if (game.playerEntity == entity) {
+            float volume = MathUtils.lerp(0, Game.ENGINE_NOISE_VOLUME_LOW, landing.timeRemaining / Landing.LANDING_DURATION);
+            game.assets.snd_engine_noise.setVolume(game.engine_noise_id, volume);
+        }
+
         if (landing.timeRemaining <= 0) {
             Entity landedOn = landing.on;
-            game.control.setTo(entity, LANDED, Landed.class).on = landedOn;
+
+            Landed landed = getEngine().createComponent(Landed.class);
+            landed.on = landedOn;
+            entity.add(landed);
+            entity.remove(Landing.class);
         }
     }
 

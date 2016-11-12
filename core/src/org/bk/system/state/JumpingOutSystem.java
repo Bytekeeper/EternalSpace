@@ -1,17 +1,18 @@
-package org.bk.system;
+package org.bk.system.state;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.SolarSystem;
 import org.bk.data.component.Physics;
 import org.bk.data.component.Steering;
 import org.bk.data.component.Transform;
+import org.bk.data.component.state.Jump;
 import org.bk.data.component.state.JumpedOut;
 import org.bk.data.component.state.JumpingIn;
 import org.bk.data.component.state.JumpingOut;
+import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -30,15 +31,12 @@ public class JumpingOutSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(getFamily(), new EntityListener() {
+        engine.addEntityListener(getFamily(), new TransitionListener(JumpingOut.class, Jump.class) {
             @Override
-            public void entityAdded(Entity entity) {
+            protected void enterState(Entity entity) {
+                entity.remove(Steering.class);
+                entity.remove(Physics.class);
                 JUMPING_OUT.get(entity).startFrom.set(TRANSFORM.get(entity).location);
-            }
-
-            @Override
-            public void entityRemoved(Entity entity) {
-
             }
         });
     }
@@ -46,8 +44,6 @@ public class JumpingOutSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         JumpingOut jumping = JUMPING_OUT.get(entity);
-        entity.remove(Steering.class);
-        entity.remove(Physics.class);
         Transform transform = TRANSFORM.get(entity);
 
         jumping.timeRemaining = Math.max(0, jumping.timeRemaining - deltaTime);
@@ -63,10 +59,14 @@ public class JumpingOutSystem extends IteratingSystem {
             if (entity == game.playerEntity) {
                 game.flash(0.2f);
                 game.assets.snd_hyperdrive_shutdown.play();
-                game.control.setTo(entity, JUMPING_IN, JumpingIn.class).from = game.currentSystem;
+                JumpingIn jumpingIn = getEngine().createComponent(JumpingIn.class);
+                jumpingIn.from = game.currentSystem;
+                entity.add(jumpingIn);
                 PERSISTENCE.get(entity).system = targetSystem;
             } else {
-                game.control.setTo(entity, JUMPED_OUT, JumpedOut.class).to = targetSystem;
+                JumpedOut jumpedOut = getEngine().createComponent(JumpedOut.class);
+                jumpedOut.to = targetSystem;
+                entity.add(jumpedOut);
             }
         }
     }

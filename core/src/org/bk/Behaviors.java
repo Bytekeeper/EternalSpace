@@ -39,7 +39,7 @@ public class Behaviors {
         Sequence<Entity> patrolThenLand = new Sequence<Entity>();
         Parallel<Entity> patrolTree = new Parallel<Entity>(Parallel.Policy.Selector);
         patrolTree.addChild(new Wait<Entity>(new GaussianFloatDistribution(10, 10)));
-        patrolTree.addChild(new PatrolTask(game));
+        patrolTree.addChild(new PatrolTask(game.engine));
         patrolThenLand.addChild(patrolTree);
         Sequence<Entity> land = new Sequence<Entity>();
         land.addChild(new RandomLandingSpotTask(game, engine));
@@ -54,7 +54,7 @@ public class Behaviors {
 
     private Task<Entity> createFightTask(Game game, Engine engine) {
         ImmutableArray<Entity> potentialEnemies = engine.getEntitiesFor(Family.all(Character.class, Transform.class, Health.class, Steering.class).get());
-        Task<Entity> fight = new AttackTask(game, potentialEnemies);
+        Task<Entity> fight = new AttackTask(game.engine, potentialEnemies);
         fight.setGuard(new EnemyNearby(potentialEnemies));
         return fight;
     }

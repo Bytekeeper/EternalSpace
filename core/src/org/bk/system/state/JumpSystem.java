@@ -1,7 +1,9 @@
-package org.bk.system;
+package org.bk.system.state;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
@@ -9,10 +11,9 @@ import org.bk.Game;
 import org.bk.Util;
 import org.bk.ai.SteeringUtil;
 import org.bk.ai.task.Stop;
-import org.bk.data.SolarSystem;
 import org.bk.data.component.*;
-import org.bk.data.component.state.Jump;
-import org.bk.data.component.state.JumpingOut;
+import org.bk.data.component.state.*;
+import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -31,12 +32,21 @@ public class JumpSystem extends IteratingSystem {
     }
 
     @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        engine.addEntityListener(getFamily(), new TransitionListener(Jump.class, ManualControl.class, Land.class, Idle.class));
+    }
+
+    @Override
     protected void processEntity(Entity entity, float deltaTime) {
         Steering steering = STEERING.get(entity);
         Movement movement = MOVEMENT.get(entity);
         Jump jump = JUMP.get(entity);
 
         Steerable<Vector2> steerable = steering.steerable;
+        if (steerable == null) {
+            return;
+        }
 
         tv.set(jump.target.position).sub(game.currentSystem.position).angleRad();
         stop.setOwner(steerable).
@@ -63,7 +73,13 @@ public class JumpSystem extends IteratingSystem {
         if (entity == game.playerEntity) {
             game.assets.snd_hyperdrive_engage.play();
         }
-        SolarSystem target = jump.target;
-        game.control.setTo(entity, JUMPING_OUT, JumpingOut.class).to = target;
+        JumpingOut jumpingOut = getEngine().createComponent(JumpingOut.class);
+        jumpingOut.to = jump.target;
+        entity.add(jumpingOut);
+    }
+
+    @Override
+    public PooledEngine getEngine() {
+        return (PooledEngine) super.getEngine();
     }
 }

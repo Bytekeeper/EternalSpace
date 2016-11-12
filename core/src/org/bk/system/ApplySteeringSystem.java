@@ -4,11 +4,11 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.data.component.*;
-import org.bk.data.component.state.Landing;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -40,6 +40,14 @@ public class ApplySteeringSystem extends IteratingSystem {
             for (Weapons.Weapon weapon : weapons.weapon) {
                 weapon.firing = weaponControl.primaryFire;
             }
+        }
+        if (entity == game.playerEntity) {
+            float volume = MathUtils.lerp(Game.ENGINE_NOISE_VOLUME_LOW, Game.ENGINE_NOISE_VOLUME_HIGH, (Math.abs(steering.thrust) + 0.2f * Math.abs(steering.turn)) / 1.2f);
+            float pitch = MathUtils.lerp(1.0f, 2.0f, (Math.abs(steering.thrust) + 0.2f * Math.abs(steering.turn)) / 1.2f);
+            Sound snd_engine_noise = game.assets.snd_engine_noise;
+            long engine_noise_id = game.engine_noise_id;
+            snd_engine_noise.setVolume(engine_noise_id, volume);
+            snd_engine_noise.setPitch(engine_noise_id, pitch);
         }
     }
 
