@@ -29,7 +29,7 @@ import org.bk.data.component.Transform;
 import org.bk.data.component.WeaponControl;
 import org.bk.data.component.state.Jump;
 import org.bk.data.component.state.Land;
-import org.bk.data.component.state.ManualControl;
+import org.bk.data.component.ManualControl;
 import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
@@ -39,9 +39,9 @@ import static org.bk.data.component.Mapper.*;
 
 public class Game extends com.badlogic.gdx.Game {
     public static final float SQRT_2 = (float) Math.sqrt(2);
-    public static final float ACTION_VELOCITY_THRESHOLD2 = 100;
+    public static final float ACTION_VELOCITY_THRESHOLD2 = 10;
     public static final float ACTION_DELTA_ANGLE_THRESHOLD = 0.01f;
-    public static final float JUMP_SCALE = 800;
+    public static final float JUMP_SCALE = 4000;
     public static final float ENGINE_NOISE_VOLUME_LOW = 0.4f;
     public static final float ENGINE_NOISE_VOLUME_HIGH = 0.7f;
     public Viewport viewport;
@@ -119,33 +119,42 @@ public class Game extends com.badlogic.gdx.Game {
 
     private void initWorldEngine() {
         engine = new PooledEngine();
-        engine.addSystem(new SystemPopulateSystem(this, 0));
-        engine.addSystem(new AISystem(1));
-        engine.addSystem(new IdleSystem(0));
-        engine.addSystem(new LandSystem(2));
-        engine.addSystem(new JumpSystem(this, 2));
-        engine.addSystem(new LiftingOffSystem(this, 2));
-        engine.addSystem(new ManualControlSystem(2));
-        engine.addSystem(new WeaponControlSystem(2));
-        engine.addSystem(new ApplySteeringSystem(this, 3));
-        engine.addSystem(new RenderingSystem(this, 4));
-        engine.addSystem(new LifeTimeSystem(4));
-        engine.addSystem(new Box2DPhysicsSystem(this, 5));
-        engine.addSystem(new ProjectileHitSystem(this, 6));
-        engine.addSystem(new WeaponSystem(this, 7));
-        engine.addSystem(new HealthSystem(this, 8));
-        engine.addSystem(new PersistenceSystem(9));
-        engine.addSystem(new SelectionSystem(this, 9));
+        // Planets and ships etc.
+        engine.addSystem(new SystemPopulateSystem(this));
+        engine.addSystem(new TrafficSystem(this));
+        engine.addSystem(new AsteroidSystem(this));
 
-        engine.addSystem(new AsteroidSystem(this, 9000));
+        // Render
+        engine.addSystem(new RenderingSystem(this));
 
-        engine.addSystem(new OrbitingSystem(10000));
-        engine.addSystem(new LandingSystem(this, 10000));
-        engine.addSystem(new JumpingOutSystem(this, 10000));
-        engine.addSystem(new JumpingInSystem(this, 10000));
-        engine.addSystem(new BatterySystem(15000));
+        // Actual steering
+        engine.addSystem(new AISystem());
+        engine.addSystem(new ManualControlSystem());
+        engine.addSystem(new WeaponControlSystem());
 
-        engine.addSystem(new TrafficSystem(this, 20000));
+        // Apply actions
+        engine.addSystem(new WeaponSystem(this));
+        engine.addSystem(new LiftingOffSystem(this));
+        engine.addSystem(new LandingSystem(this));
+        engine.addSystem(new JumpingOutSystem(this));
+        engine.addSystem(new JumpingInSystem(this));
+
+        // Control
+        engine.addSystem(new LandSystem());
+        engine.addSystem(new JumpSystem(this));
+        engine.addSystem(new ApplySteeringSystem(this));
+
+        // Physics
+        engine.addSystem(new Box2DPhysicsSystem(this));
+        engine.addSystem(new OrbitingSystem());
+        engine.addSystem(new ProjectileHitSystem(this));
+        engine.addSystem(new PersistenceSystem());
+        engine.addSystem(new SelectionSystem(this));
+
+        // Misc
+        engine.addSystem(new HealthSystem(this));
+        engine.addSystem(new LifeTimeSystem());
+        engine.addSystem(new BatterySystem());
     }
 
     private void initScreens() {
@@ -203,19 +212,16 @@ public class Game extends com.badlogic.gdx.Game {
 //            " " + physicsBody.getMass());
 //        }
 //        lastVel = movement.velocity.len();
-        ManualControl manualControl = MANUAL_CONTROL.get(playerEntity);
-        if (manualControl != null) {
-            manualControl.thrust = 0;
-            manualControl.turn = 0;
-        }
+        ManualControl manualControl = playerControl();
+        manualControl.reset();
         if (Gdx.input.isKeyPressed(Keys.UP)) {
-            playerControl().thrust = 1;
+            manualControl.thrust = 1;
         }
         if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            playerControl().turn = 1;
+            manualControl.turn = 1;
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            playerControl().turn = -1;
+            manualControl.turn = -1;
         }
         if (Gdx.input.isKeyPressed(Keys.J) && player.selectedJumpTarget != null) {
             Jump jump = engine.createComponent(Jump.class);

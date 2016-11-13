@@ -12,8 +12,8 @@ import static org.bk.data.component.Mapper.BATTERY;
  * Created by dante on 10.11.2016.
  */
 public class BatterySystem extends IteratingSystem {
-    public BatterySystem(int priority) {
-        super(Family.all(Landed.class, Battery.class).get(), priority);
+    public BatterySystem() {
+        super(Family.all(Landed.class, Battery.class).get());
     }
 
     @Override

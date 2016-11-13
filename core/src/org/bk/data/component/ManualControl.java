@@ -1,4 +1,4 @@
-package org.bk.data.component.state;
+package org.bk.data.component;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;

@@ -21,8 +21,8 @@ import static org.bk.data.component.Mapper.HEALTH;
 public class HealthSystem extends IteratingSystem {
     private final Game game;
 
-    public HealthSystem(Game game, int priority) {
-        super(Family.all(Health.class).get(), priority);
+    public HealthSystem(Game game) {
+        super(Family.all(Health.class).get());
         this.game = game;
     }
 

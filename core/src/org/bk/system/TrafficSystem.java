@@ -27,8 +27,8 @@ public class TrafficSystem extends EntitySystem {
     private ImmutableArray<Entity> shipEntities;
     private final Vector2 tv = new Vector2();
 
-    public TrafficSystem(Game game, int priority) {
-        super(priority);
+    public TrafficSystem(Game game) {
+        super();
         this.game = game;
     }
 
@@ -101,7 +101,6 @@ public class TrafficSystem extends EntitySystem {
                 transform.location.set(TRANSFORM.get(target).location);
                 entity.add(getEngine().createComponent(LiftingOff.class));
             } else {
-                entity.add(getEngine().createComponent(Start.class));
                 Movement movement = MOVEMENT.get(entity);
                 transform.location.set(TRANSFORM.get(target).location).add(MathUtils.random(-1000, 1000), MathUtils.random(-1000, 1000));
                 movement.velocity.setToRandomDirection().scl(MathUtils.random(0, movement.maxVelocity));
@@ -112,7 +111,6 @@ public class TrafficSystem extends EntitySystem {
                 aiControlled.behaviorTree = game.behaviors.jump(entity, game);
             }
         } else {
-            entity.add(getEngine().createComponent(Start.class));
             transform.location.set(rnd.nextFloat() * 5000 - 2500, rnd.nextFloat() * 5000 - 2500);
             JumpingIn jumpingIn = getEngine().createComponent(JumpingIn.class);
             jumpingIn.from = game.gameData.getSystem().random();

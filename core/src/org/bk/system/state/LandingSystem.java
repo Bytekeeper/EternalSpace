@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.MathUtils;
 import org.bk.Game;
 import org.bk.data.component.*;
 import org.bk.data.component.state.*;
-import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -20,15 +19,14 @@ public class LandingSystem extends IteratingSystem {
 
     private final Game game;
 
-    public LandingSystem(Game game, int priority) {
-        super(Family.all(Landing.class).get(), priority);
+    public LandingSystem(Game game) {
+        super(Family.all(Landing.class).get());
         this.game = game;
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(getFamily(), new TransitionListener(Landing.class, Land.class));
     }
 
     @Override

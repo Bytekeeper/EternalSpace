@@ -10,12 +10,8 @@ import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
 import org.bk.ai.Arrive;
 import org.bk.ai.SteeringUtil;
-import org.bk.data.component.Movement;
-import org.bk.data.component.Steering;
-import org.bk.data.component.Touching;
-import org.bk.data.component.Transform;
+import org.bk.data.component.*;
 import org.bk.data.component.state.*;
-import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -25,18 +21,21 @@ import static org.bk.data.component.Mapper.*;
 public class LandSystem extends IteratingSystem {
     private final Arrive steerToLandingSpot = new Arrive(null, null);
 
-    public LandSystem(int priority) {
-        super(Family.all(Land.class, Transform.class, Movement.class, Steering.class).get(), priority);
+    public LandSystem() {
+        super(Family.all(Land.class, Transform.class, Movement.class, Steering.class).get());
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(getFamily(), new TransitionListener(Land.class, ManualControl.class, Jump.class, Idle.class));
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        if (States.UNABORTABLE_ACTIONS.matches(entity)) {
+            entity.remove(Land.class);
+            return;
+        }
         Steering steering = STEERING.get(entity);
         Steerable<Vector2> steerable = steering.steerable;
         Land land = LAND.get(entity);
@@ -57,6 +56,7 @@ public class LandSystem extends IteratingSystem {
                     if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {
                         Landing landing = getEngine().createComponent(Landing.class);
                         entity.add(landing);
+                        entity.remove(Land.class);
                         break;
                     }
                 }

@@ -15,8 +15,8 @@ import static org.bk.data.component.Mapper.*;
  */
 public class AISystem extends IteratingSystem {
 
-    public AISystem(int priority) {
-        super(Family.all(Steering.class, Transform.class, AIControlled.class).get(), priority);
+    public AISystem() {
+        super(Family.all(Steering.class, Transform.class, AIControlled.class).get());
     }
 
     @Override

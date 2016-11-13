@@ -8,7 +8,6 @@ import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import org.bk.Game;
 import org.bk.Util;
 import org.bk.ai.Pursue;
 import org.bk.ai.SteeringUtil;
@@ -16,7 +15,7 @@ import org.bk.data.Faction;
 import org.bk.data.component.AIControlled;
 import org.bk.data.component.Character;
 import org.bk.data.component.Steering;
-import org.bk.data.component.state.ManualControl;
+import org.bk.data.component.ManualControl;
 
 import static org.bk.data.component.Mapper.*;
 

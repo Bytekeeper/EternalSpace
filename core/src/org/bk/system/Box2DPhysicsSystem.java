@@ -55,8 +55,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
         }
     };
 
-    public Box2DPhysicsSystem(Game game, int priority) {
-        super(priority);
+    public Box2DPhysicsSystem(Game game) {
+
         assets = game.assets;
         world = new World(Vector2.Zero, true);
         world.setContactListener(myContactListener);
@@ -271,7 +271,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
         @Override
         public void entityRemoved(Entity entity) {
             com.badlogic.gdx.physics.box2d.Body bodyToDestroy = entityBody.remove(entity);
-            world.destroyBody(bodyToDestroy);
+            if (bodyToDestroy != null) {
+                world.destroyBody(bodyToDestroy);
+            }
             entity.remove(Touching.class);
         }
     }

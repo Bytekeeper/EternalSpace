@@ -18,8 +18,8 @@ public class SelectionSystem extends EntitySystem {
     private final Vector2 tv = new Vector2();
     private final Game game;
 
-    public SelectionSystem(final Game game, int priority) {
-        super(priority);
+    public SelectionSystem(final Game game) {
+
         this.game = game;
         game.inputMultiplexer.addProcessor(new InputAdapter() {
             @Override

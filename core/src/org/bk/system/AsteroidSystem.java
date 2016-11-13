@@ -30,8 +30,8 @@ public class AsteroidSystem extends IteratingSystem {
     private static final float MAX_ASTEROID_SPEED = 300;
     private final Game game;
 
-    public AsteroidSystem(Game game, int priority) {
-        super(Family.all(Asteroid.class, Transform.class).get(), priority);
+    public AsteroidSystem(Game game) {
+        super(Family.all(Asteroid.class, Transform.class).get());
         this.game = game;
     }
 

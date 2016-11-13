@@ -46,8 +46,8 @@ public class RenderingSystem extends EntitySystem {
     private final Vector2 tv = new Vector2();
     private final Radar radar;
 
-    public RenderingSystem(final Game game, int priority) {
-        super(priority);
+    public RenderingSystem(final Game game) {
+
         this.game = game;
         assets = game.assets;
         batch = game.batch;
@@ -148,10 +148,10 @@ public class RenderingSystem extends EntitySystem {
         draw(transform, tv, textureRegion);
 //        game.assets.debugFont.draw(batch, "" + transform.location, transform.location.x, transform.location.y);
         if (AI_DEBUG && AI_CONTROLLED.has(entity)) {
-            Component state = game.control.getState(entity);
-            if (state != null) {
-                assets.debugFont.draw(batch, String.format("state: %s", state.getClass().getSimpleName()), transform.location.x, transform.location.y - 20);
-            }
+//            Component state = game.control.getState(entity);
+//            if (state != null) {
+//                assets.debugFont.draw(batch, String.format("state: %s", state.getClass().getSimpleName()), transform.location.x, transform.location.y - 20);
+//            }
             AIControlled aiControlled = AI_CONTROLLED.get(entity);
             if (aiControlled.behaviorTree != null) {
                 renderBehaviorTree(aiControlled.behaviorTree, transform.location.x, transform.location.y - 20);

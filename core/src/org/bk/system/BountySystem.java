@@ -12,7 +12,7 @@ import org.bk.Game;
  */
 public class BountySystem extends EntitySystem {
     public BountySystem(Game game, int priority) {
-        super(priority);
+
 
         game.entityDestroyed.add(new Listener<Entity>() {
             @Override

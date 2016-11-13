@@ -21,8 +21,8 @@ import static org.bk.data.component.Mapper.TRANSFORM;
 public class OrbitingSystem extends SortedIteratingSystem {
     private final Vector2 tv = new Vector2();
 
-    public OrbitingSystem(int priority) {
-        super(Family.all(Transform.class, Orbiting.class).get(), new OrbitingComparator(), priority);
+    public OrbitingSystem() {
+        super(Family.all(Transform.class, Orbiting.class).get(), new OrbitingComparator());
     }
 
     @Override

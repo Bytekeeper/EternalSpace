@@ -22,8 +22,8 @@ public class SystemPopulateSystem extends EntitySystem {
     public final Signal<String> systemChanged = new Signal<String>();
     private boolean dispatchOnNextUpdate;
 
-    public SystemPopulateSystem(Game game, int priority) {
-        super(priority);
+    public SystemPopulateSystem(Game game) {
+
         this.game = game;
     }
 

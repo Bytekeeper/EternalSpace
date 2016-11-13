@@ -20,8 +20,8 @@ public class WeaponSystem extends IteratingSystem {
     private static final float MAX_PROJECTILE_LIFETIME = 20;
     private final Game game;
 
-    public WeaponSystem(Game game, int priority) {
-        super(Family.all(Weapons.class, Transform.class).get(), priority);
+    public WeaponSystem(Game game) {
+        super(Family.all(Weapons.class, Transform.class).get());
         this.game = game;
     }
 

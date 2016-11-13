@@ -95,7 +95,7 @@ template falcon {
     }
     WeaponControl {
     }
-    Start {
+    ManualControl {
     }
     JumpDrive {
         powerCost 333
@@ -156,7 +156,7 @@ template Titan {
     }
     WeaponControl {
     }
-    Start {
+    ManualControl {
     }
     Weapons {
         weapon {

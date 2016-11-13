@@ -11,8 +11,8 @@ import static org.bk.data.component.Mapper.LIFE_TIME;
  * Created by dante on 16.10.2016.
  */
 public class LifeTimeSystem extends IteratingSystem {
-    public LifeTimeSystem(int priority) {
-        super(Family.all(LifeTime.class).get(), priority);
+    public LifeTimeSystem() {
+        super(Family.all(LifeTime.class).get());
     }
 
     @Override

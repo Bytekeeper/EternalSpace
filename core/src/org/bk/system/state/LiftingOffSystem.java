@@ -1,18 +1,14 @@
 package org.bk.system.state;
 
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import org.bk.Game;
 import org.bk.data.component.Physics;
 import org.bk.data.component.Steering;
-import org.bk.data.component.state.Idle;
+import org.bk.data.component.state.Land;
 import org.bk.data.component.state.Landed;
 import org.bk.data.component.state.LiftingOff;
-import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.LANDED;
 import static org.bk.data.component.Mapper.LIFTING_OFF;
@@ -23,28 +19,26 @@ import static org.bk.data.component.Mapper.LIFTING_OFF;
 public class LiftingOffSystem extends IteratingSystem {
     private final Game game;
 
-    public LiftingOffSystem(Game game, int priority) {
-        super(Family.all(LiftingOff.class).get(), priority);
+    public LiftingOffSystem(Game game) {
+        super(Family.all(LiftingOff.class).get());
         this.game = game;
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(getFamily(), new TransitionListener(LiftingOff.class, Landed.class) {
-            @Override
-            protected void enterState(Entity entity) {
-                LIFTING_OFF.get(entity).from = LANDED.get(entity).on;
-            }
-        });
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        LiftingOff liftingOff = LIFTING_OFF.get(entity);
+        Landed landed = (Landed) entity.remove(Landed.class);
+        if (landed != null) {
+            liftingOff.from = landed.on;
+        }
         entity.remove(Physics.class);
         entity.remove(Steering.class);
 
-        LiftingOff liftingOff = LIFTING_OFF.get(entity);
         liftingOff.timeRemaining = Math.max(0, liftingOff.timeRemaining - deltaTime);
 
         if (game.playerEntity == entity) {
@@ -55,8 +49,7 @@ public class LiftingOffSystem extends IteratingSystem {
         if (liftingOff.timeRemaining <= 0) {
             entity.add(getEngine().createComponent(Physics.class));
             entity.add(getEngine().createComponent(Steering.class));
-            Idle idle = getEngine().createComponent(Idle.class);
-            entity.add(idle);
+            entity.remove(LiftingOff.class);
         }
     }
 

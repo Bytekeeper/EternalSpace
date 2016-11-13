@@ -13,8 +13,8 @@ import static org.bk.data.component.Mapper.PERSISTENCE;
  * Created by dante on 10.11.2016.
  */
 public class PersistenceSystem extends IteratingSystem {
-    public PersistenceSystem(int priority) {
-        super(Family.one(JumpedOut.class, Landed.class).get(), priority);
+    public PersistenceSystem() {
+        super(Family.one(JumpedOut.class, Landed.class).get());
     }
 
     @Override

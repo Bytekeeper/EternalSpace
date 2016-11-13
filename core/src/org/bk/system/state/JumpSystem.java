@@ -13,7 +13,6 @@ import org.bk.ai.SteeringUtil;
 import org.bk.ai.task.Stop;
 import org.bk.data.component.*;
 import org.bk.data.component.state.*;
-import org.bk.fsm.TransitionListener;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -26,19 +25,22 @@ public class JumpSystem extends IteratingSystem {
     private final Game game;
 
 
-    public JumpSystem(Game game, int priority) {
-        super(Family.all(Steering.class, Transform.class, Movement.class, Jump.class).get(), priority);
+    public JumpSystem(Game game) {
+        super(Family.all(Steering.class, Transform.class, Movement.class, Jump.class).get());
         this.game = game;
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
-        engine.addEntityListener(getFamily(), new TransitionListener(Jump.class, ManualControl.class, Land.class, Idle.class));
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        if (States.UNABORTABLE_ACTIONS.matches(entity)) {
+            entity.remove(Land.class);
+            return;
+        }
         Steering steering = STEERING.get(entity);
         Movement movement = MOVEMENT.get(entity);
         Jump jump = JUMP.get(entity);
@@ -76,6 +78,7 @@ public class JumpSystem extends IteratingSystem {
         JumpingOut jumpingOut = getEngine().createComponent(JumpingOut.class);
         jumpingOut.to = jump.target;
         entity.add(jumpingOut);
+        entity.remove(Jump.class);
     }
 
     @Override

@@ -19,8 +19,8 @@ public class ApplySteeringSystem extends IteratingSystem {
     private final Vector2 tv = new Vector2();
     private final Game game;
 
-    public ApplySteeringSystem(Game game, int priority) {
-        super(Family.all(Movement.class, Steering.class, Transform.class).get(), priority);
+    public ApplySteeringSystem(Game game) {
+        super(Family.all(Movement.class, Steering.class, Transform.class).get());
         this.game = game;
     }
 

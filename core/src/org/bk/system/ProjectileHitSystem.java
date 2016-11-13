@@ -18,8 +18,8 @@ public class ProjectileHitSystem extends IteratingSystem {
     private final Game game;
     private final Array<Entity> toDamage = new Array<Entity>();
 
-    public ProjectileHitSystem(Game game, int priority) {
-        super(Family.all(Projectile.class, Touching.class).get(), priority);
+    public ProjectileHitSystem(Game game) {
+        super(Family.all(Projectile.class, Touching.class).get());
         this.game = game;
     }
 
