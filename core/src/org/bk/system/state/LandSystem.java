@@ -1,9 +1,6 @@
 package org.bk.system.state;
 
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
@@ -28,6 +25,17 @@ public class LandSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
+        engine.addEntityListener(getFamily(), new EntityListener() {
+            @Override
+            public void entityAdded(Entity entity) {
+                States.abortActions(entity, Land.class);
+            }
+
+            @Override
+            public void entityRemoved(Entity entity) {
+
+            }
+        });
     }
 
     @Override
@@ -36,6 +44,7 @@ public class LandSystem extends IteratingSystem {
             entity.remove(Land.class);
             return;
         }
+
         Steering steering = STEERING.get(entity);
         Steerable<Vector2> steerable = steering.steerable;
         Land land = LAND.get(entity);

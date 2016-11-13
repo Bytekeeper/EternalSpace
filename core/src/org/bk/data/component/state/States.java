@@ -10,7 +10,16 @@ import com.badlogic.gdx.utils.Array;
  */
 public class States {
     public static final Array<? extends Class<? extends Component>> ABORTABLE_ACTIONS = Array.with(Jump.class, Land.class);
-    public static Family UNABORTABLE_ACTIONS = Family.all(JumpingIn.class, JumpedOut.class, Landing.class, LiftingOff.class).get();
+    public static Family UNABORTABLE_ACTIONS = Family.one(Landed.class, JumpingIn.class, JumpingOut.class, Landing.class, LiftingOff.class).get();
+
+    public static void abortActions(Entity e, Class<? extends Component> allBut) {
+        for (Class<? extends Component> abortableAction : ABORTABLE_ACTIONS) {
+            if (allBut == abortableAction) {
+                continue;
+            }
+            e.remove(abortableAction);
+        }
+    }
 
     public static void abortActions(Entity e) {
         for (Class<? extends Component> abortableAction : ABORTABLE_ACTIONS) {

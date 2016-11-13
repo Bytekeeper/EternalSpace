@@ -1,9 +1,6 @@
 package org.bk.system.state;
 
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.ai.steer.Steerable;
 import com.badlogic.gdx.math.Vector2;
@@ -13,6 +10,7 @@ import org.bk.ai.SteeringUtil;
 import org.bk.ai.task.Stop;
 import org.bk.data.component.*;
 import org.bk.data.component.state.*;
+import org.bk.graphics.StatusBar;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -33,6 +31,17 @@ public class JumpSystem extends IteratingSystem {
     @Override
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
+        engine.addEntityListener(getFamily(), new EntityListener() {
+            @Override
+            public void entityAdded(Entity entity) {
+                States.abortActions(entity, Jump.class);
+            }
+
+            @Override
+            public void entityRemoved(Entity entity) {
+
+            }
+        });
     }
 
     @Override

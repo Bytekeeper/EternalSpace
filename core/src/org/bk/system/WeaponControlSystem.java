@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import org.bk.data.component.WeaponControl;
 import org.bk.data.component.Weapons;
+import org.bk.data.component.state.States;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -18,10 +19,11 @@ public class WeaponControlSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        boolean allowFiring = !States.UNABORTABLE_ACTIONS.matches(entity);
         WeaponControl weaponControl = WEAPON_CONTROL.get(entity);
         Weapons weapons = WEAPONS.get(entity);
         for (Weapons.Weapon weapon : weapons.weapon) {
-            weapon.firing = weaponControl.primaryFire;
+            weapon.firing = allowFiring && weaponControl.primaryFire;
         }
     }
 }
