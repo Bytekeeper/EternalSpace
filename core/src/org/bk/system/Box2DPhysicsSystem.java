@@ -89,6 +89,8 @@ public class Box2DPhysicsSystem extends EntitySystem {
         while (nextStep < 0) {
             for (com.badlogic.gdx.physics.box2d.Body body : bodies) {
                 Entity entity = (Entity) body.getUserData();
+                Transform transform = TRANSFORM.get(entity);
+                body.setTransform(tv.set(transform.location).scl(W2B), transform.orientRad);
                 Movement movement = MOVEMENT.get(entity);
                 if (movement != null) {
                     tv.set(movement.linearAccel).scl(W2B);

@@ -34,6 +34,21 @@ template "planet" {
     }
 }
 
+template "venuslike1" {
+    Celestial {
+        radarColor 0.3 0.8 0.5 1
+    }
+    Body {
+        graphics "planet/venuslike1"
+        dimension 210 210
+    }
+    Transform {
+    }
+    Physics {
+    }
+}
+
+
 template "gas1" {
     Celestial {
         radarColor 0.6 0.2 0.6 1
@@ -47,6 +62,35 @@ template "gas1" {
     Physics {
     }
 }
+
+template "gas2" {
+    Celestial {
+        radarColor 0.6 0.2 0.6 1
+    }
+    Body {
+        graphics "planet/gas2"
+        dimension 256 256
+    }
+    Transform {
+    }
+    Physics {
+    }
+}
+
+template "G-Type star" {
+    Celestial {
+        radarColor 0.8 0.8 0.2 1
+    }
+    Body {
+        graphics "planet/star_g_type"
+        dimension 512 512
+    }
+    Transform {
+    }
+    Physics {
+    }
+}
+
 
 template "moon" {
     Celestial {
@@ -189,12 +233,28 @@ template Titan {
     }
 }
 
-template asteroid {
+template "asteroid rock1"{
     Asteroid {
     }
     Body {
-        dimension 45 45
-        graphics "asteroid/asteroid_placeholder"
+        dimension 46 46
+        graphics "asteroid/rock1"
+    }
+    Movement {
+        maxVelocity 500
+    }
+    Physics {
+    }
+    Transform {
+    }
+}
+
+template "asteroid nickeliron1"{
+    Asteroid {
+    }
+    Body {
+        dimension 40 40
+        graphics "asteroid/nickel_iron1"
     }
     Movement {
         maxVelocity 500
@@ -218,6 +278,39 @@ system "Arcos" {
         every 120
     }
 
+    entity - "Arcos alpha" {
+        template "G-Type star"
+        Transform {
+            location -2000 100
+        }
+    }
+
+    entity - "Arcos alpha moon 1" {
+        template "moon"
+        Transform {
+            location -1500 0
+        }
+        Orbiting {
+            entity "Arcos alpha"
+            distance 500
+            speed 200
+            tidalLock true
+        }
+    }
+
+    entity - "Arcos alpha moon 2" {
+        template "moon"
+        Transform {
+            location -2000 500
+        }
+        Orbiting {
+            entity "Arcos alpha"
+            distance 500
+            speed 200
+            tidalLock true
+        }
+    }
+
     entity - "Arcos prime" {
         template "planet"
         Character {
@@ -225,6 +318,12 @@ system "Arcos" {
         }
         Transform {
             location -120 100
+        }
+    }
+    entity - "Arcos 2" {
+        template "venuslike1"
+        Transform {
+            location -20 800
         }
     }
     entity - "Arcos prime moon 1" {
@@ -240,6 +339,12 @@ system "Arcos" {
         template "gas1"
         Transform {
             location 500 -50
+        }
+    }
+    entity {
+        template "gas2"
+        Transform {
+            location -700 200
         }
     }
 }

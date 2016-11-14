@@ -71,6 +71,8 @@ public class Game extends com.badlogic.gdx.Game {
     public Signal<Entity> entityDestroyed = new Signal<Entity>();
     public long engine_noise_id;
 
+    public final Array<Message> messages = new Array<Message>();
+
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);

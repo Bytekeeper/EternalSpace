@@ -1,14 +1,21 @@
 
 textures.png
-size: 1024,512
+size: 1024,1024
 format: RGBA8888
 filter: MipMapLinearLinear,Linear
 repeat: none
-asteroid/asteroid_placeholder
+asteroid/nickel_iron1
   rotate: false
-  xy: 879, 407
-  size: 90, 90
-  orig: 90, 90
+  xy: 874, 883
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+asteroid/rock1
+  rotate: false
+  xy: 774, 710
+  size: 128, 128
+  orig: 128, 128
   offset: 0, 0
   index: -1
 effect/small+1
@@ -20,14 +27,14 @@ effect/small+1
   index: -1
 particle
   rotate: false
-  xy: 971, 465
+  xy: 774, 594
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 planet/earth_moon
   rotate: false
-  xy: 263, 241
+  xy: 516, 755
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -46,23 +53,44 @@ planet/gas1
   orig: 259, 259
   offset: 0, 0
   index: -1
+planet/gas2
+  rotate: false
+  xy: 516, 497
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+planet/star_g_type
+  rotate: false
+  xy: 2, 499
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+planet/venuslike1
+  rotate: false
+  xy: 521, 239
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
 projectile/ion bolt~0
   rotate: false
-  xy: 231, 136
+  xy: 1004, 911
   size: 16, 100
   orig: 16, 100
   offset: 0, 0
   index: -1
 ship/5
   rotate: false
-  xy: 779, 326
+  xy: 774, 840
   size: 98, 171
   orig: 98, 171
   offset: 0, 0
   index: -1
 ship/sparrow
   rotate: false
-  xy: 779, 244
+  xy: 774, 628
   size: 70, 80
   orig: 70, 80
   offset: 0, 0
@@ -76,28 +104,28 @@ ui/credits
   index: -1
 ui/health
   rotate: false
-  xy: 879, 373
+  xy: 874, 849
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui/power
   rotate: false
-  xy: 36, 2
+  xy: 846, 676
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui/radar_placeholder
   rotate: false
-  xy: 521, 241
+  xy: 263, 239
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 ui/shield
   rotate: false
-  xy: 879, 339
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

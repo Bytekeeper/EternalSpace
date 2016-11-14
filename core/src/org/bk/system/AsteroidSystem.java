@@ -22,7 +22,7 @@ import static org.bk.data.component.Mapper.TRANSFORM;
  * Created by dante on 19.10.2016.
  */
 public class AsteroidSystem extends IteratingSystem {
-    private static final int MAX_DENSITY_ASTEROIDS = 200;
+    private static final int MAX_DENSITY_ASTEROIDS = 500;
     private static final float MAX_ASTEROID_DISTANCE = 2000;
     private static final float MAX_ASTEROID_DISTANCE2 = MAX_ASTEROID_DISTANCE * MAX_ASTEROID_DISTANCE;
     private static final float MIN_ASTEROID_DISTANCE = 1000;
@@ -65,7 +65,12 @@ public class AsteroidSystem extends IteratingSystem {
     }
 
     private void spawnAsteroid(Vector3 cameraPosition, float minAsteroidDistance, float maxAsteroidDistance) {
-        Entity asteroid = game.spawn("asteroid");
+        Entity asteroid;
+        if (MathUtils.randomBoolean()) {
+            asteroid = game.spawn("asteroid rock1");
+        } else {
+            asteroid = game.spawn("asteroid nickeliron1");
+        }
         Movement movement = MOVEMENT.get(asteroid);
         movement.velocity.setToRandomDirection().scl(MathUtils.random(MIN_ASTEROID_SPEED, MAX_ASTEROID_SPEED));
         movement.angularVelocity = MathUtils.random(-MathUtils.PI2, MathUtils.PI2);
