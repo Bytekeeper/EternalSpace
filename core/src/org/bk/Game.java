@@ -79,8 +79,8 @@ public class Game extends com.badlogic.gdx.Game {
         viewport.update(width, height);
         uiBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
         shape.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
-        stage.getViewport().update(width, height);
-        hud.getViewport().update(width, height);
+        stage.getViewport().update(width, height, true);
+        hud.getViewport().update(width, height, true);
         this.width = width;
         this.height = height;
     }

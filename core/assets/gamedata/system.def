@@ -1,7 +1,7 @@
 template projectile {
     Body {
-        dimension 8 50
-        graphics "projectile/ion bolt~0"
+        dimension 4 32
+        graphics "projectile/slug"
     }
     LifeTime {
         remaining 2

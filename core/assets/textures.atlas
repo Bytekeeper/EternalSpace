@@ -74,11 +74,11 @@ planet/venuslike1
   orig: 256, 256
   offset: 0, 0
   index: -1
-projectile/ion bolt~0
+projectile/slug
   rotate: false
-  xy: 1004, 911
-  size: 16, 100
-  orig: 16, 100
+  xy: 1004, 947
+  size: 8, 64
+  orig: 8, 64
   offset: 0, 0
   index: -1
 ship/5
