@@ -169,8 +169,8 @@ template Titan {
     Physics {
     }
     Body {
-        dimension 98 171
-        graphics "ship/5"
+        dimension 128 128
+        graphics "ship/shuttle1"
     }
     Controllable {
     }
@@ -216,16 +216,10 @@ template Titan {
     }
     Thrusters {
         thruster {
-            offset -90 10
+            offset -50 -35
         }
         thruster {
-            offset -90 -10
-        }
-        thruster {
-            offset 0 -35
-        }
-        thruster {
-            offset 0 35
+            offset -50 35
         }
     }
     Transform {

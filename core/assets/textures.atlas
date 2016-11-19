@@ -27,7 +27,7 @@ effect/small+1
   index: -1
 particle
   rotate: false
-  xy: 774, 610
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -88,9 +88,16 @@ ship/5
   orig: 98, 171
   offset: 0, 0
   index: -1
+ship/shuttle1
+  rotate: false
+  xy: 774, 580
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
 ship/swallow
   rotate: false
-  xy: 774, 644
+  xy: 774, 514
   size: 128, 64
   orig: 128, 64
   offset: 0, 0
@@ -111,7 +118,7 @@ ui/health
   index: -1
 ui/power
   rotate: false
-  xy: 36, 2
+  xy: 908, 849
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -125,7 +132,7 @@ ui/radar_placeholder
   index: -1
 ui/shield
   rotate: false
-  xy: 908, 849
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
