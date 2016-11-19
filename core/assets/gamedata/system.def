@@ -111,8 +111,8 @@ template falcon {
     Physics {
     }
     Body {
-        dimension 35 40
-        graphics "ship/sparrow"
+        dimension 64 32
+        graphics "ship/swallow"
     }
     Controllable {
     }
