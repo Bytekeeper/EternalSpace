@@ -221,6 +221,12 @@ template Titan {
         thruster {
             offset -50 35
         }
+        thruster {
+            offset -55 -50
+        }
+        thruster {
+            offset -55 50
+        }
     }
     Transform {
 
