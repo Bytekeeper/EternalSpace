@@ -22,7 +22,6 @@ import com.badlogic.gdx.ai.steer.SteeringAcceleration;
 import com.badlogic.gdx.ai.steer.SteeringBehavior;
 import com.badlogic.gdx.ai.utils.Location;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Util;
 
@@ -77,7 +76,7 @@ public class Arrive extends SteeringBehavior<Vector2> {
         float v = owner.getLinearVelocity().len();
 
 
-        float turnTime = (MathUtils.PI - Math.abs(Util.deltaAngle(owner.getLinearVelocity().angleRad(), owner.getOrientation()))) / actualLimiter.getMaxAngularSpeed() + 0.2f;
+        float turnTime = (MathUtils.PI - Math.abs(Util.deltaAngle(owner.getLinearVelocity().angleRad(), owner.getOrientation()))) / actualLimiter.getMaxAngularSpeed() + 0.3f;
         float radius = 0.5f * v * v / actualLimiter.getMaxLinearAcceleration() + turnTime * v;
         tv.set(owner.getLinearVelocity()).nor().scl(radius);
         tv.add(owner.getPosition());

@@ -20,14 +20,14 @@ asteroid/rock1
   index: -1
 effect/small+1
   rotate: false
-  xy: 204, 116
+  xy: 904, 891
   size: 25, 120
   orig: 25, 120
   offset: 0, 0
   index: -1
 particle
   rotate: false
-  xy: 914, 979
+  xy: 774, 523
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -76,9 +76,16 @@ planet/venuslike1
   index: -1
 projectile/slug
   rotate: false
-  xy: 904, 947
+  xy: 204, 172
   size: 8, 64
   orig: 8, 64
+  offset: 0, 0
+  index: -1
+ship/mars_transport1
+  rotate: false
+  xy: 263, 109
+  size: 256, 128
+  orig: 256, 128
   offset: 0, 0
   index: -1
 ship/shuttle1
@@ -104,14 +111,14 @@ ui/credits
   index: -1
 ui/health
   rotate: false
-  xy: 774, 523
+  xy: 521, 205
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui/power
   rotate: false
-  xy: 36, 2
+  xy: 931, 979
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -125,7 +132,7 @@ ui/radar_placeholder
   index: -1
 ui/shield
   rotate: false
-  xy: 808, 523
+  xy: 214, 204
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

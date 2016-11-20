@@ -99,6 +99,7 @@ public class Hud extends WidgetGroup {
         Shield shield = SHIELD.get(game.playerEntity);
         Account account = ACCOUNT.get(game.playerEntity);
         playerShipOutline.setShape(game.assets.outlineOf(BODY.get(game.playerEntity).graphics));
+        playerShipOutline.invalidateHierarchy();
         Steering steering = STEERING.get(game.playerEntity);
         if (steering != null) {
             Entity selectedEntity = game.player.selectedEntity;
@@ -108,6 +109,7 @@ public class Hud extends WidgetGroup {
                 targetShipOutline.setShape(game.assets.outlineOf(BODY.get(selectedEntity).graphics));
                 targetShipOutline.setRotation(TRANSFORM.get(selectedEntity).orientRad * MathUtils.radDeg);
             }
+            targetShipOutline.invalidateHierarchy();
         }
 
         healthBar.setFactor(health.hull / health.maxHull);
