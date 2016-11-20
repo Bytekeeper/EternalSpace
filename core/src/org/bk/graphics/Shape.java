@@ -54,9 +54,13 @@ public class Shape extends Widget {
         }
         super.draw(batch, parentAlpha);
         batch.end();
+        float renderSize = Vector2.len((maxX - minX), (maxY - minY));
+        float scale = Math.min(getWidth() / renderSize, getHeight() / renderSize);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         tm.set(shapeRenderer.getTransformMatrix());
-        shapeRenderer.translate(-minX + getX(), -minY + getY(), 0);
+        shapeRenderer.translate(renderSize / 2 * scale + getX(), renderSize / 2 * scale + getY(), 0);
+        shapeRenderer.scale(scale, scale, 1);
+
         shapeRenderer.rotate(0, 0, 1, rotation);
         for (float[] f: shape) {
             shapeRenderer.polygon(f);
@@ -64,15 +68,5 @@ public class Shape extends Widget {
         shapeRenderer.setTransformMatrix(tm);
         shapeRenderer.end();
         batch.begin();
-    }
-
-    @Override
-    public float getPrefWidth() {
-        return maxX - minX;
-    }
-
-    @Override
-    public float getPrefHeight() {
-        return maxY - minY;
     }
 }

@@ -60,12 +60,12 @@ public class Hud extends WidgetGroup {
 
     private void topLeft(Assets assets, Table tl) {
         targetShipOutline = new Shape(game.shape);
-        tl.add(targetShipOutline);
+        tl.add(targetShipOutline).size(150);
     }
 
     private void topRight(Assets assets, Table tr) {
         playerShipOutline = new Shape(game.shape);
-        tr.add(playerShipOutline);
+        tr.add(playerShipOutline).size(100);
     }
 
     private void bottomRight(Assets assets, Table br) {
