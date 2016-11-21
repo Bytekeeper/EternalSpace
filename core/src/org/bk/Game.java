@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bk.data.EntityGroup;
@@ -34,6 +35,8 @@ import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
 import org.bk.system.state.*;
+import org.bk.ui.Message;
+import org.bk.ui.Messages;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -71,7 +74,7 @@ public class Game extends com.badlogic.gdx.Game {
     public Signal<Entity> entityDestroyed = new Signal<Entity>();
     public long engine_noise_id;
 
-    public final Array<Message> messages = new Array<Message>();
+    private Messages messages;
 
     @Override
     public void resize(int width, int height) {
@@ -83,6 +86,8 @@ public class Game extends com.badlogic.gdx.Game {
         hud.getViewport().update(width, height, true);
         this.width = width;
         this.height = height;
+
+        messages.setBounds(0, 0, width, height);
     }
 
     @Override
@@ -97,6 +102,8 @@ public class Game extends com.badlogic.gdx.Game {
         shape = new ShapeRenderer();
         stage = new Stage(new ScreenViewport(), uiBatch);
         hud = new Stage(new ScreenViewport(), uiBatch);
+        messages = new Messages(assets.skin);
+        hud.addActor(messages);
 
         inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(stage);
@@ -188,15 +195,16 @@ public class Game extends com.badlogic.gdx.Game {
             setScreen(null);
         }
 
-        uiBatch.begin();
-        assets.debugFont.draw(uiBatch, Gdx.graphics.getFramesPerSecond() + " FPS", Gdx.graphics.getWidth() - 80, Gdx.graphics.getHeight() - 20);
-        assets.debugFont.draw(uiBatch, engine.getEntities().size() + " Entities", Gdx.graphics.getWidth() - 80, Gdx.graphics.getHeight() - 40);
-        uiBatch.end();
         super.render();
         stage.act();
         stage.draw();
         hud.act();
         hud.draw();
+
+        uiBatch.begin();
+        assets.debugFont.draw(uiBatch, Gdx.graphics.getFramesPerSecond() + " FPS", Gdx.graphics.getWidth() - 80, Gdx.graphics.getHeight() - 20);
+        assets.debugFont.draw(uiBatch, engine.getEntities().size() + " Entities", Gdx.graphics.getWidth() - 80, Gdx.graphics.getHeight() - 40);
+        uiBatch.end();
     }
 
     private float accelTimer = 1;
@@ -290,6 +298,10 @@ public class Game extends com.badlogic.gdx.Game {
 
     public String msg(String key) {
         return assets.localization.get(key);
+    }
+
+    public void addMessage(Message message) {
+        messages.append(message);
     }
 
     @Override

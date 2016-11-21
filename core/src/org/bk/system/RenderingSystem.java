@@ -6,12 +6,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Affine2;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.RandomXS128;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StringBuilder;
 import org.bk.Assets;
@@ -23,6 +24,10 @@ import org.bk.data.component.state.LiftingOff;
 import org.bk.graphics.Hud;
 import org.bk.graphics.Radar;
 
+import java.nio.IntBuffer;
+
+import static com.badlogic.gdx.graphics.GL30.GL_BLUE;
+import static com.badlogic.gdx.graphics.GL30.GL_RED;
 import static org.bk.Game.SQRT_2;
 import static org.bk.data.component.Mapper.*;
 
@@ -45,6 +50,7 @@ public class RenderingSystem extends EntitySystem {
     private final Affine2 ta = new Affine2();
     private final Vector2 tv = new Vector2();
     private final Radar radar;
+    private GlyphLayout glyphLayout = new GlyphLayout();
 
     public RenderingSystem(final Game game) {
 
@@ -70,6 +76,11 @@ public class RenderingSystem extends EntitySystem {
 
         for (Entity entity : planetEntities) {
             drawEntityWithBody(entity);
+            Transform transform = TRANSFORM.get(entity);
+            tv.set(game.viewport.getCamera().position.x, game.viewport.getCamera().position.y);
+            if (transform.location.dst2(tv) < 400 * 400) {
+                drawCelestialInfo(entity);
+            }
         }
         for (Entity entity : asteroidEntities) {
             drawEntityWithBody(entity);
@@ -84,6 +95,29 @@ public class RenderingSystem extends EntitySystem {
         game.uiBatch.begin();
         drawHUD();
         game.uiBatch.end();
+    }
+
+    private void drawCelestialInfo(Entity entity) {
+        Name name = NAME.get(entity);
+        if (name == null) {
+            return;
+        }
+        Transform transform = TRANSFORM.get(entity);
+        Body body = BODY.get(entity);
+        tv.set(body.dimension).scl(0.6f);
+        batch.draw(assets.textures.get("ui/marker"), transform.location.x - tv.x, transform.location.y - tv.y,
+                4, 16, 8, 32, 1, 1, -45);
+        batch.draw(assets.textures.get("ui/marker"), transform.location.x + tv.x, transform.location.y - tv.y,
+                4, 16, 8, 32, 1, 1, 45);
+        batch.draw(assets.textures.get("ui/marker"), transform.location.x - tv.x, transform.location.y + tv.y,
+                4, 16, 8, 32, 1, 1, 45);
+        batch.draw(assets.textures.get("ui/marker"), transform.location.x + tv.x, transform.location.y + tv.y,
+                4, 16, 8, 32, 1, 1, -45);
+        glyphLayout.setText(assets.hudFont, name.name);
+        tv.x = transform.location.x - glyphLayout.width / 2;
+        tv.y = transform.location.y - tv.y - glyphLayout.height;
+
+        assets.hudFont.draw(batch, name.name, tv.x, tv.y);
     }
 
     private void drawHUD() {

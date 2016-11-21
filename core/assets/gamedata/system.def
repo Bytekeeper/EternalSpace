@@ -381,6 +381,9 @@ system "Arcos" {
 
     entity - "Arcos prime" {
         template "planet"
+        Name {
+            name "Arcos Prime"
+        }
         Character {
             faction "United Mars Government"
         }
