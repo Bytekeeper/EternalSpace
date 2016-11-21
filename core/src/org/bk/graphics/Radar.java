@@ -37,7 +37,7 @@ public class Radar {
     }
 
     public void drawBackground() {
-        batch.draw(assets.textures.get("ui/radar_placeholder"), bounds.x, bounds.y, bounds.getWidth(), bounds.getHeight());
+        batch.draw(assets.textures.get("ui/radar"), bounds.x, bounds.y, bounds.getWidth(), bounds.getHeight());
     }
 
     public void drawShip(Entity entity) {

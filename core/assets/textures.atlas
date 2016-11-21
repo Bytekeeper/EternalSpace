@@ -130,7 +130,7 @@ ui/power
   orig: 32, 32
   offset: 0, 0
   index: -1
-ui/radar_placeholder
+ui/radar
   rotate: false
   xy: 263, 239
   size: 256, 256

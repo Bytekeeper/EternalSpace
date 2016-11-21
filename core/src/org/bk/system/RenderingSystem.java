@@ -75,7 +75,10 @@ public class RenderingSystem extends EntitySystem {
             Transform transform = TRANSFORM.get(entity);
             tv.set(game.viewport.getCamera().position.x, game.viewport.getCamera().position.y);
             if (transform.location.dst2(tv) < 400 * 400) {
+                float shade = MathUtils.clamp((450 * 450 - transform.location.dst2(tv)) / 400 / 400, 0, 1);
+                batch.setColor(1, 1, 1, shade);
                 drawCelestialInfo(entity);
+                batch.setColor(Color.WHITE);
             }
         }
         for (Entity entity : asteroidEntities) {
