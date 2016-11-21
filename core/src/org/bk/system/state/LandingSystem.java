@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import org.bk.Game;
 import org.bk.data.component.*;
@@ -34,6 +35,9 @@ public class LandingSystem extends IteratingSystem {
         entity.remove(Physics.class);
         entity.remove(Steering.class);
         Landing landing = LANDING.get(entity);
+        if (landing.on == null) {
+            Gdx.app.error(LandSystem.class.getSimpleName(), entity.getComponents() + " is landing on 'null'!");
+        }
         landing.timeRemaining = Math.max(0, landing.timeRemaining - deltaTime);
 
         if (game.playerEntity == entity) {
@@ -43,6 +47,11 @@ public class LandingSystem extends IteratingSystem {
 
         if (landing.timeRemaining <= 0) {
             Entity landedOn = landing.on;
+
+            Name name = NAME.get(landedOn);
+            if (game.playerEntity == entity && name != null) {
+                game.addMessage("Landed on " + name.name);
+            }
 
             Landed landed = getEngine().createComponent(Landed.class);
             landed.on = landedOn;

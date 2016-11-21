@@ -148,12 +148,14 @@ template falcon {
         weapon {
             cooldownPerShot 0.1
             projectile "projectile"
-            offset 20 -5
+            muzzleEffect "muzzle1"
+            offset 5 -10
         }
         weapon {
             cooldownPerShot 0.1
             projectile "projectile"
-            offset 20 5
+            muzzleEffect "muzzle1"
+            offset 5 10
         }
     }
     Thrusters {
@@ -509,10 +511,12 @@ mission "Mission 2" {
 
 faction "Player Faction" {
     name "Player"
+    color 0.25 0.6 0 1
 }
 
 faction "United Mars Government" {
     name "United Mars Government"
+    color 0.39 0.11 0 1
     relation "Player Faction" {
         reputation 100
     }

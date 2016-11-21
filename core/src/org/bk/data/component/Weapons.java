@@ -14,6 +14,7 @@ public class Weapons implements Component {
         public float cooldown;
         public float cooldownPerShot;
         public boolean firing;
+        public String muzzleEffect;
         public EntityTemplate projectile;
     }
 }

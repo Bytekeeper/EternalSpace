@@ -38,7 +38,7 @@ public class AsteroidSystem extends IteratingSystem {
     @Override
     public void addedToEngine(final Engine engine) {
         super.addedToEngine(engine);
-        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<String>() {
+        game.systemChanged.add(new Listener<String>() {
             @Override
             public void receive(Signal<String> signal, String object) {
                 for (Entity e: getEntities()) {

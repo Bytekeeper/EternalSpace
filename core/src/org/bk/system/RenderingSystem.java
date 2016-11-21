@@ -1,33 +1,29 @@
 package org.bk.system;
 
-import com.badlogic.ashley.core.*;
+import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.RandomXS128;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.StringBuilder;
+import com.badlogic.gdx.utils.ObjectMap;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.Mission;
 import org.bk.data.component.*;
+import org.bk.data.component.Character;
 import org.bk.data.component.state.Landing;
 import org.bk.data.component.state.LiftingOff;
 import org.bk.graphics.Hud;
 import org.bk.graphics.Radar;
 
-import java.nio.IntBuffer;
-
-import static com.badlogic.gdx.graphics.GL30.GL_BLUE;
-import static com.badlogic.gdx.graphics.GL30.GL_RED;
 import static org.bk.Game.SQRT_2;
 import static org.bk.data.component.Mapper.*;
 
@@ -47,13 +43,13 @@ public class RenderingSystem extends EntitySystem {
     private Array<Star> stars = new Array<Star>();
     private Game game;
     private RandomXS128 rnd = new RandomXS128();
-    private final Affine2 ta = new Affine2();
     private final Vector2 tv = new Vector2();
+    private final Vector2 tv2 = new Vector2();
     private final Radar radar;
     private GlyphLayout glyphLayout = new GlyphLayout();
+    private ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect> muzzles = new ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect>();
 
     public RenderingSystem(final Game game) {
-
         this.game = game;
         assets = game.assets;
         batch = game.batch;
@@ -75,7 +71,7 @@ public class RenderingSystem extends EntitySystem {
         updateStarBackground();
 
         for (Entity entity : planetEntities) {
-            drawEntityWithBody(entity);
+            drawEntityWithBody(entity, deltaTime);
             Transform transform = TRANSFORM.get(entity);
             tv.set(game.viewport.getCamera().position.x, game.viewport.getCamera().position.y);
             if (transform.location.dst2(tv) < 400 * 400) {
@@ -83,13 +79,21 @@ public class RenderingSystem extends EntitySystem {
             }
         }
         for (Entity entity : asteroidEntities) {
-            drawEntityWithBody(entity);
+            drawEntityWithBody(entity, deltaTime);
         }
         for (Entity entity : shipEntities) {
-            drawEntityWithBody(entity);
+            drawEntityWithBody(entity, deltaTime);
+            if (game.player.selectedEntity == entity) {
+                Character character = CHARACTER.get(entity);
+                if (character != null) {
+                    batch.setColor(character.faction.color);
+                }
+                drawMarkerAround(entity);
+                batch.setColor(Color.WHITE);
+            }
         }
         for (Entity entity : projectileEntities) {
-            drawEntityWithBody(entity);
+            drawEntityWithBody(entity, deltaTime);
         }
         batch.end();
         game.uiBatch.begin();
@@ -102,22 +106,28 @@ public class RenderingSystem extends EntitySystem {
         if (name == null) {
             return;
         }
-        Transform transform = TRANSFORM.get(entity);
-        Body body = BODY.get(entity);
-        tv.set(body.dimension).scl(0.6f);
-        batch.draw(assets.textures.get("ui/marker"), transform.location.x - tv.x, transform.location.y - tv.y,
-                4, 16, 8, 32, 1, 1, -45);
-        batch.draw(assets.textures.get("ui/marker"), transform.location.x + tv.x, transform.location.y - tv.y,
-                4, 16, 8, 32, 1, 1, 45);
-        batch.draw(assets.textures.get("ui/marker"), transform.location.x - tv.x, transform.location.y + tv.y,
-                4, 16, 8, 32, 1, 1, 45);
-        batch.draw(assets.textures.get("ui/marker"), transform.location.x + tv.x, transform.location.y + tv.y,
-                4, 16, 8, 32, 1, 1, -45);
+        Transform transform = drawMarkerAround(entity);
         glyphLayout.setText(assets.hudFont, name.name);
         tv.x = transform.location.x - glyphLayout.width / 2;
         tv.y = transform.location.y - tv.y - glyphLayout.height;
 
         assets.hudFont.draw(batch, name.name, tv.x, tv.y);
+    }
+
+    private Transform drawMarkerAround(Entity entity) {
+        Transform transform = TRANSFORM.get(entity);
+        Body body = BODY.get(entity);
+        tv.set(body.dimension.len() * 0.7f, 0).rotate(45);
+        tv2.set(transform.location).sub(4, 16);
+        batch.draw(assets.textures.get("ui/marker"), tv2.x - tv.x, tv2.y - tv.y,
+                4, 16, 8, 32, 1, 1, -45);
+        batch.draw(assets.textures.get("ui/marker"), tv2.x + tv.x, tv2.y - tv.y,
+                4, 16, 8, 32, 1, 1, 45);
+        batch.draw(assets.textures.get("ui/marker"), tv2.x - tv.x, tv2.y + tv.y,
+                4, 16, 8, 32, 1, 1, 45);
+        batch.draw(assets.textures.get("ui/marker"), tv2.x + tv.x, tv2.y + tv.y,
+                4, 16, 8, 32, 1, 1, -45);
+        return transform;
     }
 
     private void drawHUD() {
@@ -141,7 +151,7 @@ public class RenderingSystem extends EntitySystem {
         }
     }
 
-    private void drawEntityWithBody(Entity entity) {
+    private void drawEntityWithBody(Entity entity, float delta) {
         if (entity.isScheduledForRemoval()) {
             return;
         }
@@ -166,8 +176,6 @@ public class RenderingSystem extends EntitySystem {
         if (LANDED.has(entity)) {
             return;
         }
-        ta.setToTranslation(location);
-        ta.rotateRad(transform.orientRad);
         tv.set(body.dimension);
         Landing landing = LANDING.get(entity);
         LiftingOff liftingOff = LIFTING_OFF.get(entity);
@@ -180,6 +188,37 @@ public class RenderingSystem extends EntitySystem {
         }
         TextureRegion textureRegion = assets.textures.get(body.graphics);
         draw(transform, tv, textureRegion);
+        Weapons weapons = WEAPONS.get(entity);
+        if (weapons != null) {
+            for (Weapons.Weapon w : weapons.weapon) {
+                ParticleEffectPool.PooledEffect muzzleEffect = muzzles.get(w);
+                if(muzzleEffect != null) {
+                    tv.set(w.offset).rotateRad(transform.orientRad).add(transform.location);
+                    muzzleEffect.setPosition(tv.x, tv.y);
+                    muzzleEffect.draw(batch, delta);
+                    if (muzzleEffect.isComplete()) {
+                        muzzleEffect.free();
+                        muzzles.remove(w);
+                        muzzleEffect = null;
+                    }
+                }
+                 if (!w.firing || w.muzzleEffect == null) {
+                    continue;
+                }
+                if (muzzleEffect == null) {
+                    muzzleEffect = assets.effects.get(w.muzzleEffect).obtain();
+                    float rotate = transform.orientRad * MathUtils.radiansToDegrees - 90;
+                    for (ParticleEmitter particleEmitter : muzzleEffect.getEmitters()) {
+                        ParticleEmitter.ScaledNumericValue angle = particleEmitter.getAngle();
+                        angle.setLow(angle.getLowMin() + rotate, angle.getLowMax() + rotate);
+                        angle.setHigh(angle.getHighMin() + rotate, angle.getHighMax() + rotate);
+                    }
+
+                    muzzles.put(w, muzzleEffect);
+                }
+            }
+        }
+
 //        game.assets.debugFont.draw(batch, "" + transform.location, transform.location.x, transform.location.y);
         if (AI_DEBUG && AI_CONTROLLED.has(entity)) {
 //            Component state = game.control.getState(entity);

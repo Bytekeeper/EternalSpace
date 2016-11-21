@@ -16,14 +16,12 @@ import static org.bk.data.component.Mapper.PERSISTENCE;
 /**
  * Created by dante on 20.10.2016.
  */
-public class SystemPopulateSystem extends EntitySystem {
+public class SolarSystemSwitchSystem extends EntitySystem {
     private Game game;
     private ImmutableArray<Entity> allTransformEntities;
-    public final Signal<String> systemChanged = new Signal<String>();
     private boolean dispatchOnNextUpdate;
 
-    public SystemPopulateSystem(Game game) {
-
+    public SolarSystemSwitchSystem(Game game) {
         this.game = game;
     }
 
@@ -36,13 +34,15 @@ public class SystemPopulateSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         if (dispatchOnNextUpdate) {
-            systemChanged.dispatch(game.currentSystem.name);
+            game.systemChanged.dispatch(game.currentSystem.name);
             dispatchOnNextUpdate = false;
         }
         Persistence playerPersistence = PERSISTENCE.get(game.playerEntity);
         if (game.currentSystem == null || playerPersistence.system != game.currentSystem) {
+            if (game.currentSystem != null) {
+                game.addMessage("Arrived in " + playerPersistence.system.name);
+            }
             game.currentSystem = playerPersistence.system;
-            Gdx.app.debug(SystemPopulateSystem.class.getSimpleName(), "Switching world to system " + game.currentSystem);
             removeAllEntitiesNotInSystem();
             game.populateCurrentSystem();
             dispatchOnNextUpdate = true;

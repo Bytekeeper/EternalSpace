@@ -41,6 +41,9 @@ public class ProjectileHitSystem extends IteratingSystem {
                     toDamage.add(potentialTarget);
                 }
             } else if (targetCharacter != null) {
+                if (owned.owner == game.playerEntity && potentialTarget == game.player.selectedEntity) {
+                    owned.affiliation.makeEnemies(targetCharacter.faction);
+                }
                 if (targetCharacter.faction.isEnemy(owned.affiliation)) {
                     toDamage.add(potentialTarget);
                 }

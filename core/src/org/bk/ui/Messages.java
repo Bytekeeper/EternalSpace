@@ -58,11 +58,10 @@ public class Messages extends Group {
 
     }
 
-    public void append(Message message) {
-        displayTimes.insert(0, message.displayTime);
-        Label actor = new Label(message.text, skin);
+    public void append(String message, float duration) {
+        displayTimes.insert(0, duration);
+        Label actor = new Label(message, skin);
         actor.addAction(Actions.sequence(Actions.alpha(0), Actions.fadeIn(1)));
         addActorAt(0, actor);
-        Pools.free(message);
     }
 }

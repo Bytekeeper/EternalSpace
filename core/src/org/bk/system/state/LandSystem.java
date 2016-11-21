@@ -64,6 +64,7 @@ public class LandSystem extends IteratingSystem {
                     Vector2 landingLocation = TRANSFORM.get(e).location;
                     if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {
                         Landing landing = getEngine().createComponent(Landing.class);
+                        landing.on = e;
                         entity.add(landing);
                         entity.remove(Land.class);
                         break;

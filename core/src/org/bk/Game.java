@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bk.data.EntityGroup;
@@ -35,7 +34,6 @@ import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
 import org.bk.system.state.*;
-import org.bk.ui.Message;
 import org.bk.ui.Messages;
 
 import static org.bk.data.component.Mapper.*;
@@ -71,7 +69,8 @@ public class Game extends com.badlogic.gdx.Game {
 
     public InputMultiplexer inputMultiplexer;
 
-    public Signal<Entity> entityDestroyed = new Signal<Entity>();
+    public final Signal<String> systemChanged = new Signal<String>();
+    public final Signal<Entity> entityDestroyed = new Signal<Entity>();
     public long engine_noise_id;
 
     private Messages messages;
@@ -128,13 +127,13 @@ public class Game extends com.badlogic.gdx.Game {
 
     private void initWorldEngine() {
         engine = new PooledEngine();
-        // Planets and ships etc.
-        engine.addSystem(new SystemPopulateSystem(this));
-        engine.addSystem(new TrafficSystem(this));
-        engine.addSystem(new AsteroidSystem(this));
-
         // Render
         engine.addSystem(new RenderingSystem(this));
+
+        // Planets and ships etc.
+        engine.addSystem(new SolarSystemSwitchSystem(this));
+        engine.addSystem(new TrafficSystem(this));
+        engine.addSystem(new AsteroidSystem(this));
 
         // Actual steering
         engine.addSystem(new AISystem());
@@ -300,8 +299,8 @@ public class Game extends com.badlogic.gdx.Game {
         return assets.localization.get(key);
     }
 
-    public void addMessage(Message message) {
-        messages.append(message);
+    public void addMessage(String message) {
+        messages.append(message, 8);
     }
 
     @Override

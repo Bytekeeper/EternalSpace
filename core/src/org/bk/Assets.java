@@ -6,9 +6,7 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
@@ -41,6 +39,7 @@ public class Assets {
     public ObjectMap<String, TextureRegion> textures = new ObjectMap<String, TextureRegion>();
     private ObjectMap<String, Array<float[]>> outline = new ObjectMap<String, Array<float[]>>();
     public Outliner outliner = new Outliner();
+    public ObjectMap<String, ParticleEffectPool> effects = new ObjectMap<String, ParticleEffectPool>();
 
     public Assets() {
         assetManager = new AssetManager();
@@ -70,6 +69,22 @@ public class Assets {
 
         scriptContext = new ScriptContext(this.gameData);
         scriptContext.load(Gdx.files.internal("gamedata/system.def").reader());
+
+        loadEffect("muzzle1");
+    }
+
+    private void loadEffect(String effectName) {
+        final ParticleEffect particleEffect = new ParticleEffect();
+        particleEffect.load(Gdx.files.internal("fx/" + effectName), atlas);
+        effects.put(effectName, new ParticleEffectPool(particleEffect, 0, 20) {
+            @Override
+            protected void reset(PooledEffect effect) {
+                super.reset(effect);
+                for (int i = 0; i < effect.getEmitters().size; i++) {
+                    effect.getEmitters().get(i).getAngle().load(particleEffect.getEmitters().get(i).getAngle());
+                }
+            }
+        });
     }
 
     private AssetDescriptor<Sound> loadSound(String fileName) {

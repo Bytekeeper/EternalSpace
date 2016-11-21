@@ -22,9 +22,7 @@ import static org.bk.data.component.Mapper.*;
 public class TrafficSystem extends EntitySystem {
     private final Game game;
     private RandomXS128 rnd = new RandomXS128();
-    private float nextSpawn;
     private ImmutableArray<Entity> entitiesToLandOn;
-    private ImmutableArray<Entity> shipEntities;
     private final Vector2 tv = new Vector2();
 
     public TrafficSystem(Game game) {
@@ -36,8 +34,7 @@ public class TrafficSystem extends EntitySystem {
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
         entitiesToLandOn = engine.getEntitiesFor(Family.all(LandingPlace.class, Transform.class).get());
-        shipEntities = engine.getEntitiesFor(Family.all(Controllable.class).get());
-        engine.getSystem(SystemPopulateSystem.class).systemChanged.add(new Listener<String>() {
+        game.systemChanged.add(new Listener<String>() {
             @Override
             public void receive(Signal<String> signal, String object) {
                 Gdx.app.log(TrafficSystem.class.getSimpleName(), "Setting up initial traffic deployment");
@@ -50,17 +47,12 @@ public class TrafficSystem extends EntitySystem {
                 }
             }
         });
-        setSpawnTimer();
     }
 
     private void spawnTraffic(SolarSystem.TrafficDefinition td, boolean initialDeployment) {
         for (Entity e: game.spawnGroup(td.group)) {
             setupEntity(initialDeployment, e);
         }
-    }
-
-    private void setSpawnTimer() {
-        nextSpawn = rnd.nextFloat() * 15;
     }
 
     @Override
