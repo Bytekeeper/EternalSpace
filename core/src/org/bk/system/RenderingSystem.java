@@ -8,21 +8,24 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.RandomXS128;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import org.bk.Assets;
+import org.bk.BiasedScaledNumericValueDelegate;
 import org.bk.Game;
 import org.bk.data.Mission;
 import org.bk.data.component.*;
 import org.bk.data.component.Character;
 import org.bk.data.component.state.Landing;
 import org.bk.data.component.state.LiftingOff;
-import org.bk.graphics.Hud;
 import org.bk.graphics.Radar;
+import org.bk.ui.BackgroundStars;
+import org.bk.ui.Hud;
 
 import static org.bk.Game.SQRT_2;
 import static org.bk.data.component.Mapper.*;
@@ -31,8 +34,6 @@ import static org.bk.data.component.Mapper.*;
  * Created by dante on 15.10.2016.
  */
 public class RenderingSystem extends EntitySystem {
-    public static final int STAR_BORDER = 200;
-    public static final int STAR_BORDER2 = STAR_BORDER * 2;
     private static final boolean AI_DEBUG = false;
     private final Assets assets;
     private final SpriteBatch batch;
@@ -40,14 +41,14 @@ public class RenderingSystem extends EntitySystem {
     private ImmutableArray<Entity> projectileEntities;
     private ImmutableArray<Entity> planetEntities;
     private ImmutableArray<Entity> asteroidEntities;
-    private Array<Star> stars = new Array<Star>();
     private Game game;
-    private RandomXS128 rnd = new RandomXS128();
     private final Vector2 tv = new Vector2();
     private final Vector2 tv2 = new Vector2();
     private final Radar radar;
     private GlyphLayout glyphLayout = new GlyphLayout();
     private ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect> muzzles = new ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect>();
+    private ObjectMap<Thrusters.Thruster, ParticleEffectPool.PooledEffect> thrusters = new ObjectMap<Thrusters.Thruster, ParticleEffectPool.PooledEffect>();
+    private BackgroundStars backgroundStars;
 
     public RenderingSystem(final Game game) {
         this.game = game;
@@ -55,6 +56,7 @@ public class RenderingSystem extends EntitySystem {
         batch = game.batch;
         radar = new Radar(game);
         game.hud.addActor(new Hud(game, assets));
+        backgroundStars = new BackgroundStars(game.viewport, assets.textures.get("particle"));
     }
 
     @Override
@@ -68,7 +70,8 @@ public class RenderingSystem extends EntitySystem {
     @Override
     public void update(float deltaTime) {
         batch.begin();
-        updateStarBackground();
+        backgroundStars.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        backgroundStars.draw(batch);
 
         for (Entity entity : planetEntities) {
             drawEntityWithBody(entity, deltaTime);
@@ -166,14 +169,33 @@ public class RenderingSystem extends EntitySystem {
             return;
         }
         Steering steering = STEERING.get(entity);
-        if (steering != null && steering.thrust != 0) {
+        if (steering != null) {
+            boolean fireThrusters = steering.thrust != 0;
             Thrusters thrusters = THRUSTERS.get(entity);
             for (Thrusters.Thruster thruster : thrusters.thruster) {
-                tv.set(thruster.offset).rotateRad(transform.orientRad).add(location).rotateRad(thruster.orientRad);
-                float hbx = 8;
-                float hby = 40;
-                batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
-                        hbx * 2, hby * 2, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
+                ParticleEffectPool.PooledEffect thrusterEffect = this.thrusters.get(thruster);
+                if (thrusterEffect != null) {
+                    tv.set(thruster.offset).rotateRad(transform.orientRad).add(transform.location);
+                    float rotate = transform.orientRad * MathUtils.radiansToDegrees - 90 + thruster.orientDeg;
+                    thrusterEffect.setPosition(tv.x, tv.y);
+                    BiasedScaledNumericValueDelegate.setBias(thrusterEffect.getEmitters(), rotate);
+                    thrusterEffect.draw(batch, delta);
+                    if (!fireThrusters) {
+                        thrusterEffect.free();
+                        this.thrusters.remove(thruster);
+                        thrusterEffect = null;
+                    }
+                }
+                if (thrusterEffect == null && fireThrusters) {
+                    thrusterEffect = assets.effects.get(thruster.thrusterEffect).obtain();
+                    this.thrusters.put(thruster, thrusterEffect);
+
+                }
+//                tv.set(thruster.offset).rotateRad(transform.orientDeg).add(location).rotateRad(thruster.orientDeg);
+//                float hbx = 8;
+//                float hby = 40;
+//                batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
+//                        hbx * 2, hby * 2, 1, 1, transform.orientDeg * MathUtils.radDeg - 90);
             }
         }
         if (LANDED.has(entity)) {
@@ -195,8 +217,10 @@ public class RenderingSystem extends EntitySystem {
         if (weapons != null) {
             for (Weapons.Weapon w : weapons.weapon) {
                 ParticleEffectPool.PooledEffect muzzleEffect = muzzles.get(w);
-                if(muzzleEffect != null) {
+                if (muzzleEffect != null) {
                     tv.set(w.offset).rotateRad(transform.orientRad).add(transform.location);
+                    float rotate = transform.orientRad * MathUtils.radiansToDegrees - 90 + w.orientDeg;
+                    BiasedScaledNumericValueDelegate.setBias(muzzleEffect.getEmitters(), rotate);
                     muzzleEffect.setPosition(tv.x, tv.y);
                     muzzleEffect.draw(batch, delta);
                     if (muzzleEffect.isComplete()) {
@@ -205,18 +229,11 @@ public class RenderingSystem extends EntitySystem {
                         muzzleEffect = null;
                     }
                 }
-                 if (!w.firing || w.muzzleEffect == null) {
+                if (!w.firing || w.muzzleEffect == null) {
                     continue;
                 }
                 if (muzzleEffect == null) {
                     muzzleEffect = assets.effects.get(w.muzzleEffect).obtain();
-                    float rotate = transform.orientRad * MathUtils.radiansToDegrees - 90;
-                    for (ParticleEmitter particleEmitter : muzzleEffect.getEmitters()) {
-                        ParticleEmitter.ScaledNumericValue angle = particleEmitter.getAngle();
-                        angle.setLow(angle.getLowMin() + rotate, angle.getLowMax() + rotate);
-                        angle.setHigh(angle.getHighMin() + rotate, angle.getHighMax() + rotate);
-                    }
-
                     muzzles.put(w, muzzleEffect);
                 }
             }
@@ -256,47 +273,6 @@ public class RenderingSystem extends EntitySystem {
         }
     }
 
-    private void updateStarBackground() {
-        int starAmount = Gdx.graphics.getWidth() * Gdx.graphics.getHeight() / 600;
-        if (stars.size != starAmount) {
-            stars.clear();
-            for (int i = 0; i < starAmount; i++) {
-                Star star = new Star();
-                tv.set(rnd.nextFloat() * (Gdx.graphics.getWidth() + STAR_BORDER2) - STAR_BORDER,
-                        rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER);
-                game.viewport.unproject(tv);
-                star.position.set(tv);
-                star.brightness = brightness();
-                stars.add(star);
-            }
-        }
-        for (Star star : stars) {
-            tv.set(star.position);
-            game.viewport.project(tv);
-            if (tv.x < -STAR_BORDER || tv.x > Gdx.graphics.getWidth() + STAR_BORDER) {
-                tv.x += Math.signum(Gdx.graphics.getWidth() / 2 - tv.x) * (Gdx.graphics.getWidth() + STAR_BORDER * (1 + rnd.nextFloat()));
-                tv.y = rnd.nextFloat() * (Gdx.graphics.getHeight() + STAR_BORDER2) - STAR_BORDER;
-                game.viewport.unproject(tv);
-                star.position.set(tv);
-                star.brightness = brightness();
-            } else if (tv.y < -STAR_BORDER || tv.y > Gdx.graphics.getHeight() + STAR_BORDER) {
-                tv.x = rnd.nextFloat() * (Gdx.graphics.getWidth() + STAR_BORDER2) - STAR_BORDER;
-                tv.y += Math.signum(Gdx.graphics.getHeight() / 2 - tv.y) * (Gdx.graphics.getHeight() + STAR_BORDER * (1 + rnd.nextFloat()));
-                tv.y = Gdx.graphics.getHeight() - tv.y;
-                game.viewport.unproject(tv);
-                star.position.set(tv);
-                star.brightness = brightness();
-            }
-            batch.setColor(star.brightness, star.brightness, star.brightness, 1);
-            batch.draw(assets.textures.get("particle"), star.position.x, star.position.y, 3, 3);
-        }
-        batch.setColor(Color.WHITE);
-    }
-
-    private float brightness() {
-        return rnd.nextFloat() * 0.5f + 0.2f;
-    }
-
     private void draw(Transform transform, Vector2 dimension, TextureRegion textureRegion) {
         float hbx = dimension.x / 2;
         float hby = dimension.y / 2;
@@ -304,8 +280,4 @@ public class RenderingSystem extends EntitySystem {
                 dimension.x, dimension.y, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
     }
 
-    private class Star {
-        final Vector2 position = new Vector2();
-        float brightness;
-    }
 }

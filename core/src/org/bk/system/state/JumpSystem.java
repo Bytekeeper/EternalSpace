@@ -10,7 +10,6 @@ import org.bk.ai.SteeringUtil;
 import org.bk.ai.task.Stop;
 import org.bk.data.component.*;
 import org.bk.data.component.state.*;
-import org.bk.graphics.StatusBar;
 
 import static org.bk.data.component.Mapper.*;
 

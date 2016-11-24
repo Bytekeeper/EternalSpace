@@ -8,8 +8,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import org.bk.Game;
-import org.bk.data.component.*;
 import org.bk.data.component.Character;
+import org.bk.data.component.*;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -28,7 +28,7 @@ public class WeaponSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         Weapons weapons = WEAPONS.get(entity);
-        for (Weapons.Weapon weapon: weapons.weapon) {
+        for (Weapons.Weapon weapon : weapons.weapon) {
             weapon.cooldown = Math.max(0, weapon.cooldown - deltaTime);
             if (weapon.cooldown > 0 || !weapon.firing) {
                 continue;
@@ -61,7 +61,7 @@ public class WeaponSystem extends IteratingSystem {
         owned.affiliation = ownerCharacter.faction;
         projectileEntity.add(owned);
         Transform projectileTransform = TRANSFORM.get(projectileEntity);
-        projectileTransform.orientRad = (sourceTransform.orientRad + weapon.orientRad) % MathUtils.PI2;
+        projectileTransform.orientRad = (sourceTransform.orientRad + weapon.orientDeg * MathUtils.degreesToRadians) % MathUtils.PI2;
         projectileTransform.location.set(weapon.offset).rotateRad(sourceTransform.orientRad).add(sourceTransform.location);
         Projectile projectile = PROJECTILE.get(projectileEntity);
         Movement movement = MOVEMENT.get(projectileEntity);

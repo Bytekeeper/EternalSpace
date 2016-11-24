@@ -9,6 +9,7 @@ import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Created by dante on 17.11.2016.
@@ -27,10 +28,10 @@ public class SpaceShipGenerator {
         Array<Polygon> triangles = new Array<Polygon>();
         Array<Face> faces = new Array<Face>(true, 20);
         Array<Array<Face>> faceIterations = new Array<Array<Face>>();
-        faces.add(new Face(0, -rnd.nextInt(100) - 50, 0, rnd.nextInt(100) + 50));
-        for (int i = 0; i < 7; i++) {
+        faces.add(new Face(0, -rnd.nextInt(50) - 50, 0, rnd.nextInt(80) + 80));
+        for (int i = 0; i < 10; i++) {
             Face best = null;
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 5; j++) {
                 Face face = faces.random();
                 if (best == null || Math.max(face.x1, face.x2) > Math.max(best.x1, best.x2)) {
                     best = face;
@@ -38,12 +39,18 @@ public class SpaceShipGenerator {
             }
             Face face = best;
             int toReplace = faces.indexOf(face, true);
-            int dx = face.y2 - face.y1;
-            dx *= rnd.nextFloat() * 0.3f + 0.3;
-            int dy = face.x1 - face.x2;
-            dy *= rnd.nextFloat() * 0.3f + 0.3;
-            dx += face.x1 + (face.x2 - face.x1) * (rnd.nextFloat() * 1.2 - 0.1);
-            dy += face.y1 + (face.y2 - face.y1) * (rnd.nextFloat() * 1.2 - 0.1);
+            Vector2 nextCorner = new Vector2(face.x2 - face.x1, face.y2 - face.y1);
+            nextCorner.rotate90(-1).setLength(rnd.nextFloat() * 60 + 20);
+            nextCorner.add(face.x1 * 0.5f, face.y1 * 0.5f);
+            nextCorner.add(face.x2 * 0.5f, face.y2 * 0.5f);
+//            int dx = face.y2 - face.y1;
+//            dx *= rnd.nextFloat() * 0.3f + 0.3;
+//            int dy = face.x1 - face.x2;
+//            dy *= rnd.nextFloat() * 0.3f + 0.3;
+//            dx += face.x1 + (face.x2 - face.x1) * (rnd.nextFloat() * 1.2 - 0.1);
+//            dy += face.y1 + (face.y2 - face.y1) * (rnd.nextFloat() * 1.2 - 0.1);
+            int dx = (int) nextCorner.x;
+            int dy = (int) nextCorner.y;
             Face a = new Face(face.x1, face.y1, dx, dy);
             Face b = new Face(dx, dy, face.x2, face.y2);
             faces.set(toReplace, b);
@@ -51,6 +58,10 @@ public class SpaceShipGenerator {
             Polygon polygon = new Polygon(new int[]{face.x1, dx, face.x2},
                     new int[]{face.y1, dy, face.y2}, 3);
             triangles.add(polygon);
+
+//            Polygon p = new Polygon(polygon.xpoints, polygon.ypoints, 3);
+//            p.translate(256, 256);
+//            g.drawPolygon(p);
 //            for (float t = 1; t > 0.9; t -= 0.02f) {
 //                float shade = 1.7f - t * 1.3f;
 //                g.setColor(new Color(shade, shade, shade));
@@ -69,20 +80,28 @@ public class SpaceShipGenerator {
             faceIterations.add(new Array<Face>(faces));
         }
 
-        for (int i = faceIterations.size - 1; i >= 2; i -= 4) {
+        drawGuns(g, triangles);
+
+        float baseShade = 2.1f;
+        for (int i = faceIterations.size - 1; i >= 2; i -= 3) {
             Array<Face> facesToProcess = faceIterations.get(i);
             Polygon polygon = polygonOf(facesToProcess, true);
             polygon.translate(256, 256);
             g.setColor(Color.GRAY);
-            for (float t = 1; t > 0.9; t -= 0.02f) {
-                float shade = 2.3f - t * 1.7f;
+            for (float t = 1; t > 0.9; t -= 0.005f) {
+                float shade = baseShade - t * 1.7f;
                 g.setColor(new Color(shade, shade, shade));
                 Polygon smaller = resize(polygon, t);
                 g.fillPolygon(smaller);
             }
+            baseShade += 0.05f;
         }
-        drawDecals(g, faces, 3, 2, 10);
+        drawHBars(g, triangles);
+
         drawDecals(g, triangles);
+        drawDecals(g, triangles);
+        drawDecals(g, triangles);
+
 
         for (int i = 0; i < 2; i++) {
             Polygon polygon = triangles.get(rnd.nextInt(triangles.size - 4) + 2);
@@ -105,43 +124,142 @@ public class SpaceShipGenerator {
             g.fillOval(256 - i, 256 - i * 3, i * 2, i * 6);
         }
         g.setColor(new Color(0.9f, 0.9f, 1));
-        g.fillOval(256 - 6, 256 - 30, 12, 6);;
+        g.fillOval(256 - 6, 256 - 30, 12, 6);
         ImageIO.write(image, "png", new File("target.png"));
     }
 
-    private static void drawDecals(Graphics2D g, Array<Polygon> polygons) {
-        int pindex = rnd.nextInt(polygons.size - 4) + 2;
-        Polygon polygon = polygons.get(pindex);
-        int x[] = polygon.xpoints;
-        int y[] = polygon.ypoints;
-        int x1 = x[0] * 8 / 10;
-        int y1 = y[0] * 8 / 10;
-        int x2 = x[1] * 8 / 10;
-        int y2 = y[1] * 8 / 10;
-        int x3 = x[2] * 8 / 10;
-        int y3 = y[2] * 8 / 10;
-        decalLine(g, x1, y1, x3, y3);
-        decalLine(g, x1, y1, x2, y2);
-    }
-
-    private static void drawDecals(Graphics2D g, Array<Face> faces, int length, int decalAmount, int scale) {
-        int decal = rnd.nextInt(faces.size - length - 2) + 1;
-        for (int j = 0; j < length; j++) {
-            Face f = faces.get(decal + j);
-            for (int k = scale - decalAmount; k < scale; k++) {
-                int x1 = f.x1 * k / scale;
-                int y1 = f.y1 * k / scale;
-                int x2 = f.x2 * k / scale;
-                int y2 = f.y2 * k / scale;
-                decalLine(g, x1, y1, x2, y2);
+    private static void drawGuns(Graphics2D g, Array<Polygon> triangles) {
+        for (int i = 0; i < 30; i++) {
+            Polygon base = triangles.get(rnd.nextInt(triangles.size - 2) + 2);
+            int best = -1;
+            for (int j = 0; j < 3; j++) {
+                if (base.xpoints[j] > 10 && (best < 0 || base.ypoints[j] < base.ypoints[best])) {
+                    best = j;
+                }
+            }
+            if (best < 0) {
+                continue;
+            }
+            int x = (int) (base.xpoints[best] * 0.9);
+            int y = base.ypoints[best] + 20;
+//            gunPlaceholder.translate(0, -10);
+            boolean collides = false;
+            for (int j = 0; j < triangles.size; j++) {
+                if (triangles.get(j) == base) {
+                    continue;
+                }
+                com.badlogic.gdx.math.Polygon poly2 = toGdxPoly(triangles.get(j));
+                if (Intersector.intersectSegmentPolygon(new Vector2(x, y), new Vector2(x, y - 100), poly2)) {
+                    collides = true;
+                    break;
+                }
+            }
+            if (!collides) {
+                g.setColor(Color.GRAY);
+                g.fillRect(x + 248, y + 226, 10, 50);
+                g.fillRect(254 - x, y + 226, 10, 50);
+                g.setColor(Color.LIGHT_GRAY);
+                g.fillRect(x + 251, y + 206, 5, 67);
+                g.fillRect(256 - x, y + 206, 5, 67);
+                g.setColor(Color.DARK_GRAY);
+                for (int j = 0; j < 5 ; j++) {
+                    g.fillRect(x + 248, y + 226 + j * 10, 10, 5);
+                    g.fillRect(254 - x, y + 226 + j * 10, 10, 5);
+                }
+                break;
             }
         }
     }
 
+    private static com.badlogic.gdx.math.Polygon toGdxPoly(Polygon base) {
+        return new com.badlogic.gdx.math.Polygon(new float[]{base.xpoints[0], base.ypoints[0],
+                base.xpoints[1], base.ypoints[1], base.xpoints[2], base.ypoints[2]});
+    }
+
+    private static Polygon toJavaPoly(com.badlogic.gdx.math.Polygon polygon) {
+        float[] v = polygon.getTransformedVertices();
+        return new Polygon(new int[] {(int) v[0], (int) v[2], (int) v[4]},
+                new int[] {(int) v[1], (int) v[2], (int) v[3]}, 3);
+    }
+
+
+    private static void drawHBars(Graphics2D g, Array<Polygon> triangles) {
+        Polygon best = null;
+        double bestArea = 0;
+        for (int i = 0; i < 8; i++) {
+            Polygon a = triangles.random();
+            double pa = area(a);
+            {
+                if (pa > bestArea) {
+                    best = a;
+                    bestArea = pa;
+                }
+            }
+        }
+        if (best != null) {
+            Polygon resized = resize(best, 0.8f);
+            Vector2 segment = new Vector2(resized.xpoints[2] - resized.xpoints[1], resized.ypoints[2] - resized.ypoints[1]);
+            Vector2 dir1 = new Vector2(resized.xpoints[0] - resized.xpoints[1], resized.ypoints[0] - resized.ypoints[1]).nor();
+            Vector2 dir2 = new Vector2(segment).rotate90(1).nor();
+            Vector2 pos = new Vector2(resized.xpoints[1], resized.ypoints[1]);
+            double bheight = bheight(resized);
+            resized.translate(256, 256);
+//            g.setColor(Color.YELLOW);
+//            g.drawPolygon(resized);
+
+            for (int i = 0; i < 3; i++) {
+                segment.scl((float) ((bheight - 20) / bheight));
+                pos.mulAdd(dir1, 20);
+                if (bheight < 10) {
+                    break;
+                }
+                int x[] = new int[]{(int) pos.x, (int) (pos.x + segment.x), (int) (pos.x + segment.x + dir2.x * 10), (int) (pos.x + dir2.x * 10)};
+                int y[] = new int[]{(int) pos.y, (int) (pos.y + segment.y), (int) (pos.y + segment.y + dir2.y * 10), (int) (pos.y + dir2.y * 10)};
+                Polygon toDraw = new Polygon(x, y, 4);
+                toDraw.translate(256, 256);
+                g.setColor(Color.RED.darker());
+                g.fillPolygon(toDraw);
+                for (int j = 0; j < 4; j++) {
+                    x[j] = - x[j];
+                }
+                toDraw = new Polygon(x, y, 4);
+                toDraw.translate(256, 256);
+                g.fillPolygon(toDraw);
+            }
+        }
+    }
+
+    private static double bheight(Polygon p) {
+        int a = (int) Vector2.len(p.xpoints[1] - p.xpoints[0], p.ypoints[1] - p.ypoints[0]);
+        int a2 = a * a;
+        int b = (int) Vector2.len(p.xpoints[2] - p.xpoints[0], p.ypoints[2] - p.ypoints[0]);
+        int b2 = b * b;
+        int c = (int) Vector2.len(p.xpoints[1] - p.xpoints[2], p.ypoints[1] - p.ypoints[2]);
+        int c2 = c * c;
+        return Math.sqrt(2 * (a2 * b2 + b2 * c2 + c2 * a2) - (a2 * a2 + b2 * b2 + c2 * c2)) / (2 * b);
+    }
+
+    private static double area(Polygon p) {
+        int a = (int) Vector2.len(p.xpoints[1] - p.xpoints[0], p.ypoints[1] - p.ypoints[0]);
+        int b = (int) Vector2.len(p.xpoints[2] - p.xpoints[0], p.ypoints[2] - p.ypoints[0]);
+        int c = (int) Vector2.len(p.xpoints[1] - p.xpoints[2], p.ypoints[1] - p.ypoints[2]);
+        int s = (a + b + c) / 2;
+        return Math.sqrt(s * (s - a) * (s - b) * (s - c));
+    }
+
+    private static void drawDecals(Graphics2D g, Array<Polygon> polygons) {
+        int pindex = rnd.nextInt(polygons.size);
+        Polygon polygon = resize(polygons.get(pindex), 0.8f);
+        int x[] = polygon.xpoints;
+        int y[] = polygon.ypoints;
+        decalLine(g, x[0], y[0], x[2], y[2]);
+        decalLine(g, x[0], y[0], x[1], y[1]);
+    }
+
     private static void decalLine(Graphics2D g, int x1, int y1, int x2, int y2) {
         g.setColor(Color.WHITE);
-        g.drawLine(x1 + 257, y1 + 256,
-                x2 + 257, y2 + 256);
+        g.drawLine(x1 + 255, y1 + 256,
+                x2 + 255, y2 + 256);
         g.drawLine(255 - x1, y1 + 256,
                 255 - x2, y2 + 256);
         g.setColor(Color.DARK_GRAY);
@@ -180,7 +298,7 @@ public class SpaceShipGenerator {
     }
 
     public static Polygon polygonOf(Array<Face> faces, boolean addMirrored) {
-        int npoints = addMirrored ? faces.size * 2 + 1: faces.size + 1;
+        int npoints = addMirrored ? faces.size * 2 + 1 : faces.size + 1;
         int x[] = new int[npoints];
         int y[] = new int[npoints];
         x[0] = faces.get(0).x1;

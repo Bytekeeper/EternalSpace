@@ -1,23 +1,16 @@
 package org.bk;
 
-import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.I18NBundle;
 import com.badlogic.gdx.utils.ObjectMap;
 import org.bk.data.GameData;
-import org.bk.data.component.*;
 import org.bk.script.ScriptContext;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by dante on 13.10.2016.
@@ -71,12 +64,33 @@ public class Assets {
         scriptContext.load(Gdx.files.internal("gamedata/system.def").reader());
 
         loadEffect("muzzle1");
+        loadEffect("thrust1");
     }
 
     private void loadEffect(String effectName) {
         final ParticleEffect particleEffect = new ParticleEffect();
         particleEffect.load(Gdx.files.internal("fx/" + effectName), atlas);
         effects.put(effectName, new ParticleEffectPool(particleEffect, 0, 20) {
+            @Override
+            protected PooledEffect newObject() {
+                PooledEffect result = super.newObject();
+                replaceAnglesOf(result.getEmitters());
+                return result;
+            }
+
+            private void replaceAnglesOf(Array<ParticleEmitter> emitters) {
+                for (int i = 0; i < emitters.size; i++) {
+                    final ParticleEmitter emitter = emitters.get(i);
+                    emitters.set(i, new ParticleEmitter(emitter) {
+                        BiasedScaledNumericValueDelegate replacement = new BiasedScaledNumericValueDelegate(super.getAngle());
+                        @Override
+                        public ScaledNumericValue getAngle() {
+                            return replacement;
+                        }
+                    });
+                }
+            }
+
             @Override
             protected void reset(PooledEffect effect) {
                 super.reset(effect);

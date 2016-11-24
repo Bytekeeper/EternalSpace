@@ -8,5 +8,5 @@ import org.bk.data.CargoItem;
  */
 public class Mount extends CargoItem {
     public final Vector2 offset = new Vector2();
-    public float orientRad;
+    public float orientDeg;
 }

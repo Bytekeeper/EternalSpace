@@ -1,4 +1,4 @@
-package org.bk.graphics;
+package org.bk.ui;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.MathUtils;
@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.data.component.*;
+import org.bk.ui.Shape;
+import org.bk.ui.StatusBar;
 
 import static org.bk.data.component.Mapper.*;
 

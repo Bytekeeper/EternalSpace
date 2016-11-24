@@ -17,5 +17,6 @@ public class Thrusters implements Component, Pool.Poolable {
 
 
     public static class Thruster extends Mount {
+        public String thrusterEffect;
     }
 }

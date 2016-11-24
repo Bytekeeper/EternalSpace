@@ -6,28 +6,21 @@ filter: MipMapLinearLinear,Linear
 repeat: none
 asteroid/nickel_iron1
   rotate: false
-  xy: 774, 883
+  xy: 774, 753
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 asteroid/rock1
   rotate: false
-  xy: 774, 753
+  xy: 774, 623
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-effect/small+1
-  rotate: false
-  xy: 204, 116
-  size: 25, 120
-  orig: 25, 120
-  offset: 0, 0
-  index: -1
 particle
   rotate: false
-  xy: 904, 849
+  xy: 774, 523
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -76,9 +69,16 @@ planet/venuslike1
   index: -1
 projectile/slug
   rotate: false
-  xy: 521, 173
+  xy: 997, 947
   size: 8, 64
   orig: 8, 64
+  offset: 0, 0
+  index: -1
+ship/bat
+  rotate: false
+  xy: 774, 557
+  size: 177, 64
+  orig: 177, 64
   offset: 0, 0
   index: -1
 ship/mars_transport1
@@ -88,16 +88,23 @@ ship/mars_transport1
   orig: 256, 128
   offset: 0, 0
   index: -1
+ship/scavenger
+  rotate: false
+  xy: 774, 883
+  size: 221, 128
+  orig: 221, 128
+  offset: 0, 0
+  index: -1
 ship/shuttle1
   rotate: false
-  xy: 774, 623
+  xy: 521, 109
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 ship/swallow
   rotate: false
-  xy: 774, 557
+  xy: 651, 173
   size: 128, 64
   orig: 128, 64
   offset: 0, 0
@@ -111,21 +118,21 @@ ui/credits
   index: -1
 ui/health
   rotate: false
-  xy: 774, 523
+  xy: 904, 849
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui/marker
   rotate: false
-  xy: 904, 883
+  xy: 204, 108
   size: 32, 128
   orig: 32, 128
   offset: 0, 0
   index: -1
 ui/power
   rotate: false
-  xy: 938, 979
+  xy: 651, 139
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -139,7 +146,7 @@ ui/radar
   index: -1
 ui/shield
   rotate: false
-  xy: 531, 205
+  xy: 204, 74
   size: 32, 32
   orig: 32, 32
   offset: 0, 0

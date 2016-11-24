@@ -11,12 +11,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.Pools;
 import org.bk.Assets;
 import org.bk.Game;
 import org.bk.Outliner;
 import org.bk.ai.SteeringUtil;
 import org.bk.data.component.Body;
-import org.bk.data.component.Character;
 import org.bk.data.component.*;
 import org.bk.data.component.Transform;
 
@@ -33,6 +33,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
     static final float W2B = 1f / 10;
     public static final float B2W = 1f / W2B;
+    public static final float SIMULATION_STEP = 1 / 60f;
     private final ContactListener myContactListener = new MyContactListener();
     //    private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     private final Assets assets;
@@ -41,6 +42,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private float nextStep;
     private ImmutableArray<Entity> touchingEntities;
     private ObjectMap<Entity, com.badlogic.gdx.physics.box2d.Body> entityBody = new ObjectMap<Entity, com.badlogic.gdx.physics.box2d.Body>();
+    private ObjectMap<Entity, PositionAndOrientation> lastPositionAndOrientation = new ObjectMap<Entity, PositionAndOrientation>();
     private Array<com.badlogic.gdx.physics.box2d.Body> bodies = new Array<com.badlogic.gdx.physics.box2d.Body>();
     private Entity lastPick;
     private QueryCallback pickCallback = new QueryCallback() {
@@ -84,13 +86,16 @@ public class Box2DPhysicsSystem extends EntitySystem {
             if (touching.touchList.size == 0) {
                 entity.remove(Touching.class);
             }
+            if (!MOVEMENT.has(entity)) {
+                com.badlogic.gdx.physics.box2d.Body body = entityBody.get(entity);
+                Transform transform = TRANSFORM.get(entity);
+                body.setTransform(tv.set(transform.location).scl(W2B), transform.orientRad);
+            }
         }
         nextStep -= Math.min(deltaTime, 0.1f);
         while (nextStep < 0) {
             for (com.badlogic.gdx.physics.box2d.Body body : bodies) {
                 Entity entity = (Entity) body.getUserData();
-                Transform transform = TRANSFORM.get(entity);
-                body.setTransform(tv.set(transform.location).scl(W2B), transform.orientRad);
                 Movement movement = MOVEMENT.get(entity);
                 if (movement != null) {
                     tv.set(movement.linearAccel).scl(W2B);
@@ -105,28 +110,34 @@ public class Box2DPhysicsSystem extends EntitySystem {
                         Gdx.app.error(Box2DPhysicsSystem.class.getSimpleName(), "No max velocity set for " + entity.getComponents());
                     }
                 }
+                PositionAndOrientation positionAndOrientation = lastPositionAndOrientation.get(entity);
+                positionAndOrientation.orientation = body.getAngle();
+                positionAndOrientation.position.set(body.getPosition());
             }
-            nextStep += 1 / 60f;
-            world.step(1 / 60f, 8, 3);
+            nextStep += SIMULATION_STEP;
+            world.step(SIMULATION_STEP, 8, 3);
         }
+
+        float alpha = nextStep / SIMULATION_STEP;
+
         for (com.badlogic.gdx.physics.box2d.Body body : bodies) {
             Entity entity = (Entity) body.getUserData();
-            Transform transform = TRANSFORM.get(entity);
-            transform.orientRad = (body.getAngle() % MathUtils.PI2 + MathUtils.PI2) % MathUtils.PI2;
-            transform.location.set(body.getPosition()).scl(B2W);
-            body.setTransform(body.getPosition(), transform.orientRad);
             Movement movement = MOVEMENT.get(entity);
             if (movement != null) {
+                PositionAndOrientation lastPO = lastPositionAndOrientation.get(entity);
+                float fixedAngle = (body.getAngle() % MathUtils.PI2 + MathUtils.PI2) % MathUtils.PI2;
+                body.setTransform(body.getPosition(), fixedAngle);
+                Transform transform = TRANSFORM.get(entity);
+                transform.orientRad = MathUtils.lerpAngle(fixedAngle, lastPO.orientation, alpha);
+                transform.location.set(body.getPosition()).scl(1 - alpha);
+                transform.location.mulAdd(lastPO.position, alpha);
+                transform.location.scl(B2W);
                 movement.linearAccel.setZero();
                 movement.angularAccel = 0;
                 movement.velocity.set(body.getLinearVelocity()).scl(B2W);
                 movement.angularVelocity = body.getAngularVelocity();
             }
         }
-//        Matrix4 m = new Matrix4();
-//        m.set(game.viewport.getCamera().combined);
-//        m.scl(B2W);
-//        debugRenderer.render(world, m);
     }
 
     public Entity pick(Vector2 at) {
@@ -268,10 +279,15 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 physicsBody.createFixture(fixtureDef);
             }
 
+            lastPositionAndOrientation.put(entity, Pools.obtain(PositionAndOrientation.class));
         }
 
         @Override
         public void entityRemoved(Entity entity) {
+            PositionAndOrientation positionAndOrientation = lastPositionAndOrientation.remove(entity);
+            if (positionAndOrientation != null) {
+                Pools.free(positionAndOrientation);
+            }
             com.badlogic.gdx.physics.box2d.Body bodyToDestroy = entityBody.remove(entity);
             if (bodyToDestroy != null) {
                 world.destroyBody(bodyToDestroy);
@@ -332,5 +348,10 @@ public class Box2DPhysicsSystem extends EntitySystem {
         public void entityRemoved(Entity entity) {
 
         }
+    }
+
+    private static class PositionAndOrientation {
+        final Vector2 position = new Vector2();
+        float orientation;
     }
 }

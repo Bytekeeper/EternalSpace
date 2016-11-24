@@ -122,8 +122,133 @@ template falcon {
     }
     Movement {
         maxVelocity 500
-        angularThrust 2000
-        linearThrust 25000
+        angularThrust 4000
+        linearThrust 30000
+    }
+    Health {
+        hull 50
+        maxHull 50
+    }
+    Heat {
+    }
+    Shield {
+        shields 30
+        maxShields 30
+    }
+    Steering {
+    }
+    WeaponControl {
+    }
+    ManualControl {
+    }
+    JumpDrive {
+        powerCost 333
+    }
+    Weapons {
+        weapon {
+            cooldownPerShot 0.1
+            projectile "projectile"
+            muzzleEffect "muzzle1"
+            offset 5 -10
+        }
+        weapon {
+            cooldownPerShot 0.1
+            projectile "projectile"
+            muzzleEffect "muzzle1"
+            offset 5 10
+        }
+    }
+    Thrusters {
+        thruster {
+            offset -15 0
+            thrusterEffect "thrust1"
+            orientDeg 180
+        }
+    }
+    Transform {
+    }
+}
+
+template bat {
+    Physics {
+    }
+    Body {
+        dimension 88 32
+        graphics "ship/bat"
+    }
+    Controllable {
+    }
+    Battery {
+        capacity 1000
+        maxCapacity 1000
+    }
+    Movement {
+        maxVelocity 500
+        angularThrust 5000
+        linearThrust 30000
+    }
+    Health {
+        hull 80
+        maxHull 80
+    }
+    Heat {
+    }
+    Shield {
+        shields 50
+        maxShields 50
+    }
+    Steering {
+    }
+    WeaponControl {
+    }
+    ManualControl {
+    }
+    JumpDrive {
+        powerCost 333
+    }
+    Weapons {
+        weapon {
+            cooldownPerShot 0.1
+            projectile "projectile"
+            muzzleEffect "muzzle1"
+            offset 16 -40
+        }
+        weapon {
+            cooldownPerShot 0.1
+            projectile "projectile"
+            muzzleEffect "muzzle1"
+            offset 16 40
+        }
+    }
+    Thrusters {
+        thruster {
+            offset -16 0
+            thrusterEffect "thrust1"
+            orientDeg 180
+        }
+    }
+    Transform {
+    }
+}
+
+
+template scavenger {
+    Physics {
+    }
+    Body {
+        dimension 55 32
+        graphics "ship/scavenger"
+    }
+    Controllable {
+    }
+    Battery {
+        capacity 1000
+        maxCapacity 1000
+    }
+    Movement {
+        maxVelocity 500
+        angularThrust 5000
+        linearThrust 50000
     }
     Health {
         hull 100
@@ -160,7 +285,9 @@ template falcon {
     }
     Thrusters {
         thruster {
-            offset -20 0
+            offset -5 0
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
     }
     Transform {
@@ -219,15 +346,23 @@ template Titan {
     Thrusters {
         thruster {
             offset -50 -35
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
         thruster {
             offset -50 35
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
         thruster {
             offset -55 -50
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
         thruster {
             offset -55 50
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
     }
     Transform {
@@ -287,15 +422,23 @@ template "Mars Transport 1" {
     Thrusters {
         thruster {
             offset -60 -50
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
         thruster {
             offset -60 50
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
         thruster {
             offset -15 -80
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
         thruster {
             offset -15 80
+            thrusterEffect "thrust1"
+            orientDeg 180
         }
     }
     Transform {
@@ -474,6 +617,12 @@ mission "mission test" {
     }
     succeeded {
         change {
+            system "Arcos" {
+                traffic {
+                    group "Small Raiders"
+                    every 20
+                }
+            }
         }
         text {
             "Congratulations, the first mission test worked!"
@@ -556,8 +705,8 @@ group "Small Merchant" {
     variant {
         quota 20
         entity - "Mars Transport 1" { }
-        entity - "falcon" { }
-        entity - "falcon" { }
+        entity - "bat" { }
+        entity - "bat" { }
         entity - "falcon" { }
     }
 }
@@ -567,6 +716,12 @@ group "Small Raiders" {
     variant {
         quota 10
         entity - "falcon" { }
+        entity - "falcon" { }
+    }
+    variant {
+        quota 20
+        entity - "scavenger" { }
+        entity - "scavenger" { }
         entity - "falcon" { }
     }
 }
