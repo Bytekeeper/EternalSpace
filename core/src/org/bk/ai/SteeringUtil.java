@@ -26,7 +26,7 @@ public class SteeringUtil {
         steering.turn = 0;
         if (tsa.linear.len2() > 30) {
             float delta = Util.deltaAngle(steerable.getOrientation(), tsa.linear.angleRad());
-            if (Math.abs(delta) < 0.1f) {
+            if (Math.abs(delta) < 0.2f) {
                 steering.thrust = 1;
             }
             float oversteer = steerable.getAngularVelocity() / 20f;
