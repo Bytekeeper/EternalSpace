@@ -19,6 +19,7 @@ import static org.bk.data.component.Mapper.*;
 public class WeaponSystem extends IteratingSystem {
     private static final float MAX_PROJECTILE_LIFETIME = 20;
     private final Game game;
+    private final Vector2 tv = new Vector2();
 
     public WeaponSystem(Game game) {
         super(Family.all(Weapons.class, Transform.class).get());
@@ -62,7 +63,12 @@ public class WeaponSystem extends IteratingSystem {
         projectileEntity.add(owned);
         Transform projectileTransform = TRANSFORM.get(projectileEntity);
         projectileTransform.orientRad = (sourceTransform.orientRad + weapon.orientDeg * MathUtils.degreesToRadians) % MathUtils.PI2;
-        projectileTransform.location.set(weapon.offset).rotateRad(sourceTransform.orientRad).add(sourceTransform.location);
+        tv.set(BODY.get(projectileEntity).dimension.y / 2, 0).rotateRad(projectileTransform.orientRad);
+        projectileTransform.location
+                .set(weapon.offset)
+                .rotateRad(sourceTransform.orientRad)
+                .add(sourceTransform.location)
+                .add(tv);
         Projectile projectile = PROJECTILE.get(projectileEntity);
         Movement movement = MOVEMENT.get(projectileEntity);
         movement.maxVelocity = 2000;

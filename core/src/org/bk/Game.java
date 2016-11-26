@@ -40,7 +40,7 @@ import static org.bk.data.component.Mapper.*;
 
 public class Game extends com.badlogic.gdx.Game {
     public static final float SQRT_2 = (float) Math.sqrt(2);
-    public static final float ACTION_VELOCITY_THRESHOLD2 = 100;
+    public static final float ACTION_VELOCITY_THRESHOLD2 = 50;
     public static final float ACTION_DELTA_ANGLE_THRESHOLD = 0.01f;
     public static final float JUMP_SCALE = 4000;
     public static final float ENGINE_NOISE_VOLUME_LOW = 0.4f;
@@ -141,7 +141,6 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new WeaponControlSystem());
 
         // Apply actions
-        engine.addSystem(new WeaponSystem(this));
         engine.addSystem(new LiftingOffSystem(this));
         engine.addSystem(new LandingSystem(this));
         engine.addSystem(new JumpingOutSystem(this));
@@ -158,6 +157,8 @@ public class Game extends com.badlogic.gdx.Game {
         engine.addSystem(new ProjectileHitSystem(this));
         engine.addSystem(new PersistenceSystem());
         engine.addSystem(new SelectionSystem(this));
+
+        engine.addSystem(new WeaponSystem(this));
 
         // Misc
         engine.addSystem(new HealthSystem(this));

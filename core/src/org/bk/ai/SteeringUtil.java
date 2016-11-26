@@ -24,14 +24,14 @@ public class SteeringUtil {
         behavior.calculateSteering(tsa);
         steering.thrust = 0;
         steering.turn = 0;
-        if (tsa.linear.len2() > 2) {
+        if (tsa.linear.len2() > 30) {
             float delta = Util.deltaAngle(steerable.getOrientation(), tsa.linear.angleRad());
-            if (Math.abs(delta) < 0.05f) {
+            if (Math.abs(delta) < 0.1f) {
                 steering.thrust = 1;
             }
-            float oversteer = steerable.getAngularVelocity() / 60f;
+            float oversteer = steerable.getAngularVelocity() / 20f;
             delta = Util.deltaAngle(steerable.getOrientation() + oversteer, tsa.linear.angleRad());
-            steering.turn = MathUtils.clamp(delta * 5, -1, 1);
+            steering.turn = MathUtils.clamp(delta * 15, -1, 1);
         } else {
             steering.turn = MathUtils.clamp(tsa.angular / steerable.getMaxAngularAcceleration(), -1, 1);
         }
