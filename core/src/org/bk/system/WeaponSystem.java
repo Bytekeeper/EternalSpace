@@ -72,7 +72,7 @@ public class WeaponSystem extends IteratingSystem {
         Projectile projectile = PROJECTILE.get(projectileEntity);
         Movement movement = MOVEMENT.get(projectileEntity);
         movement.maxVelocity = 2000;
-        movement.velocity.set(Vector2.X).rotateRad(sourceTransform.orientRad).scl(projectile.initialSpeed).add(sourceMovement.velocity);
+        movement.velocity.set(Vector2.X).rotateRad(projectileTransform.orientRad).scl(projectile.initialSpeed).add(sourceMovement.velocity);
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Body implements Component {
     public final Vector2 dimension = new Vector2();
     public String graphics;
+    public String explosionEffect;
 
     public Body reset() {
         dimension.setZero();

@@ -114,6 +114,7 @@ template falcon {
     Body {
         dimension 64 32
         graphics "ship/swallow"
+        explosionEffect expl_medium1
     }
     Controllable {
     }
@@ -176,6 +177,7 @@ template bat {
     Body {
         dimension 88 32
         graphics "ship/bat"
+        explosionEffect expl_medium2
     }
     Controllable {
     }
@@ -213,12 +215,14 @@ template bat {
             projectile "projectile"
             muzzleEffect "muzzle1"
             offset 16 -40
+            orientDeg 5
         }
         weapon {
             cooldownPerShot 0.1
             projectile "projectile"
             muzzleEffect "muzzle1"
             offset 16 40
+            orientDeg -5
         }
     }
     Thrusters {
@@ -239,6 +243,7 @@ template scavenger {
     Body {
         dimension 55 32
         graphics "ship/scavenger"
+        explosionEffect expl_medium1
     }
     Controllable {
     }
@@ -301,6 +306,7 @@ template Titan {
     Body {
         dimension 128 128
         graphics "ship/shuttle1"
+        explosionEffect expl_large1
     }
     Controllable {
     }
@@ -316,8 +322,8 @@ template Titan {
         linearThrust 20000
     }
     Health {
-        hull 100
-        maxHull 100
+        hull 400
+        maxHull 400
     }
     JumpDrive {
         powerCost 333
@@ -377,6 +383,7 @@ template "Mars Transport 1" {
     Body {
         dimension 256 128
         graphics "ship/mars_transport1"
+        explosionEffect expl_large1
     }
     Controllable {
     }
@@ -392,15 +399,15 @@ template "Mars Transport 1" {
         linearThrust 40000
     }
     Health {
-        hull 100
-        maxHull 100
+        hull 300
+        maxHull 300
     }
     JumpDrive {
         powerCost 333
     }
     Shield {
-        shields 100
-        maxShields 100
+        shields 200
+        maxShields 200
     }
     Steering {
     }

@@ -66,6 +66,9 @@ public class Assets {
         loadEffect("muzzle1");
         loadEffect("thrust1");
         loadEffect("slug_spark");
+        loadEffect("expl_medium1");
+        loadEffect("expl_medium2");
+        loadEffect("expl_large1");
     }
 
     private void loadEffect(String effectName) {
