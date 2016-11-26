@@ -9,6 +9,7 @@ template projectile {
     Projectile {
         initialSpeed 1000
         yield 10
+        hitEffect "slug_spark"
     }
     Transform {
     }

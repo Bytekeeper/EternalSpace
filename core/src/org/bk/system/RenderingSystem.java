@@ -41,6 +41,7 @@ public class RenderingSystem extends EntitySystem {
     private ImmutableArray<Entity> projectileEntities;
     private ImmutableArray<Entity> planetEntities;
     private ImmutableArray<Entity> asteroidEntities;
+    private ImmutableArray<Entity> effectEntities;
     private Game game;
     private final Vector2 tv = new Vector2();
     private final Vector2 tv2 = new Vector2();
@@ -48,6 +49,7 @@ public class RenderingSystem extends EntitySystem {
     private GlyphLayout glyphLayout = new GlyphLayout();
     private ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect> muzzles = new ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect>();
     private ObjectMap<Thrusters.Thruster, ParticleEffectPool.PooledEffect> thrusters = new ObjectMap<Thrusters.Thruster, ParticleEffectPool.PooledEffect>();
+    private ObjectMap<Entity, ParticleEffectPool.PooledEffect> effects = new ObjectMap<Entity, ParticleEffectPool.PooledEffect>();
     private BackgroundStars backgroundStars;
 
     public RenderingSystem(final Game game) {
@@ -65,6 +67,7 @@ public class RenderingSystem extends EntitySystem {
         asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Controllable.class, Transform.class, Body.class).get());
         projectileEntities = engine.getEntitiesFor(Family.all(Projectile.class, Transform.class, Body.class).get());
+        effectEntities = engine.getEntitiesFor(Family.all(Effect.class, Transform.class).get());
     }
 
     @Override
@@ -101,10 +104,36 @@ public class RenderingSystem extends EntitySystem {
         for (Entity entity : projectileEntities) {
             drawEntityWithBody(entity, deltaTime);
         }
+        renderParticleEffects(deltaTime);
         batch.end();
         game.uiBatch.begin();
         drawHUD();
         game.uiBatch.end();
+    }
+
+    private void renderParticleEffects(float deltaTime) {
+        for (Entity e: effectEntities) {
+            ParticleEffectPool.PooledEffect pooledEffect = effects.get(e);
+            if (pooledEffect == null) {
+                Effect effect = EFFECT.get(e);
+                pooledEffect = assets.effects.get(effect.effect).obtain();
+                effects.put(e, pooledEffect);
+            }
+            Transform transform = TRANSFORM.get(e);
+            pooledEffect.setPosition(transform.location.x, transform.location.y);
+            float rotate = radToDegForRender(transform);
+            BiasedScaledNumericValueDelegate.setBias(pooledEffect.getEmitters(), rotate);
+            pooledEffect.draw(batch, deltaTime);
+            if (pooledEffect.isComplete()) {
+                pooledEffect.free();
+                effects.remove(e);
+                getEngine().removeEntity(e);
+            }
+        }
+    }
+
+    private float radToDegForRender(Transform transform) {
+        return transform.orientRad * MathUtils.radiansToDegrees - 90;
     }
 
     private void drawCelestialInfo(Entity entity) {
@@ -176,7 +205,7 @@ public class RenderingSystem extends EntitySystem {
                 ParticleEffectPool.PooledEffect thrusterEffect = this.thrusters.get(thruster);
                 if (thrusterEffect != null) {
                     tv.set(thruster.offset).rotateRad(transform.orientRad).add(transform.location);
-                    float rotate = transform.orientRad * MathUtils.radiansToDegrees - 90 + thruster.orientDeg;
+                    float rotate = radToDegForRender(transform) + thruster.orientDeg;
                     thrusterEffect.setPosition(tv.x, tv.y);
                     BiasedScaledNumericValueDelegate.setBias(thrusterEffect.getEmitters(), rotate);
                     thrusterEffect.draw(batch, delta);
@@ -219,7 +248,7 @@ public class RenderingSystem extends EntitySystem {
                 ParticleEffectPool.PooledEffect muzzleEffect = muzzles.get(w);
                 if (muzzleEffect != null) {
                     tv.set(w.offset).rotateRad(transform.orientRad).add(transform.location);
-                    float rotate = transform.orientRad * MathUtils.radiansToDegrees - 90 + w.orientDeg;
+                    float rotate = radToDegForRender(transform) + w.orientDeg;
                     BiasedScaledNumericValueDelegate.setBias(muzzleEffect.getEmitters(), rotate);
                     muzzleEffect.setPosition(tv.x, tv.y);
                     muzzleEffect.draw(batch, delta);

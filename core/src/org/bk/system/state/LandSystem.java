@@ -9,6 +9,7 @@ import org.bk.ai.Arrive;
 import org.bk.ai.SteeringUtil;
 import org.bk.data.component.*;
 import org.bk.data.component.state.*;
+import org.bk.system.Box2DPhysicsSystem;
 
 import static org.bk.data.component.Mapper.*;
 
@@ -59,7 +60,8 @@ public class LandSystem extends IteratingSystem {
         Vector2 ownerLocation = TRANSFORM.get(entity).location;
         Touching touching = TOUCHING.get(entity);
          if (touching != null) {
-            for (Entity e : touching.touchList) {
+            for (Box2DPhysicsSystem.TouchInfo ti : touching.touchList) {
+                Entity e = ti.other;
                 if (LANDING_PLACE.has(e)) {
                     Vector2 landingLocation = TRANSFORM.get(e).location;
                     if (ownerLocation.dst(landingLocation) < BODY.get(e).dimension.x / 2) {

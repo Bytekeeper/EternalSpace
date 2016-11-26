@@ -82,8 +82,13 @@ public class Box2DPhysicsSystem extends EntitySystem {
         world.getBodies(bodies);
         for (Entity entity : touchingEntities) {
             Touching touching = TOUCHING.get(entity);
-            touching.touchList.removeAll(touching.untouchList, true);
-            if (touching.touchList.size == 0) {
+            Array<TouchInfo> touchList = touching.touchList;
+            for (int i = 0; i < touchList.size; i++) {
+                if (touching.untouchList.contains(touchList.get(i).other, true)) {
+                    touchList.removeIndex(i);
+                }
+            }
+            if (touchList.size == 0) {
                 entity.remove(Touching.class);
             }
             if (!MOVEMENT.has(entity)) {
@@ -240,7 +245,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
             } else if (PROJECTILE.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_WEAPON;
                 fixtureDef.filter.maskBits = CATEGORY_DEBRIS | CATEGORY_SHIPS | CATEGORY_WEAPON;
-                fixtureDef.isSensor = true;
+                fixtureDef.density = 1E-10f;
                 bodyDef.bullet = true;
             } else if (CELESTIAL.has(entity)) {
                 fixtureDef.filter.categoryBits = CATEGORY_POI;
@@ -299,12 +304,30 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private class MyContactListener implements ContactListener {
         @Override
         public void beginContact(Contact contact) {
+            WorldManifold worldManifold = contact.getWorldManifold();
+            Vector2 collisionPoint = worldManifold.getPoints()[0];
+            TouchInfo touchA = Pools.obtain(TouchInfo.class);
+            TouchInfo touchB = Pools.obtain(TouchInfo.class);
             Entity a = (Entity) contact.getFixtureA().getBody().getUserData();
-            Array<Entity> touchListA = touchingOf(a).touchList;
             Entity b = (Entity) contact.getFixtureB().getBody().getUserData();
-            Array<Entity> touchListB = touchingOf(b).touchList;
-            touchListA.add(b);
-            touchListB.add(a);
+            touchA.other = b;
+            touchB.other = a;
+            if (worldManifold.getNumberOfContactPoints() > 0) {
+                touchA.collisionPoint.set(collisionPoint).scl(B2W);
+                touchB.collisionPoint.set(collisionPoint).scl(B2W);
+                touchA.normal.set(worldManifold.getNormal()).scl(-1);
+                touchB.normal.set(worldManifold.getNormal());
+            } else {
+                touchA.collisionPoint.setZero();
+                touchB.collisionPoint.setZero();
+                touchA.normal.setZero();
+                touchB.normal.setZero();
+            }
+
+            Array<TouchInfo> touchListA = touchingOf(a).touchList;
+            Array<TouchInfo> touchListB = touchingOf(b).touchList;
+            touchListA.add(touchA);
+            touchListB.add(touchB);
         }
 
         @Override
@@ -328,11 +351,20 @@ public class Box2DPhysicsSystem extends EntitySystem {
 
         @Override
         public void preSolve(Contact contact, Manifold oldManifold) {
+            if (((contact.getFixtureA().getFilterData().categoryBits | contact.getFixtureB().getFilterData().categoryBits) & CATEGORY_WEAPON) != 0) {
+                contact.setEnabled(false);
+            }
         }
 
         @Override
         public void postSolve(Contact contact, ContactImpulse impulse) {
         }
+    }
+
+    public static class TouchInfo {
+        public Entity other;
+        public final Vector2 collisionPoint = new Vector2();
+        public final Vector2 normal = new Vector2();
     }
 
     private class SetupSteerableListener implements EntityListener {

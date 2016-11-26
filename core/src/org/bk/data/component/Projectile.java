@@ -8,6 +8,7 @@ import com.badlogic.ashley.core.Component;
 public class Projectile implements Component {
     public float yield;
     public float initialSpeed;
+    public String hitEffect;
 
     public Projectile reset() {
         yield = 0;
