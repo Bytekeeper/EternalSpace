@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import org.bk.Game;
 import org.bk.data.component.Body;
-import org.bk.data.component.Effect;
 import org.bk.data.component.Health;
 import org.bk.data.component.Transform;
 
@@ -32,14 +31,7 @@ public class HealthSystem extends IteratingSystem {
             Transform entityTransform = TRANSFORM.get(entity);
             Body body = BODY.get(entity);
             if (entityTransform != null && body != null && body.explosionEffect != null) {
-                Entity explosionEntity = getEngine().createEntity();
-                Transform explTransform = getEngine().createComponent(Transform.class);
-                explTransform.location.set(entityTransform.location);
-                Effect explEffect = getEngine().createComponent(Effect.class);
-                explEffect.effect = body.explosionEffect;
-                explosionEntity.add(explTransform);
-                explosionEntity.add(explEffect);
-                getEngine().addEntity(explosionEntity);
+                game.spawnEffect(entityTransform.location, body.explosionEffect, 0);
             }
             game.entityDestroyed.dispatch(entity);
             getEngine().removeEntity(entity);

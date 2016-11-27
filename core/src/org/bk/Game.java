@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -23,13 +24,9 @@ import org.bk.data.EntityGroup;
 import org.bk.data.EntityTemplate;
 import org.bk.data.GameData;
 import org.bk.data.SolarSystem;
-import org.bk.data.component.LandingPlace;
-import org.bk.data.component.Movement;
-import org.bk.data.component.Transform;
-import org.bk.data.component.WeaponControl;
+import org.bk.data.component.*;
 import org.bk.data.component.state.Jump;
 import org.bk.data.component.state.Land;
-import org.bk.data.component.ManualControl;
 import org.bk.screen.MapScreen;
 import org.bk.screen.PlanetScreen;
 import org.bk.system.*;
@@ -284,6 +281,19 @@ public class Game extends com.badlogic.gdx.Game {
 
     public Entity spawn(EntityTemplate template) {
         return entityFactory.spawnEntity(template);
+    }
+
+    public void spawnEffect(Vector2 location, String explosionEffect, float orientRad) {
+        Entity explosionEntity = engine.createEntity();
+        Transform explTransform = engine.createComponent(Transform.class);
+        explTransform.location.set(location);
+        explTransform.orientRad = orientRad;
+        Effects explEffect = engine.createComponent(Effects.class);
+        explEffect.removeEntityWhenDone = true;
+        explEffect.effects.add().effect = explosionEffect;
+        explosionEntity.add(explTransform);
+        explosionEntity.add(explEffect);
+        engine.addEntity(explosionEntity);
     }
 
     public Array<Entity> spawnGroup(EntityGroup entityGroup) {

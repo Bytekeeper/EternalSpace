@@ -90,17 +90,7 @@ public class ProjectileHitSystem extends IteratingSystem {
             }
         }
         if (projectile.hitEffect != null) {
-
-            Effect hitEffect = getEngine().createComponent(Effect.class);
-            hitEffect.effect = projectile.hitEffect;
-            Transform transform = getEngine().createComponent(Transform.class);
-            transform.location.set(collisionPoint);
-            transform.orientRad = hitNormal.angleRad();
-
-            Entity hitEffectEntity = getEngine().createEntity();
-            hitEffectEntity.add(hitEffect);
-            hitEffectEntity.add(transform);
-            getEngine().addEntity(hitEffectEntity);
+            game.spawnEffect(collisionPoint, projectile.hitEffect, hitNormal.angleRad());
         }
         getEngine().removeEntity(entity);
     }

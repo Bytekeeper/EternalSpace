@@ -27,6 +27,8 @@ import org.bk.graphics.Radar;
 import org.bk.ui.BackgroundStars;
 import org.bk.ui.Hud;
 
+import java.util.Iterator;
+
 import static org.bk.Game.SQRT_2;
 import static org.bk.data.component.Mapper.*;
 
@@ -49,7 +51,7 @@ public class RenderingSystem extends EntitySystem {
     private GlyphLayout glyphLayout = new GlyphLayout();
     private ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect> muzzles = new ObjectMap<Weapons.Weapon, ParticleEffectPool.PooledEffect>();
     private ObjectMap<Thrusters.Thruster, ParticleEffectPool.PooledEffect> thrusters = new ObjectMap<Thrusters.Thruster, ParticleEffectPool.PooledEffect>();
-    private ObjectMap<Entity, ParticleEffectPool.PooledEffect> effects = new ObjectMap<Entity, ParticleEffectPool.PooledEffect>();
+    private ObjectMap<Effects.Effect, ParticleEffectPool.PooledEffect> effects = new ObjectMap<Effects.Effect, ParticleEffectPool.PooledEffect>();
     private BackgroundStars backgroundStars;
 
     public RenderingSystem(final Game game) {
@@ -67,7 +69,7 @@ public class RenderingSystem extends EntitySystem {
         asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).get());
         shipEntities = engine.getEntitiesFor(Family.all(Controllable.class, Transform.class, Body.class).get());
         projectileEntities = engine.getEntitiesFor(Family.all(Projectile.class, Transform.class, Body.class).get());
-        effectEntities = engine.getEntitiesFor(Family.all(Effect.class, Transform.class).get());
+        effectEntities = engine.getEntitiesFor(Family.all(Effects.class, Transform.class).get());
     }
 
     @Override
@@ -113,21 +115,30 @@ public class RenderingSystem extends EntitySystem {
 
     private void renderParticleEffects(float deltaTime) {
         for (Entity e: effectEntities) {
-            ParticleEffectPool.PooledEffect pooledEffect = effects.get(e);
-            if (pooledEffect == null) {
-                Effect effect = EFFECT.get(e);
-                pooledEffect = assets.effects.get(effect.effect).obtain();
-                effects.put(e, pooledEffect);
+            Effects effects = EFFECTS.get(e);
+            for (Iterator<Effects.Effect> i = effects.effects.iterator(); i.hasNext(); ) {
+                Effects.Effect effect = i.next();
+                ParticleEffectPool.PooledEffect pooledEffect = this.effects.get(effect);
+                if (pooledEffect == null) {
+                    pooledEffect = assets.effects.get(effect.effect).obtain();
+                    this.effects.put(effect, pooledEffect);
+                }
+                Transform transform = TRANSFORM.get(e);
+                pooledEffect.setPosition(transform.location.x, transform.location.y);
+                float rotate = radToDegForRender(transform);
+                BiasedScaledNumericValueDelegate.setBias(pooledEffect.getEmitters(), rotate);
+                pooledEffect.draw(batch, deltaTime);
+                if (pooledEffect.isComplete()) {
+                    pooledEffect.free();
+                    i.remove();
+                    this.effects.remove(effect);
+                }
             }
-            Transform transform = TRANSFORM.get(e);
-            pooledEffect.setPosition(transform.location.x, transform.location.y);
-            float rotate = radToDegForRender(transform);
-            BiasedScaledNumericValueDelegate.setBias(pooledEffect.getEmitters(), rotate);
-            pooledEffect.draw(batch, deltaTime);
-            if (pooledEffect.isComplete()) {
-                pooledEffect.free();
-                effects.remove(e);
-                getEngine().removeEntity(e);
+            if (effects.effects.size == 0) {
+                if (effects.removeEntityWhenDone) {
+                    getEngine().removeEntity(e);
+                }
+                e.remove(Effects.class);
             }
         }
     }

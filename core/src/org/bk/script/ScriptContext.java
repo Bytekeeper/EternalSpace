@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.Field;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.esotericsoftware.kryo.Kryo;
+import org.bk.PooledArray;
 import org.bk.data.EntityTemplate;
 import org.bk.data.GameData;
 import org.bk.data.component.*;
@@ -101,6 +102,20 @@ public class ScriptContext {
                 float b = Float.parseFloat(sc.next());
                 float a = Float.parseFloat(sc.next());
                 c.set(r, g, b, a);
+            } else if (PooledArray.class.isAssignableFrom(field.getType())) {
+                PooledArray<Object> array = (PooledArray<Object>) field.get(context);
+                if (array == null) {
+                    throw new IllegalStateException("Field '" + item + "' on " + context.getClass().getName() + " in should be an initialized array!");
+                }
+                String next = sc.next();
+
+                Object newInstance = array.add();
+
+                if ("{".equals(next)) {
+                    executeBlock(sc, newInstance);
+                } else {
+                    throw new ParseException("Expected '{' for pooled array, but found '" + next + "'");
+                }
             } else if (Array.class.isAssignableFrom(field.getType())) {
                 Array<Object> array = (Array<Object>) field.get(context);
                 if (array == null) {
