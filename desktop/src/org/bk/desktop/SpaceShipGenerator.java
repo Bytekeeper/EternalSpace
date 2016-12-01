@@ -28,10 +28,16 @@ public class SpaceShipGenerator {
         Array<Polygon> triangles = new Array<Polygon>();
         Array<Face> faces = new Array<Face>(true, 20);
         Array<Array<Face>> faceIterations = new Array<Array<Face>>();
-        faces.add(new Face(0, -rnd.nextInt(50) - 50, 0, rnd.nextInt(80) + 80));
-        for (int i = 0; i < 10; i++) {
+        int baseHeight = 300;
+        int variableHeight = 100;
+        int baseTriangleHeight = 30;
+        int variableTriangleHeight = 60;
+        int numTriangles = 12;
+        int wideningSteps = 2;
+        faces.add(new Face(0, -rnd.nextInt(variableHeight / 2) - baseHeight / 2, 0, rnd.nextInt(variableHeight / 2) + baseHeight / 2));
+        for (int i = 0; i < numTriangles; i++) {
             Face best = null;
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < wideningSteps; j++) {
                 Face face = faces.random();
                 if (best == null || Math.max(face.x1, face.x2) > Math.max(best.x1, best.x2)) {
                     best = face;
@@ -40,7 +46,7 @@ public class SpaceShipGenerator {
             Face face = best;
             int toReplace = faces.indexOf(face, true);
             Vector2 nextCorner = new Vector2(face.x2 - face.x1, face.y2 - face.y1);
-            nextCorner.rotate90(-1).setLength(rnd.nextFloat() * 60 + 20);
+            nextCorner.rotate90(-1).setLength(rnd.nextFloat() * variableTriangleHeight + baseTriangleHeight);
             nextCorner.add(face.x1 * 0.5f, face.y1 * 0.5f);
             nextCorner.add(face.x2 * 0.5f, face.y2 * 0.5f);
 //            int dx = face.y2 - face.y1;

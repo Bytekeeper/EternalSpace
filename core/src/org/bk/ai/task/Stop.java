@@ -23,7 +23,7 @@ public class Stop extends SteeringBehavior<Vector2> {
         if (steering.linear.len2() < MathUtils.FLOAT_ROUNDING_ERROR) {
             steering.linear.setZero();
         }
-        steering.angular = MathUtils.clamp(Util.deltaAngle(owner.getOrientation(), orientation) * 5, -1, 1) * owner.getMaxAngularAcceleration();
+        steering.angular = MathUtils.clamp(Util.deltaAngle(owner.getOrientation(), orientation) * 10, -1, 1) * owner.getMaxAngularAcceleration();
         return steering;
     }
 

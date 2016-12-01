@@ -381,7 +381,7 @@ template "Mars Transport 1" {
     Physics {
     }
     Body {
-        dimension 256 128
+        dimension 200 206
         graphics "ship/mars_transport1"
         explosionEffect expl_large1
     }
@@ -429,22 +429,12 @@ template "Mars Transport 1" {
     }
     Thrusters {
         thruster {
-            offset -60 -50
+            offset -100 -50
             thrusterEffect "thrust1"
             orientDeg 180
         }
         thruster {
-            offset -60 50
-            thrusterEffect "thrust1"
-            orientDeg 180
-        }
-        thruster {
-            offset -15 -80
-            thrusterEffect "thrust1"
-            orientDeg 180
-        }
-        thruster {
-            offset -15 80
+            offset -100 50
             thrusterEffect "thrust1"
             orientDeg 180
         }
