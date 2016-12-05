@@ -23,5 +23,6 @@ public class Weapons implements Component, Pool.Poolable {
         public boolean firing;
         public String muzzleEffect;
         public EntityTemplate projectile;
+        public EntityTemplate beam;
     }
 }

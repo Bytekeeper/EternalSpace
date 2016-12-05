@@ -39,6 +39,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private final Assets assets;
     private World world;
     private final Vector2 tv = new Vector2();
+    private final Vector2 tv2 = new Vector2();
     private float nextStep;
     private ImmutableArray<Entity> touchingEntities;
     private ObjectMap<Entity, com.badlogic.gdx.physics.box2d.Body> entityBody = new ObjectMap<Entity, com.badlogic.gdx.physics.box2d.Body>();
@@ -56,6 +57,9 @@ public class Box2DPhysicsSystem extends EntitySystem {
             return true;
         }
     };
+    private ImmutableArray<Entity> beamEntities;
+
+    private BeamCallback beamCallback = new BeamCallback();
 
     public Box2DPhysicsSystem(Game game) {
 
@@ -70,6 +74,7 @@ public class Box2DPhysicsSystem extends EntitySystem {
         touchingEntities = engine.getEntitiesFor(Family.all(Touching.class).get());
         engine.addEntityListener(family, new MyEntityListener());
         engine.addEntityListener(Family.all(Steering.class, Physics.class, Transform.class, Movement.class).get(), new SetupSteerableListener());
+        beamEntities = engine.getEntitiesFor(Family.all(Body.class, Beam.class, Transform.class).get());
     }
 
     @Override
@@ -143,6 +148,20 @@ public class Box2DPhysicsSystem extends EntitySystem {
                 movement.angularVelocity = body.getAngularVelocity();
             }
         }
+
+        for (Entity beamEntity : beamEntities) {
+            Body body = BODY.get(beamEntity);
+            Transform transform = TRANSFORM.get(beamEntity);
+            tv.set(Vector2.X).scl(body.dimension.y / 2).rotateRad(transform.orientRad);
+            tv2.set(transform.location).sub(tv).scl(W2B);
+            tv.add(transform.location).scl(W2B);
+            Beam beam = BEAM.get(beamEntity);
+            beam.touched.clear();
+            beamCallback.beam = beam;
+
+            world.rayCast(beamCallback, tv2, tv);
+        }
+
     }
 
     public Entity pick(Vector2 at) {
@@ -340,15 +359,6 @@ public class Box2DPhysicsSystem extends EntitySystem {
             touchingB.untouchList.add(a);
         }
 
-        private Touching touchingOf(Entity e) {
-            Touching touching = TOUCHING.get(e);
-            if (touching == null) {
-                touching = getEngine().createComponent(Touching.class);
-                e.add(touching);
-            }
-            return touching;
-        }
-
         @Override
         public void preSolve(Contact contact, Manifold oldManifold) {
             if (((contact.getFixtureA().getFilterData().categoryBits | contact.getFixtureB().getFilterData().categoryBits) & CATEGORY_WEAPON) != 0) {
@@ -359,6 +369,15 @@ public class Box2DPhysicsSystem extends EntitySystem {
         @Override
         public void postSolve(Contact contact, ContactImpulse impulse) {
         }
+    }
+
+    Touching touchingOf(Entity e) {
+        Touching touching = TOUCHING.get(e);
+        if (touching == null) {
+            touching = getEngine().createComponent(Touching.class);
+            e.add(touching);
+        }
+        return touching;
     }
 
     public static class TouchInfo {
@@ -385,5 +404,22 @@ public class Box2DPhysicsSystem extends EntitySystem {
     private static class PositionAndOrientation {
         final Vector2 position = new Vector2();
         float orientation;
+    }
+
+    private class BeamCallback implements RayCastCallback {
+        public Beam beam;
+
+        @Override
+        public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+            Filter filterData = fixture.getFilterData();
+            if ((filterData.categoryBits & (CATEGORY_DEBRIS | CATEGORY_SHIPS | CATEGORY_WEAPON)) == 0) {
+                return 1;
+            }
+            TouchInfo touchInfo = beam.touched.add();
+            touchInfo.collisionPoint.set(point).scl(B2W);
+            touchInfo.normal.set(normal);
+            touchInfo.other = (Entity) fixture.getBody().getUserData();
+            return 1;
+        }
     }
 }

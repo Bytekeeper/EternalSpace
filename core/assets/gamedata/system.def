@@ -19,6 +19,18 @@ template projectile {
     }
 }
 
+template beam1 {
+    Body {
+        dimension 4 256
+        graphics "projectile/beam#1"
+    }
+    Beam {
+        hitEffect "beam1_spark"
+    }
+    Transform {
+    }
+}
+
 template "planet" {
     Celestial {
         radarColor 0.3 0.8 0.5 1
@@ -149,7 +161,7 @@ template falcon {
     Weapons {
         weapon {
             cooldownPerShot 0.1
-            projectile "projectile"
+            beam "beam1"
             muzzleEffect "muzzle1"
             offset 5 -10
         }

@@ -54,7 +54,7 @@ public class PooledArray<T> extends Array<T> {
 
     @Override
     public void clear() {
-        Pools.freeAll(this);
+        Pools.freeAll(this, true);
         super.clear();
     }
 }

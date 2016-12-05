@@ -150,8 +150,10 @@ public class Game extends com.badlogic.gdx.Game {
 
         // Physics
         engine.addSystem(new Box2DPhysicsSystem(this));
+        engine.addSystem(new AttachedSystem());
         engine.addSystem(new OrbitingSystem());
         engine.addSystem(new ProjectileHitSystem(this));
+        engine.addSystem(new BeamHitSystem(this));
         engine.addSystem(new PersistenceSystem());
         engine.addSystem(new SelectionSystem(this));
 
@@ -288,9 +290,9 @@ public class Game extends com.badlogic.gdx.Game {
         Transform explTransform = engine.createComponent(Transform.class);
         explTransform.location.set(location);
         explTransform.orientRad = orientRad;
-        Effects explEffect = engine.createComponent(Effects.class);
+        Effect explEffect = engine.createComponent(Effect.class);
         explEffect.removeEntityWhenDone = true;
-        explEffect.effects.add().effect = explosionEffect;
+        explEffect.effect = explosionEffect;
         explosionEntity.add(explTransform);
         explosionEntity.add(explEffect);
         engine.addEntity(explosionEntity);

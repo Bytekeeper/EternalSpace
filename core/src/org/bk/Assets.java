@@ -66,6 +66,7 @@ public class Assets {
         loadEffect("muzzle1");
         loadEffect("thrust1");
         loadEffect("slug_spark");
+        loadEffect("beam1_spark");
         loadEffect("expl_medium1");
         loadEffect("expl_medium2");
         loadEffect("expl_large1");

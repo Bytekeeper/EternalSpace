@@ -48,7 +48,9 @@ public class Mapper {
     public static final ComponentMapper<LiftingOff> LIFTING_OFF = mapperFor(LiftingOff.class);
     public static final ComponentMapper<JumpedOut> JUMPED_OUT = mapperFor(JumpedOut.class);
     public static final ComponentMapper<Name> NAME = mapperFor(Name.class);
-    public static final ComponentMapper<Effects> EFFECTS = mapperFor(Effects.class);
+    public static final ComponentMapper<Effect> EFFECT = mapperFor(Effect.class);
+    public static final ComponentMapper<Beam> BEAM = mapperFor(Beam.class);
+    public static final ComponentMapper<Attached> ATTACHED = mapperFor(Attached.class);
 
 
     private static <T extends Component> ComponentMapper<T> mapperFor(Class<T> componentClass) {
