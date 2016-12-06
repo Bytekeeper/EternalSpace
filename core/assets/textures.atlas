@@ -6,28 +6,28 @@ filter: MipMapLinearLinear,Linear
 repeat: none
 asteroid/nickel_iron1
   rotate: false
-  xy: 851, 110
+  xy: 813, 110
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 particle
   rotate: false
-  xy: 851, 76
+  xy: 70, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 planet/earth_moon
   rotate: false
-  xy: 666, 756
+  xy: 660, 756
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 planet/earthlike1
   rotate: false
-  xy: 649, 38
+  xy: 388, 37
   size: 200, 200
   orig: 200, 200
   offset: 0, 0
@@ -41,7 +41,7 @@ planet/gas1
   index: -1
 planet/gas2
   rotate: false
-  xy: 666, 498
+  xy: 660, 498
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -56,106 +56,92 @@ planet/star_g_type
 projectile/beam#1
   rotate: false
   xy: 516, 500
-  size: 8, 512
-  orig: 8, 512
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#10
   rotate: false
-  xy: 606, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 918, 370
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#11
   rotate: false
-  xy: 616, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 970, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#12
   rotate: false
-  xy: 626, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 988, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#13
   rotate: false
-  xy: 636, 500
-  size: 8, 512
-  orig: 8, 512
-  offset: 0, 0
-  index: -1
-projectile/beam#14
-  rotate: false
-  xy: 646, 500
-  size: 8, 512
-  orig: 8, 512
-  offset: 0, 0
-  index: -1
-projectile/beam#15
-  rotate: false
-  xy: 656, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 1006, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#2
   rotate: false
-  xy: 526, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 534, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#3
   rotate: false
-  xy: 536, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 552, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#4
   rotate: false
-  xy: 546, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 570, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#5
   rotate: false
-  xy: 556, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 588, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#6
   rotate: false
-  xy: 566, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 606, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#7
   rotate: false
-  xy: 576, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 624, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#8
   rotate: false
-  xy: 586, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 642, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/beam#9
   rotate: false
-  xy: 596, 500
-  size: 8, 512
-  orig: 8, 512
+  xy: 952, 500
+  size: 16, 512
+  orig: 16, 512
   offset: 0, 0
   index: -1
 projectile/slug
@@ -181,7 +167,7 @@ ship/mars_transport1
   index: -1
 ship/scavenger
   rotate: false
-  xy: 388, 109
+  xy: 590, 109
   size: 221, 128
   orig: 221, 128
   offset: 0, 0
@@ -202,21 +188,21 @@ ui/credits
   index: -1
 ui/health
   rotate: false
-  xy: 924, 980
+  xy: 36, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ui/marker
   rotate: false
-  xy: 611, 109
+  xy: 918, 884
   size: 32, 128
   orig: 32, 128
   offset: 0, 0
   index: -1
 ui/power
   rotate: false
-  xy: 321, 68
+  xy: 104, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -230,34 +216,48 @@ ui/radar
   index: -1
 ui/shield
   rotate: false
-  xy: 36, 2
+  xy: 138, 2
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 
 textures2.png
-size: 512,512
+size: 512,1024
 format: RGBA8888
 filter: MipMapLinearLinear,Linear
 repeat: none
 asteroid/rock1
   rotate: false
-  xy: 2, 2
+  xy: 38, 128
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 planet/venuslike1
   rotate: false
-  xy: 2, 132
+  xy: 38, 258
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
+projectile/beam#14
+  rotate: false
+  xy: 2, 2
+  size: 16, 512
+  orig: 16, 512
+  offset: 0, 0
+  index: -1
+projectile/beam#15
+  rotate: false
+  xy: 20, 2
+  size: 16, 512
+  orig: 16, 512
+  offset: 0, 0
+  index: -1
 ship/shuttle1
   rotate: false
-  xy: 260, 260
+  xy: 296, 386
   size: 128, 128
   orig: 128, 128
   offset: 0, 0

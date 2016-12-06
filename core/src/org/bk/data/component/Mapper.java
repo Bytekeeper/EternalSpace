@@ -51,7 +51,8 @@ public class Mapper {
     public static final ComponentMapper<Effect> EFFECT = mapperFor(Effect.class);
     public static final ComponentMapper<Beam> BEAM = mapperFor(Beam.class);
     public static final ComponentMapper<Attached> ATTACHED = mapperFor(Attached.class);
-
+    public static final ComponentMapper<TextureComponent> TEXTURE_COMPONENT = mapperFor(TextureComponent.class);
+    public static final ComponentMapper<AnimationComponent> ANIMATION_COMPONENT = mapperFor(AnimationComponent.class);
 
     private static <T extends Component> ComponentMapper<T> mapperFor(Class<T> componentClass) {
         MAPPED_COMPONENTS.add(componentClass);

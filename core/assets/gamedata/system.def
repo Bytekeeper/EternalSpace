@@ -21,8 +21,8 @@ template projectile {
 
 template beam1 {
     Body {
-        dimension 4 256
-        graphics "projectile/beam#1"
+        dimension 8 256
+        graphics "projectile/beam#15"
     }
     Beam {
         hitEffect "beam1_spark"

@@ -125,6 +125,7 @@ public class Game extends com.badlogic.gdx.Game {
     private void initWorldEngine() {
         engine = new PooledEngine();
         // Render
+        engine.addSystem(new AssetSystem(this));
         engine.addSystem(new RenderingSystem(this));
 
         // Planets and ships etc.

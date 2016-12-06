@@ -39,6 +39,7 @@ public class RenderingSystem extends EntitySystem {
     private final SpriteBatch batch;
     private ImmutableArray<Entity> shipEntities;
     private ImmutableArray<Entity> projectileEntities;
+    private ImmutableArray<Entity> beamEntities;
     private ImmutableArray<Entity> planetEntities;
     private ImmutableArray<Entity> asteroidEntities;
     private ImmutableArray<Entity> effectEntities;
@@ -62,10 +63,11 @@ public class RenderingSystem extends EntitySystem {
 
     @Override
     public void addedToEngine(Engine engine) {
-        planetEntities = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class, Body.class).get());
-        asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).get());
-        shipEntities = engine.getEntitiesFor(Family.all(Controllable.class, Transform.class, Body.class).get());
-        projectileEntities = engine.getEntitiesFor(Family.all(Transform.class, Body.class).one(Projectile.class, Beam.class).get());
+        planetEntities = engine.getEntitiesFor(Family.all(Celestial.class, Transform.class, Body.class).one(TextureComponent.class, AnimationComponent.class).get());
+        asteroidEntities = engine.getEntitiesFor(Family.all(Asteroid.class, Transform.class, Body.class).one(TextureComponent.class, AnimationComponent.class).get());
+        shipEntities = engine.getEntitiesFor(Family.all(Controllable.class, Transform.class, Body.class).one(TextureComponent.class, AnimationComponent.class).get());
+        projectileEntities = engine.getEntitiesFor(Family.all(Transform.class, Body.class, Projectile.class).one(TextureComponent.class, AnimationComponent.class).get());
+        beamEntities = engine.getEntitiesFor(Family.all(Transform.class, Body.class, Beam.class).one(TextureComponent.class, AnimationComponent.class).get());
         effectEntities = engine.getEntitiesFor(Family.all(Effect.class, Transform.class).get());
     }
 
@@ -101,6 +103,9 @@ public class RenderingSystem extends EntitySystem {
             }
         }
         for (Entity entity : projectileEntities) {
+            drawEntityWithBody(entity, deltaTime);
+        }
+        for (Entity entity : beamEntities) {
             drawEntityWithBody(entity, deltaTime);
         }
         renderParticleEffects(deltaTime);
@@ -220,13 +225,7 @@ public class RenderingSystem extends EntitySystem {
                 if (thrusterEffect == null && fireThrusters) {
                     thrusterEffect = assets.effects.get(thruster.thrusterEffect).obtain();
                     this.thrusters.put(thruster, thrusterEffect);
-
                 }
-//                tv.set(thruster.offset).rotateRad(transform.orientDeg).add(location).rotateRad(thruster.orientDeg);
-//                float hbx = 8;
-//                float hby = 40;
-//                batch.draw(assets.textures.get("effect/small+1"), tv.x - hbx, tv.y - hby, hbx, hby,
-//                        hbx * 2, hby * 2, 1, 1, transform.orientDeg * MathUtils.radDeg - 90);
             }
         }
         if (LANDED.has(entity)) {
@@ -242,8 +241,23 @@ public class RenderingSystem extends EntitySystem {
             float scale = 1 - liftingOff.timeRemaining / liftingOff.LIFTOFF_DURATION;
             tv.scl(scale);
         }
-        TextureRegion textureRegion = assets.textures.get(body.graphics);
-        draw(transform, tv, textureRegion, body.clipY);
+        TextureComponent textureComponent = TEXTURE_COMPONENT.get(entity);
+        if (textureComponent != null) {
+            draw(transform, tv, textureComponent.textureRegion, body.clipY);
+        } else {
+            AnimationComponent animationComponent = ANIMATION_COMPONENT.get(entity);
+            animationComponent.animationTime = (animationComponent.animationTime + delta) % (animationComponent.frames.size * animationComponent.frameDuration);
+            float framePosition = animationComponent.animationTime / animationComponent.frameDuration;
+            int kf1 = (int) (framePosition);
+            float kf2a = (framePosition - MathUtils.floor(framePosition));
+            int kf2 = (kf1 + 1) % animationComponent.frames.size;
+            float kf1a = 1 - kf2a;
+            batch.setColor(1, 1, 1, kf1a);
+            draw(transform, tv, animationComponent.frames.get(kf1), body.clipY);
+            batch.setColor(1, 1, 1, kf2a);
+            draw(transform, tv, animationComponent.frames.get(kf2), body.clipY);
+            batch.setColor(1, 1, 1, 1);
+        }
         Weapons weapons = WEAPONS.get(entity);
         if (weapons != null) {
             for (Weapons.Weapon w : weapons.weapon) {
@@ -313,8 +327,6 @@ public class RenderingSystem extends EntitySystem {
             cy = (int) (clipY * textureRegion.getRegionHeight() / dimension.y);
             h = clipY;
         }
-//        batch.draw(textureRegion, transform.location.x - hbx, transform.location.y - hby, hbx, hby,
-//                dimension.x, dimension.y, 1, 1, transform.orientRad * MathUtils.radDeg - 90);
         batch.draw(textureRegion.getTexture(), transform.location.x - hbx, transform.location.y - hby, hbx, hby,
                 dimension.x, h, 1, 1, transform.orientRad * MathUtils.radDeg - 90,
                 textureRegion.getRegionX(), textureRegion.getRegionY(), textureRegion.getRegionWidth(), cy, false, false);
