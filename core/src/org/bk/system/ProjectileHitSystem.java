@@ -67,31 +67,39 @@ public class ProjectileHitSystem extends IteratingSystem {
 
         Projectile projectile = PROJECTILE.get(entity);
         float damagePerEntity = projectile.yield / toDamage.size;
-        for (Entity e: toDamage) {
-            Damage damage = DAMAGE.get(e);
-            if (damage == null) {
-                damage = getEngine().createComponent(Damage.class);
-                e.add(damage);
-            }
-            float damageRem = damagePerEntity;
-            damage.overall += damageRem;
-            if (owned != null && owned.owner == game.playerEntity) {
-                damage.byPlayer += damageRem;
-            }
-            Shield shield = SHIELD.get(e);
-            if (shield != null) {
-                float shieldDamage = Math.min(shield.shields, damageRem);
-                shield.shields -= shieldDamage;
-                damageRem -= shieldDamage;
-            }
-            Health health = HEALTH.get(e);
-            if (health != null) {
-                health.hull -= Math.min(health.hull, damageRem);
-            }
-        }
+        applyDamage(owned != null ? owned.owner == game.playerEntity : false, damagePerEntity, toDamage, getEngine());
         if (projectile.hitEffect != null) {
             game.spawnEffect(collisionPoint, projectile.hitEffect, hitNormal.angleRad());
         }
         getEngine().removeEntity(entity);
+    }
+
+    static void applyDamage(boolean byPlayer, float damagePerEntity, Array<Entity> toDamage, PooledEngine engine) {
+        for (Entity e: toDamage) {
+            applyDamage(byPlayer, damagePerEntity, engine, e);
+        }
+    }
+
+    static void applyDamage(boolean byPlayer, float damageToApply, PooledEngine engine, Entity applyDamageTo) {
+        Damage damage = DAMAGE.get(applyDamageTo);
+        if (damage == null) {
+            damage = engine.createComponent(Damage.class);
+            applyDamageTo.add(damage);
+        }
+        float damageRem = damageToApply;
+        damage.overall += damageRem;
+        if (byPlayer) {
+            damage.byPlayer += damageRem;
+        }
+        Shield shield = SHIELD.get(applyDamageTo);
+        if (shield != null) {
+            float shieldDamage = Math.min(shield.shields, damageRem);
+            shield.shields -= shieldDamage;
+            damageRem -= shieldDamage;
+        }
+        Health health = HEALTH.get(applyDamageTo);
+        if (health != null) {
+            health.hull -= Math.min(health.hull, damageRem);
+        }
     }
 }
