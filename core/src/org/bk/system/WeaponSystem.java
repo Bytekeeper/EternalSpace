@@ -60,6 +60,9 @@ public class WeaponSystem extends IteratingSystem {
                 Entity beamEntity = activeBeams.get(weapon);
                 if (beamEntity == null) {
                     beamEntity = spawnBeam(weapon, entity);
+//                    SoundComponent soundComponent = getEngine().createComponent(SoundComponent.class);
+//                    soundComponent.id = game.assets.snd_beam1.loop();
+//                    beamEntity.add(soundComponent);
                     Owned owned = getEngine().createComponent(Owned.class);
                     owned.affiliation = CHARACTER.get(entity).faction;
                     owned.owner = entity;

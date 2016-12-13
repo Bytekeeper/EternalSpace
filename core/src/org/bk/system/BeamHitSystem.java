@@ -86,6 +86,7 @@ public class BeamHitSystem extends IteratingSystem {
             if (effect.particleEffect != null && effect.particleEffect.isComplete()) {
                 beam.effectEntity = null;
             }
+            ProjectileHitSystem.applyDamage(owned.owner == game.playerEntity, beam.damagePerSecond * deltaTime, getEngine(), otherEntity);
             return;
         }
         body.clipY = -1;
